@@ -2,6 +2,7 @@ package com.shinhan.dongibuyeo.domain.member.service;
 
 import com.shinhan.dongibuyeo.domain.member.dto.request.MemberLoginRequest;
 import com.shinhan.dongibuyeo.domain.member.dto.request.MemberSaveRequest;
+import com.shinhan.dongibuyeo.domain.member.dto.response.DuplicateEmailResponse;
 import com.shinhan.dongibuyeo.domain.member.dto.response.MemberLoginResponse;
 import com.shinhan.dongibuyeo.domain.member.entity.Member;
 import com.shinhan.dongibuyeo.domain.member.exception.MemberNotFoundException;
@@ -51,6 +52,13 @@ public class MemberService {
         String apikey = null;
         //TODO: WebClient 연결 후 메일 검증 로직 추가
         return apikey;
+    }
+
+    public DuplicateEmailResponse duplicateEmail(String email) {
+        String apiKey = getApiKeyByEmail(email);
+        boolean isDuplicate = apiKey != null && !apiKey.isEmpty();
+
+        return new DuplicateEmailResponse(isDuplicate, apiKey);
     }
 
     public MemberLoginResponse login(MemberLoginRequest request) {

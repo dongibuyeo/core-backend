@@ -2,6 +2,7 @@ package com.shinhan.dongibuyeo.domain.member.controller;
 
 import com.shinhan.dongibuyeo.domain.member.dto.request.MemberLoginRequest;
 import com.shinhan.dongibuyeo.domain.member.dto.request.MemberSaveRequest;
+import com.shinhan.dongibuyeo.domain.member.dto.response.DuplicateEmailResponse;
 import com.shinhan.dongibuyeo.domain.member.dto.response.MemberLoginResponse;
 import com.shinhan.dongibuyeo.domain.member.service.MemberService;
 import jakarta.validation.Valid;
@@ -30,5 +31,9 @@ public class MemberController {
         return ResponseEntity.ok(memberService.login(memberLoginRequest));
     }
 
+    @GetMapping("/duplicate/{email}")
+    public ResponseEntity<DuplicateEmailResponse> duplicateNickname(@PathVariable String email) {
+        return ResponseEntity.ok(memberService.duplicateEmail(email));
+    }
 
 }

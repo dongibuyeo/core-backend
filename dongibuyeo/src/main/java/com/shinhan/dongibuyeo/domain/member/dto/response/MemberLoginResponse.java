@@ -10,7 +10,13 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 public class MemberLoginResponse {
-    private UUID memberId;
+
+    private UUID id;
+    private String email;
+    private String name;
     private String nickname;
     private String profileImage;
+    private String apiKey;
+    private String deviceToken;
+
 }
