@@ -1,6 +1,6 @@
-package com.shinhan.dongibuyeo.account.service;
+package com.shinhan.dongibuyeo.domain.account.service;
 
-import com.shinhan.dongibuyeo.account.repository.AccountRepository;
+import com.shinhan.dongibuyeo.domain.account.repository.AccountRepository;
 import org.springframework.stereotype.Service;
 
 @Service
