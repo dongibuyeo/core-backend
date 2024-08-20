@@ -43,4 +43,16 @@ public class Member {
     public void updateApiKey(String apiKey) {
         this.apiKey = apiKey;
     }
+
+    public void updateDeviceToken(String deviceToken) {
+        this.deviceToken = deviceToken;
+    }
+
+    public void changeNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void changeProfileImage(String profileImage) {
+        this.profileImage = profileImage;
+    }
 }
