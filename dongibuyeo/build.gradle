@@ -30,9 +30,17 @@ dependencies {
     // ulid-creator
     implementation group: 'com.github.f4b6a3', name: 'ulid-creator', version: '5.1.0'
 
+    // valid
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
+
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.mysql:mysql-connector-j'
     annotationProcessor 'org.projectlombok:lombok'
+
+    // mapstruct
+    implementation 'org.mapstruct:mapstruct:1.5.3.Final'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.3.Final'
+
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
