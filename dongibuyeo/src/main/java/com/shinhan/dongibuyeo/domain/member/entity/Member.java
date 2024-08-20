@@ -1,4 +1,4 @@
-package com.shinhan.dongibuyeo.member.entity;
+package com.shinhan.dongibuyeo.domain.member.entity;
 
 import com.github.f4b6a3.ulid.UlidCreator;
 import jakarta.persistence.*;
