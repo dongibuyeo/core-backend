@@ -1,5 +1,6 @@
 package com.shinhan.dongibuyeo.account.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.AccessLevel;
@@ -14,5 +15,6 @@ import java.util.UUID;
 public class Account {
 
     @Id
+    @Column(columnDefinition = "BINARY(16)")
     private UUID id;
 }
