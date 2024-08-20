@@ -1,11 +1,11 @@
 package com.shinhan.dongibuyeo.domain.member.controller;
 
+import com.shinhan.dongibuyeo.domain.member.dto.request.MemberLoginRequest;
 import com.shinhan.dongibuyeo.domain.member.dto.request.MemberSaveRequest;
-import com.shinhan.dongibuyeo.domain.member.dto.response.LoginResponse;
+import com.shinhan.dongibuyeo.domain.member.dto.response.MemberLoginResponse;
 import com.shinhan.dongibuyeo.domain.member.service.MemberService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,8 +19,16 @@ public class MemberController {
     }
 
     @PostMapping("/save")
-    public ResponseEntity<LoginResponse> saveMember(
+    public ResponseEntity<MemberLoginResponse> saveMember(
             @RequestBody @Valid MemberSaveRequest memberSaveRequest) {
         return ResponseEntity.ok(memberService.saveMember(memberSaveRequest));
     }
+
+    @GetMapping("/login")
+    public ResponseEntity<MemberLoginResponse> login(
+            @RequestBody @Valid MemberLoginRequest memberLoginRequest) {
+        return ResponseEntity.ok(memberService.login(memberLoginRequest));
+    }
+
+
 }
