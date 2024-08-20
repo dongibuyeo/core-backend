@@ -16,6 +16,9 @@ public class Member {
     @Column(columnDefinition = "BINARY(16)")
     private UUID id = UlidCreator.getMonotonicUlid().toUuid();
 
+    @Column(nullable = false)
+    private String email;
+
     @Column(nullable = false, length = 8)
     private String name;
 
@@ -29,12 +32,15 @@ public class Member {
     private String deviceToken;
 
     @Builder
-    public Member(UUID id, String name, String nickname, String profileImage, String apiKey, String deviceToken) {
-        this.id = id;
+    public Member(String email, String name, String nickname, String profileImage, String deviceToken) {
+        this.email = email;
         this.name = name;
         this.nickname = nickname;
         this.profileImage = profileImage;
-        this.apiKey = apiKey;
         this.deviceToken = deviceToken;
+    }
+
+    public void updateApiKey(String apiKey) {
+        this.apiKey = apiKey;
     }
 }
