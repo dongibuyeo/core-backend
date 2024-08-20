@@ -1,6 +1,6 @@
-package com.shinhan.dongibuyeo.account.controller;
+package com.shinhan.dongibuyeo.domain.account.controller;
 
-import com.shinhan.dongibuyeo.account.service.AccountService;
+import com.shinhan.dongibuyeo.domain.account.service.AccountService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

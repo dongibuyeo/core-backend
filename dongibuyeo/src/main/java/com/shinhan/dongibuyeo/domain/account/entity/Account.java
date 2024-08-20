@@ -1,4 +1,4 @@
-package com.shinhan.dongibuyeo.account.entity;
+package com.shinhan.dongibuyeo.domain.account.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

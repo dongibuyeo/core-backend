@@ -1,6 +1,6 @@
-package com.shinhan.dongibuyeo.account.repository;
+package com.shinhan.dongibuyeo.domain.account.repository;
 
-import com.shinhan.dongibuyeo.account.entity.Account;
+import com.shinhan.dongibuyeo.domain.account.entity.Account;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.UUID;
