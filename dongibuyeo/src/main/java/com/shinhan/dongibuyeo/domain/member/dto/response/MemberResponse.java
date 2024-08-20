@@ -9,9 +9,9 @@ import java.util.UUID;
 @Getter
 @Builder
 @AllArgsConstructor
-public class MemberLoginResponse {
+public class MemberResponse {
 
-    private UUID id;
+    private UUID memberId;
     private String email;
     private String name;
     private String nickname;
