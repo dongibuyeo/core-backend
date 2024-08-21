@@ -1,11 +1,17 @@
 package com.shinhan.dongibuyeo.domain.member.entity;
 
 import com.github.f4b6a3.ulid.UlidCreator;
+import com.shinhan.dongibuyeo.domain.challenge.entity.MemberChallenge;
 import com.shinhan.dongibuyeo.global.entity.BaseEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import lombok.*;
 import org.hibernate.annotations.SQLRestriction;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -33,6 +39,9 @@ public class Member extends BaseEntity {
     private String apiKey;
 
     private String deviceToken;
+
+    @OneToMany(mappedBy = "member")
+    private List<MemberChallenge> myChallenges = new ArrayList<>();
 
     @Builder
     public Member(String email, String name, String nickname, String profileImage, String deviceToken) {
