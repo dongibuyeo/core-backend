@@ -2,6 +2,8 @@ package com.shinhan.dongibuyeo.domain.member.client;
 
 import com.shinhan.dongibuyeo.domain.member.dto.client.ShinhanMemberRequest;
 import com.shinhan.dongibuyeo.domain.member.dto.client.ShinhanMemberResponse;
+import com.shinhan.dongibuyeo.domain.member.exception.MemberConflictException;
+import com.shinhan.dongibuyeo.domain.member.exception.MemberNotFoundException;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -26,7 +28,7 @@ public class MemberClient {
                 .retrieve()
                 .bodyToMono(ShinhanMemberResponse.class)
                 .blockOptional()
-                .orElseThrow();
+                .orElseThrow(() -> new MemberConflictException(request.getUserId()));
     }
 
     public ShinhanMemberResponse searchMember(ShinhanMemberRequest request) {
@@ -38,6 +40,6 @@ public class MemberClient {
                 .retrieve()
                 .bodyToMono(ShinhanMemberResponse.class)
                 .blockOptional()
-                .orElseThrow();
+                .orElseThrow(MemberNotFoundException::new);
     }
 }
