@@ -1,5 +1,8 @@
 package com.shinhan.dongibuyeo.domain.member.service;
 
+import com.shinhan.dongibuyeo.domain.member.client.MemberClient;
+import com.shinhan.dongibuyeo.domain.member.dto.client.ShinhanMemberRequest;
+import com.shinhan.dongibuyeo.domain.member.dto.client.ShinhanMemberResponse;
 import com.shinhan.dongibuyeo.domain.member.dto.request.DeviceTokenRequest;
 import com.shinhan.dongibuyeo.domain.member.dto.request.MemberLoginRequest;
 import com.shinhan.dongibuyeo.domain.member.dto.request.MemberSaveRequest;
@@ -10,6 +13,7 @@ import com.shinhan.dongibuyeo.domain.member.entity.Member;
 import com.shinhan.dongibuyeo.domain.member.exception.MemberNotFoundException;
 import com.shinhan.dongibuyeo.domain.member.mapper.MemberMapper;
 import com.shinhan.dongibuyeo.domain.member.repository.MemberRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,12 +23,18 @@ import java.util.UUID;
 @Service
 public class MemberService {
 
+    @Value("${shinhan.key}")
+    private String apiKey;
+
     private final MemberRepository memberRepository;
     private final MemberMapper memberMapper;
 
-    public MemberService(MemberRepository memberRepository, MemberMapper memberMapper) {
+    private final MemberClient memberClient;
+
+    public MemberService(MemberRepository memberRepository, MemberMapper memberMapper, MemberClient memberClient) {
         this.memberRepository = memberRepository;
         this.memberMapper = memberMapper;
+        this.memberClient = memberClient;
     }
 
     public Member getMemberById(UUID id) {
@@ -42,26 +52,31 @@ public class MemberService {
      */
     @Transactional
     public MemberResponse saveMember(MemberSaveRequest request) {
-        String apiKey = getApiKeyByEmail(request.getEmail());
+        ShinhanMemberResponse response = saveUserKey(request.getEmail());
 
         Member member = memberMapper.toMemberEntity(request);
-        member.updateApiKey(apiKey);
+        member.updateUserKey(response.getUserKey());
         memberRepository.save(member);
 
         return memberMapper.toMemberResponse(member);
     }
 
-    private String getApiKeyByEmail(String email) {
-        String apikey = null;
-        //TODO: WebClient 연결 후 메일 검증 로직 추가
-        return apikey;
+    private ShinhanMemberResponse saveUserKey(String email) {
+        return memberClient.saveMember(new ShinhanMemberRequest(apiKey, email));
     }
 
     public DuplicateEmailResponse duplicateEmail(String email) {
-        String apiKey = getApiKeyByEmail(email);
-        boolean isDuplicate = apiKey != null && !apiKey.isEmpty();
+        boolean isPresent = isDuplicateEmail(email);
+        return new DuplicateEmailResponse(isPresent);
+    }
 
-        return new DuplicateEmailResponse(isDuplicate, apiKey);
+    public boolean isDuplicateEmail(String email) {
+        try {
+            memberClient.searchMember(new ShinhanMemberRequest(apiKey, email));
+        } catch (MemberNotFoundException e) {
+            return false;
+        }
+        return true;
     }
 
     public MemberResponse login(MemberLoginRequest request) {
