@@ -97,7 +97,7 @@ public class MemberService {
         member.changeProfileImage(request.getProfileImage());
     }
 
-    public List<MemberResponse> findMembers() {
+    public List<MemberResponse> findAllMembers() {
         return memberRepository.findAll()
                 .stream()
                 .map(memberMapper::toMemberResponse)
