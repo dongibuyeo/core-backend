@@ -13,16 +13,15 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class AccountMapper {
-    public ShinhanMakeAccountRequest toShinhanMakeAccountRequest(MakeAccountRequest request, Member member) {
+    public ShinhanMakeAccountRequest toShinhanMakeAccountRequest(MakeAccountRequest request,String apiKey, Member member) {
         return new ShinhanMakeAccountRequest(
-                new GlobalUserHeader("createDemandDepositAccount",member.getUserKey()),
+                new GlobalUserHeader("createDemandDepositAccount",apiKey,member.getUserKey()),
                 request.getAccountTypeUniqueNo()
         );
     }
 
-    public Account toAccountEntity(ShinhanMakeAccountResponse request, Member member) {
+    public Account toAccountEntity(ShinhanMakeAccountResponse request) {
         return new Account(
-                member,
                 request.getRec().getBankCode(),
                 request.getRec().getAccountNo(),
                 request.getRec().getCurrency().getCurrency(),

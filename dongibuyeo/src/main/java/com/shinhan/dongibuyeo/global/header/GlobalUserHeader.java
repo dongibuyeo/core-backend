@@ -19,18 +19,17 @@ public class GlobalUserHeader {
     private String fintechAppNo;
     private String apiServiceCode;
     private String institutionTransactionUniqueNo;
-
-    @Value("${shinhan.key}")
     private String apiKey;
     private String userKey;
 
-    public GlobalUserHeader(String apiName, String userKey) {
+    public GlobalUserHeader(String apiName, String apiKey, String userKey) {
         this.apiName = apiName;
         setTransmissionDateAndTime();
         this.institutionCode = "00100";
         this.fintechAppNo = "001";
         this.apiServiceCode = apiName;
         makeUniqueTransactionCode();
+        this.apiKey = apiKey;
         this.userKey = userKey;
     }
 
