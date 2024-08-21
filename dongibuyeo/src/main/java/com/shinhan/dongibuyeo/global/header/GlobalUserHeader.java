@@ -11,7 +11,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class GlobalHeader {
+public class GlobalUserHeader {
     private String apiName;
     private String transmissionDate;
     private String transmissionTime;
@@ -24,7 +24,7 @@ public class GlobalHeader {
     private String apiKey;
     private String userKey;
 
-    public GlobalHeader(String apiName, String userKey) {
+    public GlobalUserHeader(String apiName, String userKey) {
         this.apiName = apiName;
         setTransmissionDateAndTime();
         this.institutionCode = "00100";

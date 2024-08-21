@@ -1,5 +1,7 @@
 package com.shinhan.dongibuyeo.domain.account.controller;
 
+import com.shinhan.dongibuyeo.domain.account.dto.request.MakeAccountRequest;
+import com.shinhan.dongibuyeo.domain.account.dto.response.AccountResponse;
 import com.shinhan.dongibuyeo.domain.account.service.AccountService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,8 +19,8 @@ public class AccountController {
     }
 
     @PostMapping("/personal")
-    public ResponseEntity<Void> makePersonalAccount() {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<AccountResponse> makePersonalAccount(@RequestBody MakeAccountRequest request) {
+        return ResponseEntity.ok(accountService.makePersonalAccount(request));
     }
 
     @PostMapping("/challenge")
