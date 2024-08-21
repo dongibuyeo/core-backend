@@ -1,12 +1,12 @@
 package com.shinhan.dongibuyeo.domain.challenge.controller;
 
+import com.shinhan.dongibuyeo.domain.challenge.dto.request.ChallengeRequest;
+import com.shinhan.dongibuyeo.domain.challenge.dto.request.JoinChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.ChallengeResponse;
 import com.shinhan.dongibuyeo.domain.challenge.service.ChallengeService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -31,5 +31,14 @@ public class ChallengeController {
         return ResponseEntity.ok(challengeService.findChallengeByChallengeId(challengeId));
     }
 
+    @PostMapping
+    public ResponseEntity<ChallengeResponse> makeChallenge(@RequestBody @Valid ChallengeRequest request) {
+        return ResponseEntity.ok(challengeService.makeChallenge(request));
+    }
 
+    @PostMapping("/join")
+    public ResponseEntity<Void> joinChallenge(@RequestBody @Valid JoinChallengeRequest request) {
+        challengeService.joinChallenge(request);
+        return ResponseEntity.ok().build();
+    }
 }

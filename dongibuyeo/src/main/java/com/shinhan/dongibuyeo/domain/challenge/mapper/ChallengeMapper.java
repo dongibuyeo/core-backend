@@ -1,5 +1,6 @@
 package com.shinhan.dongibuyeo.domain.challenge.mapper;
 
+import com.shinhan.dongibuyeo.domain.challenge.dto.request.ChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.ChallengeResponse;
 import com.shinhan.dongibuyeo.domain.challenge.entity.Challenge;
 import org.mapstruct.Mapper;
@@ -14,4 +15,6 @@ public interface ChallengeMapper {
     @Mapping(target = "deposit", expression = "java(challenge.getDeposit().get())")
     @Mapping(target = "participants", expression = "java(challenge.getParticipants().get())")
     ChallengeResponse toChallengeResponse(Challenge challenge);
+
+    Challenge toChallenge(ChallengeRequest challengeRequest);
 }
