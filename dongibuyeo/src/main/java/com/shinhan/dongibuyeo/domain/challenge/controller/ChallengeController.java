@@ -31,6 +31,12 @@ public class ChallengeController {
         return ResponseEntity.ok(challengeService.findChallengeByChallengeId(challengeId));
     }
 
+    @DeleteMapping("/{challengeId}")
+    public ResponseEntity<ChallengeResponse> deleteChallengeById(@PathVariable UUID challengeId) {
+        challengeService.deleteChallengeByChallengeId(challengeId);
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping
     public ResponseEntity<ChallengeResponse> makeChallenge(@RequestBody @Valid ChallengeRequest request) {
         return ResponseEntity.ok(challengeService.makeChallenge(request));

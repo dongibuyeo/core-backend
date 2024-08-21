@@ -24,6 +24,11 @@ public class ChallengeService {
         this.challengeMapper = challengeMapper;
     }
 
+    private Challenge findChallengeById(UUID challengeId) {
+        return challengeRepository.findChallengeById(challengeId)
+                .orElseThrow(() -> new ChallengeNotFoundException(challengeId));
+    }
+
     public List<ChallengeResponse> findAllChallenges() {
         return challengeRepository.findAll()
                 .stream()
@@ -32,9 +37,7 @@ public class ChallengeService {
     }
 
     public ChallengeResponse findChallengeByChallengeId(UUID challengeId) {
-        return challengeRepository.findChallengeById(challengeId)
-                .map(challengeMapper::toChallengeResponse)
-                .orElseThrow(() -> new ChallengeNotFoundException(challengeId));
+        return challengeMapper.toChallengeResponse(findChallengeById(challengeId));
     }
 
     @Transactional
@@ -53,4 +56,9 @@ public class ChallengeService {
     }
 
 
+    @Transactional
+    public void deleteChallengeByChallengeId(UUID challengeId) {
+        Challenge challenge = findChallengeById(challengeId);
+        challenge.softDelete();
+    }
 }
