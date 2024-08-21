@@ -1,12 +1,10 @@
 package com.shinhan.dongibuyeo.domain.member.entity;
 
 import com.github.f4b6a3.ulid.UlidCreator;
+import com.shinhan.dongibuyeo.domain.account.entity.Account;
 import com.shinhan.dongibuyeo.domain.challenge.entity.MemberChallenge;
 import com.shinhan.dongibuyeo.global.entity.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -42,6 +40,12 @@ public class Member extends BaseEntity {
 
     @OneToMany(mappedBy = "member")
     private List<MemberChallenge> myChallenges = new ArrayList<>();
+
+    @OneToMany(
+            mappedBy = "member",
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE}
+    )
+    private List<Account> accounts = new ArrayList<>();
 
     @Builder
     public Member(String email, String name, String nickname, String profileImage, String deviceToken) {

@@ -16,7 +16,7 @@ public class MemberResponse {
     private String name;
     private String nickname;
     private String profileImage;
-    private String apiKey;
+    private String userKey;
     private String deviceToken;
 
 }
