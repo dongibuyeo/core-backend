@@ -1,5 +1,6 @@
 package com.shinhan.dongibuyeo.domain.challenge.controller;
 
+import com.shinhan.dongibuyeo.domain.challenge.dto.request.CancelJoinChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.ChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.JoinChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.ChallengeResponse;
@@ -42,9 +43,15 @@ public class ChallengeController {
         return ResponseEntity.ok(challengeService.makeChallenge(request));
     }
 
-    @PostMapping("/join")
-    public ResponseEntity<Void> joinChallenge(@RequestBody @Valid JoinChallengeRequest request) {
-        challengeService.joinChallenge(request);
+    @PostMapping("/{challengeId}/join")
+    public ResponseEntity<Void> joinChallenge(@PathVariable UUID challengeId, @RequestBody @Valid JoinChallengeRequest request) {
+        challengeService.joinChallenge(challengeId, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{challengeId}/cancel")
+    public ResponseEntity<Void> cancelJoinChallenge(@PathVariable UUID challengeId, @RequestBody @Valid CancelJoinChallengeRequest request) {
+        challengeService.cancelJoinChallenge(challengeId, request.getMemberId());
         return ResponseEntity.ok().build();
     }
 }

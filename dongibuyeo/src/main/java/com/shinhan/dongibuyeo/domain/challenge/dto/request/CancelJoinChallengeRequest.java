@@ -9,8 +9,7 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class JoinChallengeRequest {
+public class CancelJoinChallengeRequest {
 
     private UUID memberId;
-    private Long deposit;
 }
