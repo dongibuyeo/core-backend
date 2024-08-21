@@ -11,8 +11,11 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.UUID;
+
 @RestController
-@RequestMapping("/member")
+@RequestMapping("/members")
 public class MemberController {
 
     private final MemberService memberService;
@@ -48,5 +51,20 @@ public class MemberController {
     public ResponseEntity<Void> changeProfile(@RequestBody ProfileRequest request) {
         memberService.updateMemberProfile(request);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping
+    public ResponseEntity<List<MemberResponse>> getAllMembers() {
+        return ResponseEntity.ok(memberService.findMembers());
+    }
+
+    @GetMapping("/id")
+    public ResponseEntity<MemberResponse> getMemberById(@RequestParam UUID memberId) {
+        return ResponseEntity.ok(memberService.findMemberById(memberId));
+    }
+
+    @GetMapping("/email")
+    public ResponseEntity<MemberResponse> getMemberByEmail(@RequestParam String email) {
+        return ResponseEntity.ok(memberService.findMemberByEmail(email));
     }
 }

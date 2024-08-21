@@ -13,6 +13,7 @@ import com.shinhan.dongibuyeo.domain.member.repository.MemberRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -80,5 +81,22 @@ public class MemberService {
         member.changeNickname(request.getNickname());
         member.changeProfileImage(request.getProfileImage());
     }
-}
 
+    public List<MemberResponse> findMembers() {
+        return memberRepository.findAll()
+                .stream()
+                .map(memberMapper::toMemberResponse)
+                .toList();
+    }
+
+    public MemberResponse findMemberById(UUID memberId) {
+        Member member = getMemberById(memberId);
+        return memberMapper.toMemberResponse(member);
+    }
+
+    public MemberResponse findMemberByEmail(String email) {
+        Member member = getMemberByEmail(email);
+        return memberMapper.toMemberResponse(member);
+    }
+
+}
