@@ -33,13 +33,15 @@ public class Account extends BaseEntity {
 
     private String currencyName;
 
-    public Account(Member member, String bankCode, String accountNo, String currency, String currencyName) {
-        this.member = member;
-        member.getAccounts().add(this);
+    public Account(String bankCode, String accountNo, String currency, String currencyName) {
         this.bankCode = bankCode;
         this.accountNo = accountNo;
         this.currency = currency;
         this.currencyName = currencyName;
     }
 
+    public void updateMember(Member member) {
+        this.member = member;
+        member.getAccounts().add(this);
+    }
 }
