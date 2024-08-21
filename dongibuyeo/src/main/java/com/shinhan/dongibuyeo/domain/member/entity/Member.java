@@ -1,8 +1,10 @@
 package com.shinhan.dongibuyeo.domain.member.entity;
 
 import com.github.f4b6a3.ulid.UlidCreator;
+import com.shinhan.dongibuyeo.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.util.UUID;
 
@@ -10,7 +12,8 @@ import java.util.UUID;
 @Getter
 @EqualsAndHashCode(of = "nickname")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Member {
+@SQLRestriction("deleted_at is null")
+public class Member extends BaseEntity {
 
     @Id
     @Column(columnDefinition = "BINARY(16)")
