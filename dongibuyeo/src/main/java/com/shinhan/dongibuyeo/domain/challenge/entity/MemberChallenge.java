@@ -31,8 +31,10 @@ public class MemberChallenge extends BaseEntity {
 
     private Boolean isSuccess;
 
-    private Double reward;
+    private Long deposit;
 
-    private Double points;
+    private Long reward;
+
+    private Long points;
 
 }

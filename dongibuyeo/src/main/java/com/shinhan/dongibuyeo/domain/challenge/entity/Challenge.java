@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Entity
 @Getter
@@ -38,7 +39,7 @@ public class Challenge extends BaseEntity {
     private String title;
     private String description;
 
-    private double deposit;
+    private AtomicLong deposit;
 
     private AtomicInteger participants;
 
