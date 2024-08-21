@@ -9,5 +9,4 @@ import lombok.Getter;
 @AllArgsConstructor
 public class DuplicateEmailResponse {
     private Boolean isPresent;
-    private String apiKey;
 }
