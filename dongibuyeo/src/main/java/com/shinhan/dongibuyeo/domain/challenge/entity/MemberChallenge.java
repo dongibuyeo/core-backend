@@ -5,6 +5,7 @@ import com.shinhan.dongibuyeo.domain.member.entity.Member;
 import com.shinhan.dongibuyeo.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLRestriction;
@@ -37,4 +38,13 @@ public class MemberChallenge extends BaseEntity {
 
     private Long points;
 
+    @Builder
+    public MemberChallenge(Member member, Challenge challenge, Long deposit) {
+        this.member = member;
+        this.challenge = challenge;
+        this.isSuccess = false;
+        this.deposit = deposit;
+        this.reward = 0L;
+        this.points = 0L;
+    }
 }
