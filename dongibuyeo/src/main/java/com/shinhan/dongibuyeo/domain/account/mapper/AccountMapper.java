@@ -13,9 +13,9 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class AccountMapper {
-    public ShinhanMakeAccountRequest toShinhanMakeAccountRequest(MakeAccountRequest request,String apiKey, Member member) {
+    public ShinhanMakeAccountRequest toShinhanMakeAccountRequest(MakeAccountRequest request, String apiKey, Member member) {
         return new ShinhanMakeAccountRequest(
-                new GlobalUserHeader("createDemandDepositAccount",apiKey,member.getUserKey()),
+                new GlobalUserHeader("createDemandDepositAccount", apiKey, member.getUserKey()),
                 request.getAccountTypeUniqueNo()
         );
     }
