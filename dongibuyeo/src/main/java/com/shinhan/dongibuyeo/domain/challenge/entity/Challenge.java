@@ -46,15 +46,15 @@ public class Challenge extends BaseEntity {
     @OneToMany(mappedBy = "challenge")
     private List<MemberChallenge> challengeMembers = new ArrayList<>();
 
-    public void addMember(MemberChallenge memberChallenge, Long userDeposit) {
+    public void addMember(MemberChallenge memberChallenge) {
         challengeMembers.add(memberChallenge);
-        deposit.getAndAdd(userDeposit);
+        deposit.getAndAdd(memberChallenge.getDeposit());
         participants.incrementAndGet();
     }
 
-    public void removeMember(MemberChallenge memberChallenge, Long userDeposit) {
+    public void removeMember(MemberChallenge memberChallenge) {
         challengeMembers.remove(memberChallenge);
-        deposit.getAndAdd(-userDeposit);
+        deposit.getAndAdd(-memberChallenge.getDeposit());
         participants.decrementAndGet();
     }
 
