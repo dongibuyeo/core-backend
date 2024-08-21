@@ -39,9 +39,9 @@ public class Challenge extends BaseEntity {
     private String title;
     private String description;
 
-    private AtomicLong deposit;
+    private AtomicLong deposit = new AtomicLong(0);
 
-    private AtomicInteger participants;
+    private AtomicInteger participants = new AtomicInteger(0);
 
     @OneToMany(mappedBy = "challenge")
     private List<MemberChallenge> challengeMembers = new ArrayList<>();
