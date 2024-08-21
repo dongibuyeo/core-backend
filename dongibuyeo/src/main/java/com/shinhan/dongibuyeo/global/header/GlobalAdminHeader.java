@@ -3,6 +3,7 @@ package com.shinhan.dongibuyeo.global.header;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.time.LocalDateTime;
@@ -10,6 +11,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class GlobalAdminHeader {
     private String apiName;
@@ -19,12 +21,11 @@ public class GlobalAdminHeader {
     private String fintechAppNo;
     private String apiServiceCode;
     private String institutionTransactionUniqueNo;
-
-    @Value("${shinhan.key}")
     private String apiKey;
 
-    public GlobalAdminHeader(String apiName) {
+    public GlobalAdminHeader(String apiName, String apiKey) {
         this.apiName = apiName;
+        this.apiKey = apiKey;
         setTransmissionDateAndTime();
         this.institutionCode = "00100";
         this.fintechAppNo = "001";
