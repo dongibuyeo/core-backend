@@ -2,8 +2,10 @@ package com.shinhan.dongibuyeo.domain.member.entity;
 
 import com.github.f4b6a3.ulid.UlidCreator;
 import com.shinhan.dongibuyeo.domain.account.entity.Account;
+import com.shinhan.dongibuyeo.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +15,8 @@ import java.util.UUID;
 @Getter
 @EqualsAndHashCode(of = "nickname")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Member {
+@SQLRestriction("deleted_at is null")
+public class Member extends BaseEntity {
 
     @Id
     @Column(columnDefinition = "BINARY(16)")
@@ -30,7 +33,7 @@ public class Member {
 
     private String profileImage;
 
-    private String apiKey;
+    private String userKey;
 
     private String deviceToken;
 
@@ -49,8 +52,8 @@ public class Member {
         this.deviceToken = deviceToken;
     }
 
-    public void updateApiKey(String apiKey) {
-        this.apiKey = apiKey;
+    public void updateUserKey(String userKey) {
+        this.userKey = userKey;
     }
 
     public void updateDeviceToken(String deviceToken) {
