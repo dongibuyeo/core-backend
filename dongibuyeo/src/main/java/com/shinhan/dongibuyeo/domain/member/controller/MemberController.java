@@ -58,13 +58,19 @@ public class MemberController {
         return ResponseEntity.ok(memberService.findMembers());
     }
 
-    @GetMapping("/id")
-    public ResponseEntity<MemberResponse> getMemberById(@RequestParam UUID memberId) {
+    @GetMapping("/{memberId}")
+    public ResponseEntity<MemberResponse> getMemberById(@PathVariable UUID memberId) {
         return ResponseEntity.ok(memberService.findMemberById(memberId));
     }
 
-    @GetMapping("/email")
-    public ResponseEntity<MemberResponse> getMemberByEmail(@RequestParam String email) {
+    @GetMapping("/email/{email}")
+    public ResponseEntity<MemberResponse> getMemberByEmail(@PathVariable String email) {
         return ResponseEntity.ok(memberService.findMemberByEmail(email));
+    }
+
+    @DeleteMapping("/{memberId}")
+    public ResponseEntity<Void> deleteMember(@PathVariable UUID memberId) {
+        memberService.deleteMemberById(memberId);
+        return ResponseEntity.noContent().build();
     }
 }
