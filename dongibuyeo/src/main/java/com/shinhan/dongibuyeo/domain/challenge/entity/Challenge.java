@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -27,6 +29,7 @@ public class Challenge extends BaseEntity {
     private ChallengeType type;
 
     @OneToOne
+    @JoinColumn(name = "account_id", unique = true)
     private Account account;
 
     private LocalDate startDate;
@@ -38,5 +41,8 @@ public class Challenge extends BaseEntity {
     private double deposit;
 
     private AtomicInteger participants;
+
+    @OneToMany(mappedBy = "challenge")
+    private List<MemberChallenge> challengeMembers = new ArrayList<>();
 
 }
