@@ -3,6 +3,8 @@ package com.shinhan.dongibuyeo.domain.account.service;
 import com.shinhan.dongibuyeo.domain.account.repository.AccountRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 public class AccountService {
 
@@ -12,4 +14,23 @@ public class AccountService {
         this.accountRepository = accountRepository;
     }
 
+    public void makePersonalAccount() {
+
+    }
+
+    public void makeChallengeAccount() {
+
+    }
+
+    public void getAllAccountsByMemberId(UUID memberId) {
+
+    }
+
+    public void getAccountByAccountId(UUID accountId) {
+
+    }
+
+    public void terminateAccountByMemberId() {
+
+    }
 }
