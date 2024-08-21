@@ -13,4 +13,6 @@ spring:
     hibernate:
       ddl-auto: create
 
+shinhan:
+  key: 7c746d26c4a44632a638a88131f0b779
 
