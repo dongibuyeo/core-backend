@@ -4,12 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
-
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AccountResponse {
-    private UUID accountId;
-    private AccountDetail detail;
+public class Currency {
+    private String currency;
+    private String currencyName;
 }
