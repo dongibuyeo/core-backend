@@ -36,7 +36,7 @@ public class Member extends BaseEntity {
 
     private String profileImage;
 
-    private String apiKey;
+    private String userKey;
 
     private String deviceToken;
 
@@ -52,8 +52,8 @@ public class Member extends BaseEntity {
         this.deviceToken = deviceToken;
     }
 
-    public void updateApiKey(String apiKey) {
-        this.apiKey = apiKey;
+    public void updateUserKey(String userKey) {
+        this.userKey = userKey;
     }
 
     public void updateDeviceToken(String deviceToken) {
