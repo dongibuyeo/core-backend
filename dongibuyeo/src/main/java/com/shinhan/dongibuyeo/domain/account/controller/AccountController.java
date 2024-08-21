@@ -27,12 +27,12 @@ public class AccountController {
     }
 
     @GetMapping("/all/{memberId}")
-    public ResponseEntity<Void> getAllAccountsByMemberId(@RequestParam UUID memberId) {
+    public ResponseEntity<Void> getAllAccountsByMemberId(@PathVariable UUID memberId) {
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{accountId}")
-    public ResponseEntity<Void> getAccountByAccountId(@RequestParam UUID accountId) {
+    public ResponseEntity<Void> getAccountByAccountId(@PathVariable UUID accountId) {
         return ResponseEntity.ok().build();
     }
 
