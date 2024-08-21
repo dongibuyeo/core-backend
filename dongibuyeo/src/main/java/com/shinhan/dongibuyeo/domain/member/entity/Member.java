@@ -1,9 +1,12 @@
 package com.shinhan.dongibuyeo.domain.member.entity;
 
 import com.github.f4b6a3.ulid.UlidCreator;
+import com.shinhan.dongibuyeo.domain.account.entity.Account;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -30,6 +33,12 @@ public class Member {
     private String apiKey;
 
     private String deviceToken;
+
+    @OneToMany(
+            mappedBy = "member",
+            cascade = {CascadeType.PERSIST,CascadeType.MERGE}
+    )
+    private List<Account> accounts = new ArrayList<>();
 
     @Builder
     public Member(String email, String name, String nickname, String profileImage, String deviceToken) {
