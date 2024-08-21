@@ -99,4 +99,9 @@ public class MemberService {
         return memberMapper.toMemberResponse(member);
     }
 
+    @Transactional
+    public void deleteMemberById(UUID memberId) {
+        Member member = getMemberById(memberId);
+        member.softDelete();
+    }
 }
