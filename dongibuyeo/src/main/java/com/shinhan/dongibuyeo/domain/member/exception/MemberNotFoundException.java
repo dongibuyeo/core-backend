@@ -7,9 +7,16 @@ import java.util.UUID;
 
 public class MemberNotFoundException extends NotFoundException {
 
-    public MemberNotFoundException(UUID memberId) {
+    public MemberNotFoundException() {
         super(
                 "NOT_FOUND_MEMBER_01",
+                "아이디에 부합한 회원을 찾을 수 없습니다."
+        );
+    }
+
+    public MemberNotFoundException(UUID memberId) {
+        super(
+                "NOT_FOUND_MEMBER_02",
                 "아이디에 부합한 회원을 찾을 수 없습니다.",
                 Map.of("memberId", String.valueOf(memberId))
         );
@@ -17,7 +24,7 @@ public class MemberNotFoundException extends NotFoundException {
 
     public MemberNotFoundException(String email) {
         super(
-                "NOT_FOUND_MEMBER_02",
+                "NOT_FOUND_MEMBER_03",
                 "이메일에 부합한 회원을 찾을 수 없습니다.",
                 Map.of("memberId", String.valueOf(email))
         );
