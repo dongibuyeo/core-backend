@@ -1,11 +1,13 @@
 package com.shinhan.dongibuyeo.domain.account.controller;
 
 import com.shinhan.dongibuyeo.domain.account.dto.request.MakeAccountRequest;
-import com.shinhan.dongibuyeo.domain.account.dto.response.AccountResponse;
+import com.shinhan.dongibuyeo.domain.account.dto.response.AccountDetailInfo;
+import com.shinhan.dongibuyeo.domain.account.dto.response.MakeAccountResponse;
 import com.shinhan.dongibuyeo.domain.account.service.AccountService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -19,18 +21,18 @@ public class AccountController {
     }
 
     @PostMapping("/personal")
-    public ResponseEntity<AccountResponse> makePersonalAccount(@RequestBody MakeAccountRequest request) {
+    public ResponseEntity<MakeAccountResponse> makePersonalAccount(@RequestBody MakeAccountRequest request) {
         return ResponseEntity.ok(accountService.makePersonalAccount(request));
     }
 
     @PostMapping("/challenge")
-    public ResponseEntity<Void> makeChallengeAccount() {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<MakeAccountResponse> makeChallengeAccount(@RequestBody MakeAccountRequest request) {
+        return ResponseEntity.ok(accountService.makeChallengeAccount(request));
     }
 
     @GetMapping("/all/{memberId}")
-    public ResponseEntity<Void> getAllAccountsByMemberId(@PathVariable UUID memberId) {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<List<AccountDetailInfo>> getAllAccountsByMemberId(@PathVariable UUID memberId) {
+        return ResponseEntity.ok(accountService.getAllAccountsByMemberId(memberId));
     }
 
     @GetMapping("/{accountId}")

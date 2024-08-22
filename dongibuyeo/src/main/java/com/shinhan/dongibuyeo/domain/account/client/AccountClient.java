@@ -1,5 +1,7 @@
 package com.shinhan.dongibuyeo.domain.account.client;
 
+import com.shinhan.dongibuyeo.domain.account.dto.client.ShinhanGetAccountsRequest;
+import com.shinhan.dongibuyeo.domain.account.dto.client.ShinhanGetAccountsResponse;
 import com.shinhan.dongibuyeo.domain.account.dto.client.ShinhanMakeAccountRequest;
 import com.shinhan.dongibuyeo.domain.account.dto.client.ShinhanMakeAccountResponse;
 import org.springframework.http.MediaType;
@@ -28,4 +30,18 @@ public class AccountClient {
                 .blockOptional()
                 .orElseThrow();
     }
+
+    public ShinhanGetAccountsResponse getAllAccountsByMember(ShinhanGetAccountsRequest request) {
+        return webClient.post()
+                .uri("/edu/demandDeposit/inquireDemandDepositAccountList")
+                .accept(MediaType.APPLICATION_JSON)
+                .acceptCharset(StandardCharsets.UTF_8)
+                .bodyValue(request)
+                .retrieve()
+                .bodyToMono(ShinhanGetAccountsResponse.class)
+                .blockOptional()
+                .orElseThrow();
+    }
+
+
 }
