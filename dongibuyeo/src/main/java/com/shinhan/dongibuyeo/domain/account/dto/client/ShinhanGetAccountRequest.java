@@ -9,7 +9,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ShinhanGetAccountsRequest {
+public class ShinhanGetAccountRequest {
     @JsonProperty("Header")
     private GlobalUserHeader header;
+    private String accountNo;
 }

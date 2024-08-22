@@ -1,13 +1,9 @@
 package com.shinhan.dongibuyeo.domain.account.mapper;
 
-import com.shinhan.dongibuyeo.domain.account.dto.client.ShinhanGetAccountsRequest;
-import com.shinhan.dongibuyeo.domain.account.dto.client.ShinhanMakeAccountRequest;
-import com.shinhan.dongibuyeo.domain.account.dto.client.ShinhanMakeAccountResponse;
+import com.shinhan.dongibuyeo.domain.account.dto.client.*;
 import com.shinhan.dongibuyeo.domain.account.dto.request.MakeAccountRequest;
-import com.shinhan.dongibuyeo.domain.account.dto.response.AccountDetailInfo;
-import com.shinhan.dongibuyeo.domain.account.dto.response.AccountInfo;
-import com.shinhan.dongibuyeo.domain.account.dto.response.MakeAccountResponse;
-import com.shinhan.dongibuyeo.domain.account.dto.response.Currency;
+import com.shinhan.dongibuyeo.domain.account.dto.request.TransferRequest;
+import com.shinhan.dongibuyeo.domain.account.dto.response.*;
 import com.shinhan.dongibuyeo.domain.account.entity.Account;
 import com.shinhan.dongibuyeo.domain.account.entity.AccountType;
 import com.shinhan.dongibuyeo.domain.member.entity.Member;
@@ -26,6 +22,24 @@ public class AccountMapper {
     public ShinhanGetAccountsRequest toShinhanGetAccountsRequest(String apiKey, String userKey) {
         return new ShinhanGetAccountsRequest(
                 new GlobalUserHeader("inquireDemandDepositAccountList",apiKey,userKey)
+        );
+    }
+
+    public ShinhanGetAccountRequest toShinhanGetAccountRequest(String apiKey, String userKey, String accountNo) {
+        return new ShinhanGetAccountRequest(
+                new GlobalUserHeader("inquireDemandDepositAccount",apiKey, userKey),
+                accountNo
+        );
+    }
+
+    public ShinhanTransferRequest toShinhanTransferRequest(TransferRequest request, String apiKey, Member member) {
+        return new ShinhanTransferRequest(
+                new GlobalUserHeader("updateDemandDepositAccountTransfer",apiKey, member.getUserKey()),
+                request.getDepositAccountNo(),
+                request.getTransferType().toString()+"입금",
+                request.getTransactionBalance(),
+                request.getWithdrawalAccountNo(),
+                request.getTransferType().toString()+"출금"
         );
     }
 
