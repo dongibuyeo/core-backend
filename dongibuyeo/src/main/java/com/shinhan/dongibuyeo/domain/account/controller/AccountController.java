@@ -46,4 +46,10 @@ public class AccountController {
     public ResponseEntity<List<TransferResponse>> accountTransfer(@RequestBody TransferRequest request) {
        return ResponseEntity.ok(accountService.accountTransfer(request));
     }
+
+    // 압금
+
+    // 계좌 해지
+
+    // 거래 내역
 }
