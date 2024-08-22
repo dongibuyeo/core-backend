@@ -1,15 +1,14 @@
 package com.shinhan.dongibuyeo.domain.challenge.service;
 
-import com.shinhan.dongibuyeo.domain.challenge.dto.request.ChallengeModifyRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.ChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.JoinChallengeRequest;
-import com.shinhan.dongibuyeo.domain.challenge.dto.request.MemberChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.ChallengeResponse;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.MemberChallengeResponse;
 import com.shinhan.dongibuyeo.domain.challenge.entity.Challenge;
 import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeStatus;
 import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeType;
 import com.shinhan.dongibuyeo.domain.challenge.entity.MemberChallenge;
+import com.shinhan.dongibuyeo.domain.challenge.exception.ChallengeAlreadyStartedException;
 import com.shinhan.dongibuyeo.domain.challenge.exception.ChallengeCannotWithdrawException;
 import com.shinhan.dongibuyeo.domain.challenge.exception.ChallengeNotFoundException;
 import com.shinhan.dongibuyeo.domain.challenge.exception.MemberChallengeNotFoundException;
@@ -17,7 +16,6 @@ import com.shinhan.dongibuyeo.domain.challenge.mapper.ChallengeMapper;
 import com.shinhan.dongibuyeo.domain.challenge.repository.ChallengeRepository;
 import com.shinhan.dongibuyeo.domain.challenge.repository.MemberChallengeRepository;
 import com.shinhan.dongibuyeo.domain.member.entity.Member;
-import com.shinhan.dongibuyeo.domain.challenge.exception.ChallengeAlreadyStartedException;
 import com.shinhan.dongibuyeo.domain.member.service.MemberService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
