@@ -4,11 +4,9 @@ import com.shinhan.dongibuyeo.domain.account.client.AccountClient;
 import com.shinhan.dongibuyeo.domain.account.dto.client.*;
 import com.shinhan.dongibuyeo.domain.account.dto.request.DepositRequest;
 import com.shinhan.dongibuyeo.domain.account.dto.request.MakeAccountRequest;
+import com.shinhan.dongibuyeo.domain.account.dto.request.TransactionHistoryRequest;
 import com.shinhan.dongibuyeo.domain.account.dto.request.TransferRequest;
-import com.shinhan.dongibuyeo.domain.account.dto.response.AccountDetailInfo;
-import com.shinhan.dongibuyeo.domain.account.dto.response.DepositResponse;
-import com.shinhan.dongibuyeo.domain.account.dto.response.MakeAccountResponse;
-import com.shinhan.dongibuyeo.domain.account.dto.response.TransferResponse;
+import com.shinhan.dongibuyeo.domain.account.dto.response.*;
 import com.shinhan.dongibuyeo.domain.account.entity.Account;
 import com.shinhan.dongibuyeo.domain.account.mapper.AccountMapper;
 import com.shinhan.dongibuyeo.domain.account.repository.AccountRepository;
@@ -101,5 +99,16 @@ public class AccountService {
         ShinhanDepositResponse deposit = accountClient.accountDeposit(accountMapper.toShinhanDepositRequest(depositRequest,apiKey,member));
 
         return deposit.getRec();
+    }
+
+    @Transactional
+    public TransactionHistorys getMemberTransactionHistory(TransactionHistoryRequest request) {
+        Member member = memberService.getMemberById(request.getMemberId());
+
+        ShinhanTransactionHistoryResponse historys = accountClient.getTransactionHistory(
+                accountMapper.toShinhanTransactionHistoryRequest(request,apiKey,member)
+        );
+
+        return historys.getRec();
     }
 }

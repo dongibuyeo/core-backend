@@ -3,6 +3,7 @@ package com.shinhan.dongibuyeo.domain.account.mapper;
 import com.shinhan.dongibuyeo.domain.account.dto.client.*;
 import com.shinhan.dongibuyeo.domain.account.dto.request.DepositRequest;
 import com.shinhan.dongibuyeo.domain.account.dto.request.MakeAccountRequest;
+import com.shinhan.dongibuyeo.domain.account.dto.request.TransactionHistoryRequest;
 import com.shinhan.dongibuyeo.domain.account.dto.request.TransferRequest;
 import com.shinhan.dongibuyeo.domain.account.dto.response.*;
 import com.shinhan.dongibuyeo.domain.account.entity.Account;
@@ -50,6 +51,17 @@ public class AccountMapper {
                 request.getAccountNo(),
                 request.getTransactionBalance(),
                 "입금"
+        );
+    }
+
+    public ShinhanTransactionHistoryRequest toShinhanTransactionHistoryRequest(TransactionHistoryRequest request, String apiKey, Member member) {
+        return new ShinhanTransactionHistoryRequest(
+                new GlobalUserHeader("inquireTransactionHistoryList",apiKey, member.getUserKey()),
+                request.getAccountNo(),
+                request.getStartDate(),
+                request.getEndDate(),
+                request.getTransactionType(),
+                request.getOrderByType()
         );
     }
 

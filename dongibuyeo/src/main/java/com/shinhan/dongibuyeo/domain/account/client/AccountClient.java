@@ -78,4 +78,16 @@ public class AccountClient {
                 .blockOptional()
                 .orElseThrow();
     }
+
+    public ShinhanTransactionHistoryResponse getTransactionHistory(ShinhanTransactionHistoryRequest request) {
+        return webClient.post()
+                .uri("/edu/demandDeposit/inquireTransactionHistory")
+                .accept(MediaType.APPLICATION_JSON)
+                .acceptCharset(StandardCharsets.UTF_8)
+                .bodyValue(request)
+                .retrieve()
+                .bodyToMono(ShinhanTransactionHistoryResponse.class)
+                .blockOptional()
+                .orElseThrow();
+    }
 }
