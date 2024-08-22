@@ -10,7 +10,7 @@ public class ChallengeAlreadyStartedException extends BaseException {
     public ChallengeAlreadyStartedException(UUID challengeId) {
         super(
                 "CHALLENGE_ALREADY_STARTED_01",
-                "이미 챌린지가 시작되어 취소할 수 없습니다.",
+                "이미 시작된 챌린지입니다.",
                 Map.of("challengeId", String.valueOf(challengeId))
         );
     }

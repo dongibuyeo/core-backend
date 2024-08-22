@@ -1,11 +1,8 @@
 package com.shinhan.dongibuyeo.domain.challenge.controller;
 
-import com.shinhan.dongibuyeo.domain.challenge.dto.request.CancelJoinChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.ChallengeModifyRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.ChallengeRequest;
-import com.shinhan.dongibuyeo.domain.challenge.dto.request.JoinChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.ChallengeResponse;
-import com.shinhan.dongibuyeo.domain.challenge.dto.response.MemberChallengeResponse;
 import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeStatus;
 import com.shinhan.dongibuyeo.domain.challenge.service.ChallengeService;
 import jakarta.validation.Valid;
@@ -25,6 +22,11 @@ public class ChallengeController {
         this.challengeService = challengeService;
     }
 
+    @PostMapping
+    public ResponseEntity<ChallengeResponse> makeChallenge(@RequestBody @Valid ChallengeRequest request) {
+        return ResponseEntity.ok(challengeService.makeChallenge(request));
+    }
+
     @GetMapping
     public ResponseEntity<List<ChallengeResponse>> getChallenges() {
         return ResponseEntity.ok(challengeService.findAllChallenges());
@@ -41,22 +43,6 @@ public class ChallengeController {
 
     }
 
-    @GetMapping("/member")
-    public ResponseEntity<List<ChallengeResponse>> getMemberChallenges(@RequestParam UUID memberId) {
-        return ResponseEntity.ok(challengeService.findAllChallengesByMemberId(memberId));
-    }
-
-     @GetMapping("/member/status")
-    public ResponseEntity<List<ChallengeResponse>> getMemberChallengesByStatus(@RequestParam UUID memberId, @RequestParam ChallengeStatus status) {
-        return ResponseEntity.ok(challengeService.findAllChallengesByMemberIdAndStatus(memberId, status));
-    }
-
-    @GetMapping("/member/{challengeId}")
-    public ResponseEntity<MemberChallengeResponse> getMemberChallengeByChallengeId(@PathVariable UUID challengeId,
-                                                                                   @RequestParam UUID memberId) {
-        return ResponseEntity.ok(challengeService.findChallengeByChallengeIdAndMemberId(challengeId, memberId));
-    }
-
     @DeleteMapping("/{challengeId}")
     public ResponseEntity<ChallengeResponse> deleteChallengeById(@PathVariable UUID challengeId) {
         challengeService.deleteChallengeByChallengeId(challengeId);
@@ -65,27 +51,8 @@ public class ChallengeController {
 
     @PatchMapping("/{challengeId}")
     public ResponseEntity<ChallengeResponse> modifyChallengeById(@PathVariable UUID challengeId,
-                                                                 @RequestBody @Valid ChallengeModifyRequest request) {
+                                                                 @RequestBody @Valid ChallengeRequest request) {
         return ResponseEntity.ok(challengeService.updateChallengeByChallengeId(challengeId, request));
-    }
-
-    @PostMapping
-    public ResponseEntity<ChallengeResponse> makeChallenge(@RequestBody @Valid ChallengeRequest request) {
-        return ResponseEntity.ok(challengeService.makeChallenge(request));
-    }
-
-    @PostMapping("/{challengeId}/join")
-    public ResponseEntity<Void> joinChallenge(@PathVariable UUID challengeId,
-                                              @RequestBody @Valid JoinChallengeRequest request) {
-        challengeService.joinChallenge(challengeId, request);
-        return ResponseEntity.ok().build();
-    }
-
-    @PostMapping("/{challengeId}/cancel")
-    public ResponseEntity<Void> cancelJoinChallenge(@PathVariable UUID challengeId,
-                                                    @RequestBody @Valid CancelJoinChallengeRequest request) {
-        challengeService.cancelJoinChallenge(challengeId, request.getMemberId());
-        return ResponseEntity.ok().build();
     }
 
 }
