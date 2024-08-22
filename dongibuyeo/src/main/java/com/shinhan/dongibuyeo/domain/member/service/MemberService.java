@@ -13,6 +13,8 @@ import com.shinhan.dongibuyeo.domain.member.entity.Member;
 import com.shinhan.dongibuyeo.domain.member.exception.MemberNotFoundException;
 import com.shinhan.dongibuyeo.domain.member.mapper.MemberMapper;
 import com.shinhan.dongibuyeo.domain.member.repository.MemberRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,10 +26,11 @@ import java.util.UUID;
 @Service
 public class MemberService {
 
+    private static final Logger log = LoggerFactory.getLogger(MemberService.class);
     @Value("${shinhan.key}")
     private String apiKey;
 
-    @Value("${shinhan.admin-email}")
+    @Value("${shinhan.admin.email}")
     private String adminEmail;
 
     private final MemberRepository memberRepository;
@@ -77,7 +80,7 @@ public class MemberService {
     public boolean isDuplicateEmail(String email) {
         try {
             memberClient.searchMember(new ShinhanMemberRequest(apiKey, email));
-        } catch (MemberNotFoundException e) {
+        } catch (RuntimeException e) { // TODO 변경
             return false;
         }
         return true;
@@ -138,6 +141,7 @@ public class MemberService {
     @Transactional
     public MemberResponse getOrCreateAdminMember() {
         if (isDuplicateEmail(adminEmail)) {
+            log.info("[getOrCreateAdminMember] 중복 회원 존재");
             ShinhanMemberResponse response = memberClient.searchMember(new ShinhanMemberRequest(apiKey, adminEmail));
 
             Member admin = Member.builder()
@@ -150,6 +154,7 @@ public class MemberService {
             memberRepository.save(admin);
             return memberMapper.toMemberResponse(admin);
         } else {
+            log.info("[getOrCreateAdminMember] 회원 신규 등록");
             return saveMember(new MemberSaveRequest(adminEmail, "admin", "admin", "", ""));
         }
     }
