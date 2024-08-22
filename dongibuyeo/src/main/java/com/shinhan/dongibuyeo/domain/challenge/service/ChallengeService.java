@@ -77,6 +77,8 @@ public class ChallengeService {
     public ChallengeResponse makeChallenge(ChallengeRequest request) {
         // TODO request의 계좌 ID 기반으로 계좌를 조회해 계좌 연결하는 로직까지 추가
         Challenge challenge = challengeMapper.toChallengeEntity(request);
+
+
         challengeRepository.save(challenge);
         return challengeMapper.toChallengeResponse(challenge);
     }
@@ -148,6 +150,7 @@ public class ChallengeService {
         memberChallenge.softDelete();
 
         // TODO 적금 해지 후 환급 로직 (유저 적금 계좌 -> 유저 챌린지 계좌)
+
     }
 
     private MemberChallenge getMemberChallenge(UUID challengeId, UUID memberId) {
