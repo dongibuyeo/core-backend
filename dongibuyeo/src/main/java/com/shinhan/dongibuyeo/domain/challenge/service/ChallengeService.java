@@ -90,13 +90,14 @@ public class ChallengeService {
                 .deposit(request.getDeposit())
                 .build();
 
-        memberChallengeRepository.save(memberChallenge);
         // 챌린지 정보 변경
         challenge.addMember(memberChallenge);
+        member.addChallenge(memberChallenge);
     }
 
     @Transactional
     public void cancelJoinChallenge(UUID challengeId, UUID memberId) {
+        Member member = memberService.getMemberById(memberId);
         Challenge challenge = findChallengeById(challengeId);
 
         // TODO: 챌린지 시작 이후엔 취소할 수 없음 -> 적금의 경우 분기처리
@@ -106,6 +107,7 @@ public class ChallengeService {
 
         MemberChallenge memberChallenge = getMemberChallenge(challengeId, memberId);
         challenge.removeMember(memberChallenge);
+        member.removeChallenge(memberChallenge);
         memberChallenge.softDelete();
 
         // TODO: 보증금 반환 로직
