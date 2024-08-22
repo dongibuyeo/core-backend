@@ -134,7 +134,7 @@ public class ChallengeService {
         MemberChallenge memberChallenge = getMemberChallenge(challengeId, memberId);
 
         // 적금의 경우만 중도 해지 가능
-        if(challenge.getType() != ChallengeType.SAVINGS) {
+        if(challenge.getType() != ChallengeType.SAVINGS_SEVEN) {
             throw new ChallengeCannotWithdrawException(challenge.getType());
         }
 
