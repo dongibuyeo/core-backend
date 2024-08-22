@@ -12,7 +12,7 @@ public interface ChallengeMapper {
 
     @Mapping(source = "challenge.id", target = "challengeId")
     @Mapping(source = "challenge.account.accountNo", target = "accountNo")
-    @Mapping(target = "deposit", expression = "java(challenge.getDeposit().get())")
+    @Mapping(target = "totalDeposit", expression = "java(challenge.getTotalDeposit().get())")
     @Mapping(target = "participants", expression = "java(challenge.getParticipants().get())")
     ChallengeResponse toChallengeResponse(Challenge challenge);
 

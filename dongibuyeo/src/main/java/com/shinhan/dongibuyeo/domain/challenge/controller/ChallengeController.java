@@ -4,8 +4,8 @@ import com.shinhan.dongibuyeo.domain.challenge.dto.request.CancelJoinChallengeRe
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.ChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.JoinChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.ChallengeResponse;
+import com.shinhan.dongibuyeo.domain.challenge.dto.response.MemberChallengeResponse;
 import com.shinhan.dongibuyeo.domain.challenge.service.ChallengeService;
-import com.shinhan.dongibuyeo.domain.member.dto.response.MemberResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -56,8 +56,13 @@ public class ChallengeController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/members/{memberId}")
-    public ResponseEntity<List<ChallengeResponse>> getMemberChallenges(@PathVariable UUID memberId) {
+    @GetMapping("/member")
+    public ResponseEntity<List<ChallengeResponse>> getMemberChallenges(@RequestParam UUID memberId) {
         return ResponseEntity.ok(challengeService.findAllChallengesByMemberId(memberId));
+    }
+
+    @GetMapping("/member/{challengeId}")
+    public ResponseEntity<MemberChallengeResponse> getMemberChallengeByChallengeId(@PathVariable UUID challengeId, @RequestParam UUID memberId) {
+        return ResponseEntity.ok(challengeService.findChallengeByChallengeIdAndMemberId(challengeId, memberId));
     }
 }

@@ -1,5 +1,6 @@
 package com.shinhan.dongibuyeo.domain.challenge.repository;
 
+import com.shinhan.dongibuyeo.domain.challenge.dto.response.MemberChallengeResponse;
 import com.shinhan.dongibuyeo.domain.challenge.entity.Challenge;
 import com.shinhan.dongibuyeo.domain.challenge.entity.MemberChallenge;
 import org.aspectj.apache.bcel.classfile.LineNumberTable;
@@ -16,8 +17,16 @@ public interface MemberChallengeRepository extends JpaRepository<MemberChallenge
 
     @Query("SELECT c " +
             "FROM Challenge c " +
-            "JOIN MemberChallenge mc " +
+            "JOIN FETCH MemberChallenge mc " +
             "ON mc.challenge.id = c.id " +
             "WHERE mc.member.id = :memberId ")
     Optional<List<Challenge>> findChallengesByMemberId(UUID memberId);
+
+    @Query("SELECT c, mc.isSuccess, mc.deposit memberDeposit, mc.reward, mc.points " +
+            "FROM Challenge c " +
+            "JOIN FETCH MemberChallenge mc " +
+            "ON mc.challenge.id = c.id " +
+            "WHERE mc.member.id = :memberId " +
+            "AND mc.challenge.id = :challengeId")
+    Optional<MemberChallengeResponse> findChallengeByMemberIdAndChallengeId(UUID memberId, UUID challengeId);
 }
