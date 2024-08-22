@@ -2,9 +2,11 @@ package com.shinhan.dongibuyeo.domain.account.service;
 
 import com.shinhan.dongibuyeo.domain.account.client.AccountClient;
 import com.shinhan.dongibuyeo.domain.account.dto.client.*;
+import com.shinhan.dongibuyeo.domain.account.dto.request.DepositRequest;
 import com.shinhan.dongibuyeo.domain.account.dto.request.MakeAccountRequest;
 import com.shinhan.dongibuyeo.domain.account.dto.request.TransferRequest;
 import com.shinhan.dongibuyeo.domain.account.dto.response.AccountDetailInfo;
+import com.shinhan.dongibuyeo.domain.account.dto.response.DepositResponse;
 import com.shinhan.dongibuyeo.domain.account.dto.response.MakeAccountResponse;
 import com.shinhan.dongibuyeo.domain.account.dto.response.TransferResponse;
 import com.shinhan.dongibuyeo.domain.account.entity.Account;
@@ -93,5 +95,11 @@ public class AccountService {
         return transfer.getRec();
     }
 
+    @Transactional
+    public DepositResponse accountDeposit(DepositRequest depositRequest) {
+        Member member = memberService.getMemberById(depositRequest.getMemberId());
+        ShinhanDepositResponse deposit = accountClient.accountDeposit(accountMapper.toShinhanDepositRequest(depositRequest,apiKey,member));
 
+        return deposit.getRec();
+    }
 }

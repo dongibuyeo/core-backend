@@ -66,4 +66,16 @@ public class AccountClient {
                 .blockOptional()
                 .orElseThrow();
     }
+
+    public ShinhanDepositResponse accountDeposit(ShinhanDepositRequest request) {
+        return webClient.post()
+                .uri("/edu/demandDeposit/updateDemandDepositAccountDeposit")
+                .accept(MediaType.APPLICATION_JSON)
+                .acceptCharset(StandardCharsets.UTF_8)
+                .bodyValue(request)
+                .retrieve()
+                .bodyToMono(ShinhanDepositResponse.class)
+                .blockOptional()
+                .orElseThrow();
+    }
 }

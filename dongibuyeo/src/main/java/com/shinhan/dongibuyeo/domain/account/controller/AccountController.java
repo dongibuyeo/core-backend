@@ -1,8 +1,10 @@
 package com.shinhan.dongibuyeo.domain.account.controller;
 
+import com.shinhan.dongibuyeo.domain.account.dto.request.DepositRequest;
 import com.shinhan.dongibuyeo.domain.account.dto.request.MakeAccountRequest;
 import com.shinhan.dongibuyeo.domain.account.dto.request.TransferRequest;
 import com.shinhan.dongibuyeo.domain.account.dto.response.AccountDetailInfo;
+import com.shinhan.dongibuyeo.domain.account.dto.response.DepositResponse;
 import com.shinhan.dongibuyeo.domain.account.dto.response.MakeAccountResponse;
 import com.shinhan.dongibuyeo.domain.account.dto.response.TransferResponse;
 import com.shinhan.dongibuyeo.domain.account.service.AccountService;
@@ -47,7 +49,12 @@ public class AccountController {
        return ResponseEntity.ok(accountService.accountTransfer(request));
     }
 
-    // 압금
+    @PostMapping("/deposit")
+    public ResponseEntity<DepositResponse> accountDeposit(@RequestBody DepositRequest request) {
+        return ResponseEntity.ok(accountService.accountDeposit(request));
+    }
+
+
 
     // 계좌 해지
 
