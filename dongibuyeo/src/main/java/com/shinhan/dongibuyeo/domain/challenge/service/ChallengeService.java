@@ -1,6 +1,5 @@
 package com.shinhan.dongibuyeo.domain.challenge.service;
 
-import com.shinhan.dongibuyeo.domain.challenge.dto.request.CancelJoinChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.ChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.JoinChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.ChallengeResponse;
@@ -12,12 +11,13 @@ import com.shinhan.dongibuyeo.domain.challenge.mapper.ChallengeMapper;
 import com.shinhan.dongibuyeo.domain.challenge.repository.ChallengeRepository;
 import com.shinhan.dongibuyeo.domain.challenge.repository.MemberChallengeRepository;
 import com.shinhan.dongibuyeo.domain.member.entity.Member;
-import com.shinhan.dongibuyeo.domain.member.exception.ChallengeAlreadyStartedException;
+import com.shinhan.dongibuyeo.domain.challenge.exception.ChallengeAlreadyStartedException;
 import com.shinhan.dongibuyeo.domain.member.service.MemberService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -53,6 +53,14 @@ public class ChallengeService {
 
     public ChallengeResponse findChallengeByChallengeId(UUID challengeId) {
         return challengeMapper.toChallengeResponse(findChallengeById(challengeId));
+    }
+
+    public List<ChallengeResponse> findAllChallengesByMemberId(UUID memberId) {
+        return memberChallengeRepository.findChallengesByMemberId(memberId)
+                .orElseGet(ArrayList::new)
+                .stream()
+                .map(challengeMapper::toChallengeResponse)
+                .toList();
     }
 
     @Transactional
@@ -106,4 +114,5 @@ public class ChallengeService {
         return memberChallengeRepository.findMemberChallengeByChallengeIdAndMemberId(challengeId, memberId)
                 .orElseThrow(() -> new MemberChallengeNotFoundException(challengeId, memberId));
     }
+
 }
