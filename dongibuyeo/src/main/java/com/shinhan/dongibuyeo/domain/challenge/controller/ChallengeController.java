@@ -46,6 +46,11 @@ public class ChallengeController {
         return ResponseEntity.ok(challengeService.findAllChallengesByMemberId(memberId));
     }
 
+     @GetMapping("/member/status")
+    public ResponseEntity<List<ChallengeResponse>> getMemberChallengesByStatus(@RequestParam UUID memberId, @RequestParam ChallengeStatus status) {
+        return ResponseEntity.ok(challengeService.findAllChallengesByMemberIdAndStatus(memberId, status));
+    }
+
     @GetMapping("/member/{challengeId}")
     public ResponseEntity<MemberChallengeResponse> getMemberChallengeByChallengeId(@PathVariable UUID challengeId,
                                                                                    @RequestParam UUID memberId) {
