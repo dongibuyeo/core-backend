@@ -1,16 +1,18 @@
 package com.shinhan.dongibuyeo.domain.account.service;
 
 import com.shinhan.dongibuyeo.domain.account.client.AccountClient;
-import com.shinhan.dongibuyeo.domain.account.dto.client.ShinhanGetAccountsResponse;
-import com.shinhan.dongibuyeo.domain.account.dto.client.ShinhanMakeAccountResponse;
+import com.shinhan.dongibuyeo.domain.account.dto.client.*;
 import com.shinhan.dongibuyeo.domain.account.dto.request.MakeAccountRequest;
+import com.shinhan.dongibuyeo.domain.account.dto.request.TransferRequest;
 import com.shinhan.dongibuyeo.domain.account.dto.response.AccountDetailInfo;
 import com.shinhan.dongibuyeo.domain.account.dto.response.MakeAccountResponse;
+import com.shinhan.dongibuyeo.domain.account.dto.response.TransferResponse;
 import com.shinhan.dongibuyeo.domain.account.entity.Account;
 import com.shinhan.dongibuyeo.domain.account.mapper.AccountMapper;
 import com.shinhan.dongibuyeo.domain.account.repository.AccountRepository;
 import com.shinhan.dongibuyeo.domain.member.entity.Member;
 import com.shinhan.dongibuyeo.domain.member.service.MemberService;
+import com.shinhan.dongibuyeo.global.header.GlobalUserHeader;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -63,15 +65,33 @@ public class AccountService {
         ShinhanGetAccountsResponse shinhanAccount = accountClient.getAllAccountsByMember(accountMapper.toShinhanGetAccountsRequest(apiKey,member.getUserKey()));
 
         shinhanAccount.getRec().forEach(
-                x -> {
-                    member.getAccounts().add(accountMapper.detailToPersonalAccountEntity(x));
-                }
+                x ->
+                    member.getAccounts().add(accountMapper.detailToPersonalAccountEntity(x))
         );
-
         return shinhanAccount.getRec();
     }
 
-    public void getAccountByAccountId(UUID accountId) {}
+    @Transactional
+    public AccountDetailInfo getAccountByAccountNo(UUID memberId, String accountNo) {
+        Member member = memberService.getMemberById(memberId);
+        ShinhanGetAccountResponse shinhanAccount = accountClient.getAccountByAccountNo(
+                accountMapper.toShinhanGetAccountRequest(apiKey,member.getUserKey(),accountNo)
+        );
 
-    public void terminateAccountByMemberId() {}
+        member.getAccounts().add(accountMapper.detailToPersonalAccountEntity(shinhanAccount.getRec()));
+        return shinhanAccount.getRec();
+    }
+
+    @Transactional
+    public List<TransferResponse> accountTransfer(TransferRequest transferRequest) {
+        Member member = memberService.getMemberById(transferRequest.getMemberId());
+
+        ShinhanTransferResponse transfer = accountClient.accountTransfer(
+            accountMapper.toShinhanTransferRequest(transferRequest,apiKey,member)
+        );
+
+        return transfer.getRec();
+    }
+
+
 }

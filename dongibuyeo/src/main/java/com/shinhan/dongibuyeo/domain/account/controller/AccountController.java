@@ -1,8 +1,10 @@
 package com.shinhan.dongibuyeo.domain.account.controller;
 
 import com.shinhan.dongibuyeo.domain.account.dto.request.MakeAccountRequest;
+import com.shinhan.dongibuyeo.domain.account.dto.request.TransferRequest;
 import com.shinhan.dongibuyeo.domain.account.dto.response.AccountDetailInfo;
 import com.shinhan.dongibuyeo.domain.account.dto.response.MakeAccountResponse;
+import com.shinhan.dongibuyeo.domain.account.dto.response.TransferResponse;
 import com.shinhan.dongibuyeo.domain.account.service.AccountService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,19 +33,17 @@ public class AccountController {
     }
 
     @GetMapping("/all/{memberId}")
-    public ResponseEntity<List<AccountDetailInfo>> getAllAccountsByMemberId(@PathVariable UUID memberId) {
+    public ResponseEntity<List<AccountDetailInfo>> getAllAccountsByMemberId(@PathVariable("memberId") UUID memberId) {
         return ResponseEntity.ok(accountService.getAllAccountsByMemberId(memberId));
     }
 
-    @GetMapping("/{accountId}")
-    public ResponseEntity<Void> getAccountByAccountId(@PathVariable UUID accountId) {
-        return ResponseEntity.ok().build();
+    @GetMapping("/member/{memberId}/{accountNo}")
+    public ResponseEntity<AccountDetailInfo> getAccountByAccountId(@PathVariable("memberId") UUID memberId, @PathVariable("accountNo") String accountNo) {
+        return ResponseEntity.ok(accountService.getAccountByAccountNo(memberId,accountNo));
     }
 
-    @PostMapping
-    public ResponseEntity<Void> terminateAccountByMemberId() {
-        return ResponseEntity.ok().build();
+    @PostMapping("/transfer")
+    public ResponseEntity<List<TransferResponse>> accountTransfer(@RequestBody TransferRequest request) {
+       return ResponseEntity.ok(accountService.accountTransfer(request));
     }
-
-
 }
