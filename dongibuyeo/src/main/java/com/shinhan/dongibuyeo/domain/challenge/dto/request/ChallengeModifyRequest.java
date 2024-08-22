@@ -19,4 +19,5 @@ public class ChallengeModifyRequest {
     private LocalDate endDate;
     private String title;
     private String description;
+    private String image;
 }
