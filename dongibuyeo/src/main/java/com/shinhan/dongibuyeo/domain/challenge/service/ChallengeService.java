@@ -3,6 +3,7 @@ package com.shinhan.dongibuyeo.domain.challenge.service;
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.ChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.JoinChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.ChallengeResponse;
+import com.shinhan.dongibuyeo.domain.challenge.dto.response.MemberChallengeResponse;
 import com.shinhan.dongibuyeo.domain.challenge.entity.Challenge;
 import com.shinhan.dongibuyeo.domain.challenge.entity.MemberChallenge;
 import com.shinhan.dongibuyeo.domain.challenge.exception.ChallengeNotFoundException;
@@ -19,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -115,4 +115,8 @@ public class ChallengeService {
                 .orElseThrow(() -> new MemberChallengeNotFoundException(challengeId, memberId));
     }
 
+    public MemberChallengeResponse findChallengeByChallengeIdAndMemberId(UUID challengeId, UUID memberId) {
+        return memberChallengeRepository.findChallengeByMemberIdAndChallengeId(challengeId, memberId)
+                .orElseThrow(() -> new MemberChallengeNotFoundException(challengeId, memberId));
+    }
 }

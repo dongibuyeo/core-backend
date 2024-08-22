@@ -11,7 +11,7 @@ import java.util.UUID;
 @Getter
 @Builder
 @AllArgsConstructor
-public class ChallengeResponse {
+public class MemberChallengeResponse {
 
     private UUID challengeId;
     private ChallengeType type;
@@ -25,4 +25,8 @@ public class ChallengeResponse {
     private Long totalDeposit;
     private Integer participants;
 
+    private Boolean isSuccess;
+    private Long memberDeposit;
+    private Long reward;
+    private Long points;
 }

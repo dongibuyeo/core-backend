@@ -39,7 +39,7 @@ public class Challenge extends BaseEntity {
     private String title;
     private String description;
 
-    private AtomicLong deposit = new AtomicLong(0);
+    private AtomicLong totalDeposit = new AtomicLong(0);
 
     private AtomicInteger participants = new AtomicInteger(0);
 
@@ -48,13 +48,13 @@ public class Challenge extends BaseEntity {
 
     public void addMember(MemberChallenge memberChallenge) {
         challengeMembers.add(memberChallenge);
-        deposit.getAndAdd(memberChallenge.getDeposit());
+        totalDeposit.getAndAdd(memberChallenge.getDeposit());
         participants.incrementAndGet();
     }
 
     public void removeMember(MemberChallenge memberChallenge) {
         challengeMembers.remove(memberChallenge);
-        deposit.getAndAdd(-memberChallenge.getDeposit());
+        totalDeposit.getAndAdd(-memberChallenge.getDeposit());
         participants.decrementAndGet();
     }
 
