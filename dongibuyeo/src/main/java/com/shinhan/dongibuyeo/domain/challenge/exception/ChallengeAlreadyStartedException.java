@@ -1,4 +1,4 @@
-package com.shinhan.dongibuyeo.domain.member.exception;
+package com.shinhan.dongibuyeo.domain.challenge.exception;
 
 import com.shinhan.dongibuyeo.global.exception.BaseException;
 
