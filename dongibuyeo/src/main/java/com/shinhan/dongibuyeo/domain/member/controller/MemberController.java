@@ -55,7 +55,7 @@ public class MemberController {
 
     @GetMapping
     public ResponseEntity<List<MemberResponse>> getAllMembers() {
-        return ResponseEntity.ok(memberService.findMembers());
+        return ResponseEntity.ok(memberService.findAllMembers());
     }
 
     @GetMapping("/{memberId}")
