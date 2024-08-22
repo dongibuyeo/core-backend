@@ -130,8 +130,7 @@ public class ChallengeService {
         challenge.updateChallengeType(request.getType());
         challenge.updateTitle(request.getTitle());
         challenge.updateDescription(request.getDescription());
-        challenge.updateStartDate(request.getStartDate());
-        challenge.updateEndDate(request.getEndDate());
+        challenge.updateDate(request.getStartDate(), request.getEndDate());
 
         return challengeMapper.toChallengeResponse(challenge);
     }
