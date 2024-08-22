@@ -36,6 +36,8 @@ public class Challenge extends BaseEntity {
     private LocalDate startDate;
     private LocalDate endDate;
 
+    private ChallengeStatus status = ChallengeStatus.SCHEDULED;
+
     private String title;
     private String description;
 
@@ -58,6 +60,17 @@ public class Challenge extends BaseEntity {
         participants.decrementAndGet();
     }
 
+    private ChallengeStatus determineStatus() {
+        LocalDate now = LocalDate.now();
+        if (startDate == null || endDate == null || now.isBefore(startDate)) {
+            return ChallengeStatus.SCHEDULED;
+        }
+        if (now.isAfter(this.endDate)) {
+            return ChallengeStatus.COMPLETED;
+        }
+        return ChallengeStatus.IN_PROGRESS;
+    }
+
     public void updateTitle(String title) {
         this.title = title;
     }
@@ -66,12 +79,10 @@ public class Challenge extends BaseEntity {
         this.description = description;
     }
 
-    public void updateStartDate(LocalDate startDate) {
+    public void updateDate(LocalDate startDate, LocalDate endDate) {
         this.startDate = startDate;
-    }
-
-    public void updateEndDate(LocalDate endDate) {
         this.endDate = endDate;
+        this.status = determineStatus();
     }
 
     public void updateChallengeType(ChallengeType type) {
