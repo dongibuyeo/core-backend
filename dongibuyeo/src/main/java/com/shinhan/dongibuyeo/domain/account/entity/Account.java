@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLRestriction;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
@@ -25,23 +26,32 @@ public class Account extends BaseEntity {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    private String bankCode;
-
     private String accountNo;
 
-    private String currency;
+    private AccountType accountType;
 
-    private String currencyName;
-
-    public Account(String bankCode, String accountNo, String currency, String currencyName) {
-        this.bankCode = bankCode;
+    public Account(String accountNo, AccountType accountType) {
         this.accountNo = accountNo;
-        this.currency = currency;
-        this.currencyName = currencyName;
+        this.accountType = accountType;
     }
 
     public void updateMember(Member member) {
         this.member = member;
         member.getAccounts().add(this);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+
+        Account account = (Account) obj;
+        return Objects.equals(this.accountNo,account.accountNo);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(accountNo);
     }
 }
