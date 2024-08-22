@@ -57,6 +57,13 @@ public class ChallengeService {
         return challengeMapper.toChallengeResponse(findChallengeById(challengeId));
     }
 
+    public List<ChallengeResponse> findAllChallengesByStatus(ChallengeStatus status) {
+        return challengeRepository.findChallengesByStatus(status)
+                .stream()
+                .map(challengeMapper::toChallengeResponse)
+                .toList();
+    }
+
     public List<ChallengeResponse> findAllChallengesByMemberId(UUID memberId) {
         return memberChallengeRepository.findChallengesByMemberId(memberId)
                 .orElseGet(ArrayList::new)
@@ -124,6 +131,11 @@ public class ChallengeService {
                 .orElseThrow(() -> new MemberChallengeNotFoundException(challengeId, memberId));
     }
 
+
+    public List<ChallengeResponse> findAllChallengesByMemberIdAndStatus(UUID memberId, ChallengeStatus status) {
+        return challengeRepository.findChallengesByMemberIdAndStatus(memberId, status);
+    }
+
     @Transactional
     public ChallengeResponse updateChallengeByChallengeId(UUID challengeId, ChallengeModifyRequest request) {
         Challenge challenge = findChallengeById(challengeId);
@@ -136,10 +148,4 @@ public class ChallengeService {
         return challengeMapper.toChallengeResponse(challenge);
     }
 
-    public List<ChallengeResponse> findAllChallengesByStatus(ChallengeStatus status) {
-        return challengeRepository.findChallengesByStatus(status)
-                .stream()
-                .map(challengeMapper::toChallengeResponse)
-                .toList();
-    }
 }
