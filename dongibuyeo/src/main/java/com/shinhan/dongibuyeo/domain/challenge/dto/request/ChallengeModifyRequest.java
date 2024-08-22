@@ -2,6 +2,7 @@ package com.shinhan.dongibuyeo.domain.challenge.dto.request;
 
 import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeType;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -11,7 +12,7 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChallengeRequest {
+public class ChallengeModifyRequest {
 
     private ChallengeType type;
     private LocalDate startDate;
