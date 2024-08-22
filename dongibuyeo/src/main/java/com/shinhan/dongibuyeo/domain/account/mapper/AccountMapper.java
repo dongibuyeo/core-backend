@@ -1,6 +1,7 @@
 package com.shinhan.dongibuyeo.domain.account.mapper;
 
 import com.shinhan.dongibuyeo.domain.account.dto.client.*;
+import com.shinhan.dongibuyeo.domain.account.dto.request.DepositRequest;
 import com.shinhan.dongibuyeo.domain.account.dto.request.MakeAccountRequest;
 import com.shinhan.dongibuyeo.domain.account.dto.request.TransferRequest;
 import com.shinhan.dongibuyeo.domain.account.dto.response.*;
@@ -40,6 +41,15 @@ public class AccountMapper {
                 request.getTransactionBalance(),
                 request.getWithdrawalAccountNo(),
                 request.getTransferType().toString()+"출금"
+        );
+    }
+
+    public ShinhanDepositRequest toShinhanDepositRequest(DepositRequest request, String apiKey, Member member) {
+        return new ShinhanDepositRequest(
+                new GlobalUserHeader("updateDemandDepositAccountDeposit",apiKey, member.getUserKey()),
+                request.getAccountNo(),
+                request.getTransactionBalance(),
+                "입금"
         );
     }
 
