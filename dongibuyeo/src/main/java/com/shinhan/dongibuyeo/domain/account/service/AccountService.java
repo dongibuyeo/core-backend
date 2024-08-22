@@ -12,7 +12,6 @@ import com.shinhan.dongibuyeo.domain.account.mapper.AccountMapper;
 import com.shinhan.dongibuyeo.domain.account.repository.AccountRepository;
 import com.shinhan.dongibuyeo.domain.member.entity.Member;
 import com.shinhan.dongibuyeo.domain.member.service.MemberService;
-import com.shinhan.dongibuyeo.global.header.GlobalUserHeader;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -44,6 +43,7 @@ public class AccountService {
     @Transactional
     public MakeAccountResponse makePersonalAccount(MakeAccountRequest request) {
         Member member = memberService.getMemberById(request.getMemberId());
+
         ShinhanMakeAccountResponse shinhanAccount = accountClient.makeAccount(accountMapper.toShinhanMakeAccountRequest(request,apiKey,member));
         Account account = accountRepository.save(accountMapper.toPersonalAccountEntity(shinhanAccount));
         account.updateMember(member);
