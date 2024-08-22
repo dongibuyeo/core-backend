@@ -26,6 +26,9 @@ public class MemberService {
     @Value("${shinhan.key}")
     private String apiKey;
 
+    @Value("${shinhan.admin-email}")
+    private String adminEmail;
+
     private final MemberRepository memberRepository;
     private final MemberMapper memberMapper;
 
@@ -118,5 +121,24 @@ public class MemberService {
     public void deleteMemberById(UUID memberId) {
         Member member = getMemberById(memberId);
         member.softDelete();
+    }
+
+    @Transactional
+    public MemberResponse findAdminMember() {
+        if (isDuplicateEmail(adminEmail)) {
+            ShinhanMemberResponse response = memberClient.searchMember(new ShinhanMemberRequest(apiKey, adminEmail));
+
+            Member admin = Member.builder()
+                    .name("admin")
+                    .email(adminEmail)
+                    .nickname("admin")
+                    .build();
+
+            admin.updateUserKey(response.getUserKey());
+            memberRepository.save(admin);
+            return memberMapper.toMemberResponse(admin);
+        } else {
+            return saveMember(new MemberSaveRequest(adminEmail, "admin", "admin", "", ""));
+        }
     }
 }

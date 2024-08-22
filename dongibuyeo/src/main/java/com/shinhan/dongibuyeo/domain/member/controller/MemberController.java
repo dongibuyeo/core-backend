@@ -73,4 +73,9 @@ public class MemberController {
         memberService.deleteMemberById(memberId);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/admin")
+    public ResponseEntity<MemberResponse> getAdminMember() {
+        return ResponseEntity.ok(memberService.findAdminMember());
+    }
 }
