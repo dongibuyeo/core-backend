@@ -6,6 +6,7 @@ import com.shinhan.dongibuyeo.domain.challenge.dto.request.ChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.JoinChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.ChallengeResponse;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.MemberChallengeResponse;
+import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeStatus;
 import com.shinhan.dongibuyeo.domain.challenge.service.ChallengeService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +33,23 @@ public class ChallengeController {
     @GetMapping("/{challengeId}")
     public ResponseEntity<ChallengeResponse> getChallengeById(@PathVariable UUID challengeId) {
         return ResponseEntity.ok(challengeService.findChallengeByChallengeId(challengeId));
+    }
+
+    @GetMapping("/status")
+    public ResponseEntity<List<ChallengeResponse>> getChallengeByStatus(@RequestParam ChallengeStatus status) {
+        return ResponseEntity.ok(challengeService.findAllChallengesByStatus(status));
+
+    }
+
+    @GetMapping("/member")
+    public ResponseEntity<List<ChallengeResponse>> getMemberChallenges(@RequestParam UUID memberId) {
+        return ResponseEntity.ok(challengeService.findAllChallengesByMemberId(memberId));
+    }
+
+    @GetMapping("/member/{challengeId}")
+    public ResponseEntity<MemberChallengeResponse> getMemberChallengeByChallengeId(@PathVariable UUID challengeId,
+                                                                                   @RequestParam UUID memberId) {
+        return ResponseEntity.ok(challengeService.findChallengeByChallengeIdAndMemberId(challengeId, memberId));
     }
 
     @DeleteMapping("/{challengeId}")
@@ -65,14 +83,4 @@ public class ChallengeController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/member")
-    public ResponseEntity<List<ChallengeResponse>> getMemberChallenges(@RequestParam UUID memberId) {
-        return ResponseEntity.ok(challengeService.findAllChallengesByMemberId(memberId));
-    }
-
-    @GetMapping("/member/{challengeId}")
-    public ResponseEntity<MemberChallengeResponse> getMemberChallengeByChallengeId(@PathVariable UUID challengeId,
-                                                                                   @RequestParam UUID memberId) {
-        return ResponseEntity.ok(challengeService.findChallengeByChallengeIdAndMemberId(challengeId, memberId));
-    }
 }

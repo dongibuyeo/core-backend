@@ -5,6 +5,7 @@ import com.shinhan.dongibuyeo.domain.account.entity.Account;
 import com.shinhan.dongibuyeo.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLRestriction;
@@ -47,6 +48,17 @@ public class Challenge extends BaseEntity {
 
     @OneToMany(mappedBy = "challenge")
     private List<MemberChallenge> challengeMembers = new ArrayList<>();
+
+    @Builder
+    public Challenge(ChallengeType type, Account account, LocalDate startDate, LocalDate endDate, String title, String description) {
+        this.type = type;
+        this.account = account;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.status = determineStatus();
+        this.title = title;
+        this.description = description;
+    }
 
     public void addMember(MemberChallenge memberChallenge) {
         challengeMembers.add(memberChallenge);

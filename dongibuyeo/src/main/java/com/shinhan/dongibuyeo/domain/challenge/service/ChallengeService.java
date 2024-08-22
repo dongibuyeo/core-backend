@@ -6,6 +6,7 @@ import com.shinhan.dongibuyeo.domain.challenge.dto.request.JoinChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.ChallengeResponse;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.MemberChallengeResponse;
 import com.shinhan.dongibuyeo.domain.challenge.entity.Challenge;
+import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeStatus;
 import com.shinhan.dongibuyeo.domain.challenge.entity.MemberChallenge;
 import com.shinhan.dongibuyeo.domain.challenge.exception.ChallengeNotFoundException;
 import com.shinhan.dongibuyeo.domain.challenge.exception.MemberChallengeNotFoundException;
@@ -67,7 +68,7 @@ public class ChallengeService {
     @Transactional
     public ChallengeResponse makeChallenge(ChallengeRequest request) {
         // TODO: request의 계좌 ID 기반으로 계좌를 조회해 계좌 연결하는 로직까지 추가
-        Challenge challenge = challengeMapper.toChallenge(request);
+        Challenge challenge = challengeMapper.toChallengeEntity(request);
         challengeRepository.save(challenge);
         return challengeMapper.toChallengeResponse(challenge);
     }
@@ -133,5 +134,12 @@ public class ChallengeService {
         challenge.updateDate(request.getStartDate(), request.getEndDate());
 
         return challengeMapper.toChallengeResponse(challenge);
+    }
+
+    public List<ChallengeResponse> findAllChallengesByStatus(ChallengeStatus status) {
+        return challengeRepository.findChallengesByStatus(status)
+                .stream()
+                .map(challengeMapper::toChallengeResponse)
+                .toList();
     }
 }

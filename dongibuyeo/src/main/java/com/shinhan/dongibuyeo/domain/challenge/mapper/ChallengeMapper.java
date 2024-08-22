@@ -16,5 +16,5 @@ public interface ChallengeMapper {
     @Mapping(target = "participants", expression = "java(challenge.getParticipants().get())")
     ChallengeResponse toChallengeResponse(Challenge challenge);
 
-    Challenge toChallenge(ChallengeRequest challengeRequest);
+    Challenge toChallengeEntity(ChallengeRequest challengeRequest);
 }
