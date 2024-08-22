@@ -56,6 +56,14 @@ public class Member extends BaseEntity {
         this.deviceToken = deviceToken;
     }
 
+    public void addChallenge(MemberChallenge memberChallenge) {
+        myChallenges.add(memberChallenge);
+    }
+
+    public void removeChallenge(MemberChallenge memberChallenge) {
+        myChallenges.remove(memberChallenge);
+    }
+
     public void updateUserKey(String userKey) {
         this.userKey = userKey;
     }
