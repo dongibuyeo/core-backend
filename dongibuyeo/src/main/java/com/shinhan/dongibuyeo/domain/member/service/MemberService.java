@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -123,8 +124,19 @@ public class MemberService {
         member.softDelete();
     }
 
+    public Optional<Member> findAdminMemberByEmail() {
+        return memberRepository.findMemberByEmail(adminEmail);
+    }
+
     @Transactional
     public MemberResponse findAdminMember() {
+        return findAdminMemberByEmail()
+                .map(memberMapper::toMemberResponse)
+                .orElse(getOrCreateAdminMember());
+    }
+
+    @Transactional
+    public MemberResponse getOrCreateAdminMember() {
         if (isDuplicateEmail(adminEmail)) {
             ShinhanMemberResponse response = memberClient.searchMember(new ShinhanMemberRequest(apiKey, adminEmail));
 
