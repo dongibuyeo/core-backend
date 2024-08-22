@@ -2,6 +2,7 @@ package com.shinhan.dongibuyeo.domain.member.entity;
 
 import com.github.f4b6a3.ulid.UlidCreator;
 import com.shinhan.dongibuyeo.domain.account.entity.Account;
+import com.shinhan.dongibuyeo.domain.challenge.entity.MemberChallenge;
 import com.shinhan.dongibuyeo.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -37,9 +38,12 @@ public class Member extends BaseEntity {
 
     private String deviceToken;
 
+    @OneToMany(mappedBy = "member")
+    private List<MemberChallenge> myChallenges = new ArrayList<>();
+
     @OneToMany(
             mappedBy = "member",
-            cascade = {CascadeType.PERSIST,CascadeType.MERGE}
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE}
     )
     private List<Account> accounts = new ArrayList<>();
 
@@ -50,6 +54,14 @@ public class Member extends BaseEntity {
         this.nickname = nickname;
         this.profileImage = profileImage;
         this.deviceToken = deviceToken;
+    }
+
+    public void addChallenge(MemberChallenge memberChallenge) {
+        myChallenges.add(memberChallenge);
+    }
+
+    public void removeChallenge(MemberChallenge memberChallenge) {
+        myChallenges.remove(memberChallenge);
     }
 
     public void updateUserKey(String userKey) {

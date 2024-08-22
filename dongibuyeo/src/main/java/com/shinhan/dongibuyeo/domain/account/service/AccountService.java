@@ -9,11 +9,9 @@ import com.shinhan.dongibuyeo.domain.account.mapper.AccountMapper;
 import com.shinhan.dongibuyeo.domain.account.repository.AccountRepository;
 import com.shinhan.dongibuyeo.domain.member.entity.Member;
 import com.shinhan.dongibuyeo.domain.member.service.MemberService;
-import com.shinhan.dongibuyeo.global.header.GlobalUserHeader;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.UUID;
 
@@ -41,17 +39,21 @@ public class AccountService {
     @Transactional
     public AccountResponse makePersonalAccount(MakeAccountRequest request) {
         Member member = memberService.getMemberById(request.getMemberId());
-        ShinhanMakeAccountResponse shinhanAccount = accountClient.makeAccount(accountMapper.toShinhanMakeAccountRequest(request,apiKey,member));
+        ShinhanMakeAccountResponse shinhanAccount = accountClient.makeAccount(accountMapper.toShinhanMakeAccountRequest(request, apiKey, member));
         Account account = accountRepository.save(accountMapper.toAccountEntity(shinhanAccount));
         account.updateMember(member);
         return accountMapper.toAccountResponse(account);
     }
 
-    public void makeChallengeAccount() {}
+    public void makeChallengeAccount() {
+    }
 
-    public void getAllAccountsByMemberId(UUID memberId) {}
+    public void getAllAccountsByMemberId(UUID memberId) {
+    }
 
-    public void getAccountByAccountId(UUID accountId) {}
+    public void getAccountByAccountId(UUID accountId) {
+    }
 
-    public void terminateAccountByMemberId() {}
+    public void terminateAccountByMemberId() {
+    }
 }
