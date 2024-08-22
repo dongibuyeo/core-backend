@@ -1,12 +1,13 @@
 package com.shinhan.dongibuyeo.domain.account.mapper;
 
-import com.shinhan.dongibuyeo.domain.account.dto.client.ShinhanMakeAccountRequest;
-import com.shinhan.dongibuyeo.domain.account.dto.client.ShinhanMakeAccountResponse;
+import com.shinhan.dongibuyeo.domain.account.dto.client.*;
+import com.shinhan.dongibuyeo.domain.account.dto.request.DepositRequest;
 import com.shinhan.dongibuyeo.domain.account.dto.request.MakeAccountRequest;
-import com.shinhan.dongibuyeo.domain.account.dto.response.AccountDetail;
-import com.shinhan.dongibuyeo.domain.account.dto.response.AccountResponse;
-import com.shinhan.dongibuyeo.domain.account.dto.response.Currency;
+import com.shinhan.dongibuyeo.domain.account.dto.request.TransactionHistoryRequest;
+import com.shinhan.dongibuyeo.domain.account.dto.request.TransferRequest;
+import com.shinhan.dongibuyeo.domain.account.dto.response.*;
 import com.shinhan.dongibuyeo.domain.account.entity.Account;
+import com.shinhan.dongibuyeo.domain.account.entity.AccountType;
 import com.shinhan.dongibuyeo.domain.member.entity.Member;
 import com.shinhan.dongibuyeo.global.header.GlobalUserHeader;
 import org.springframework.stereotype.Component;
@@ -20,26 +21,83 @@ public class AccountMapper {
         );
     }
 
-    public Account toAccountEntity(ShinhanMakeAccountResponse request) {
-        return new Account(
-                request.getRec().getBankCode(),
-                request.getRec().getAccountNo(),
-                request.getRec().getCurrency().getCurrency(),
-                request.getRec().getCurrency().getCurrencyName()
+    public ShinhanGetAccountsRequest toShinhanGetAccountsRequest(String apiKey, String userKey) {
+        return new ShinhanGetAccountsRequest(
+                new GlobalUserHeader("inquireDemandDepositAccountList",apiKey,userKey)
         );
     }
 
-    public AccountResponse toAccountResponse(Account account) {
-        return new AccountResponse(
+    public ShinhanGetAccountRequest toShinhanGetAccountRequest(String apiKey, String userKey, String accountNo) {
+        return new ShinhanGetAccountRequest(
+                new GlobalUserHeader("inquireDemandDepositAccount",apiKey, userKey),
+                accountNo
+        );
+    }
+
+    public ShinhanTransferRequest toShinhanTransferRequest(TransferRequest request, String apiKey, Member member) {
+        return new ShinhanTransferRequest(
+                new GlobalUserHeader("updateDemandDepositAccountTransfer",apiKey, member.getUserKey()),
+                request.getDepositAccountNo(),
+                request.getTransferType().toString()+"입금",
+                request.getTransactionBalance(),
+                request.getWithdrawalAccountNo(),
+                request.getTransferType().toString()+"출금"
+        );
+    }
+
+    public ShinhanDepositRequest toShinhanDepositRequest(DepositRequest request, String apiKey, Member member) {
+        return new ShinhanDepositRequest(
+                new GlobalUserHeader("updateDemandDepositAccountDeposit",apiKey, member.getUserKey()),
+                request.getAccountNo(),
+                request.getTransactionBalance(),
+                "입금"
+        );
+    }
+
+    public ShinhanTransactionHistoryRequest toShinhanTransactionHistoryRequest(TransactionHistoryRequest request, String apiKey, Member member) {
+        return new ShinhanTransactionHistoryRequest(
+                new GlobalUserHeader("inquireTransactionHistoryList",apiKey, member.getUserKey()),
+                request.getAccountNo(),
+                request.getStartDate(),
+                request.getEndDate(),
+                request.getTransactionType(),
+                request.getOrderByType()
+        );
+    }
+
+    public Account detailToPersonalAccountEntity(AccountDetailInfo info) {
+        return new Account(
+                info.getAccountNo(),
+                AccountType.PRIVATE
+        );
+    }
+
+    public Account detailToChallengeAccountEntity(AccountDetailInfo info) {
+        return new Account(
+                info.getAccountNo(),
+                AccountType.CHALLENGE
+        );
+    }
+
+    public Account toPersonalAccountEntity(ShinhanMakeAccountResponse request) {
+        return new Account(
+                request.getRec().getAccountNo(),
+                AccountType.PRIVATE
+        );
+    }
+
+    public Account toChallengeAccountEntity(ShinhanMakeAccountResponse request) {
+        return new Account(
+                request.getRec().getAccountNo(),
+                AccountType.CHALLENGE
+        );
+    }
+
+    public MakeAccountResponse toAccountResponse(Account account) {
+        return new MakeAccountResponse(
                 account.getId(),
-                new AccountDetail(
-                        account.getBankCode(),
-                        account.getAccountNo(),
-                        new Currency(
-                                account.getCurrency(),
-                                account.getCurrencyName()
-                        )
-                )
+                account.getAccountNo(),
+                account.getAccountType()
         );
     }
 }

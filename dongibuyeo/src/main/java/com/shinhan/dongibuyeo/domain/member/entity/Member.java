@@ -4,13 +4,12 @@ import com.github.f4b6a3.ulid.UlidCreator;
 import com.shinhan.dongibuyeo.domain.account.entity.Account;
 import com.shinhan.dongibuyeo.domain.challenge.entity.MemberChallenge;
 import com.shinhan.dongibuyeo.global.entity.BaseEntity;
+import io.netty.util.internal.ConcurrentSet;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLRestriction;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Getter
@@ -45,7 +44,7 @@ public class Member extends BaseEntity {
             mappedBy = "member",
             cascade = {CascadeType.PERSIST, CascadeType.MERGE}
     )
-    private List<Account> accounts = new ArrayList<>();
+    private Set<Account> accounts = new HashSet<>();
 
     @Builder
     public Member(String email, String name, String nickname, String profileImage, String deviceToken) {
