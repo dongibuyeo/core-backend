@@ -48,4 +48,19 @@ public class GlobalUserHeader {
 
         this.institutionTransactionUniqueNo = uniqueCode.toString();
     }
+
+    @Override
+    public String toString() {
+        return "GlobalUserHeader{" +
+                "apiName='" + apiName + '\'' +
+                ", transmissionDate='" + transmissionDate + '\'' +
+                ", transmissionTime='" + transmissionTime + '\'' +
+                ", institutionCode='" + institutionCode + '\'' +
+                ", fintechAppNo='" + fintechAppNo + '\'' +
+                ", apiServiceCode='" + apiServiceCode + '\'' +
+                ", institutionTransactionUniqueNo='" + institutionTransactionUniqueNo + '\'' +
+                ", apiKey='" + apiKey + '\'' +
+                ", userKey='" + userKey + '\'' +
+                '}';
+    }
 }

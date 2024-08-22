@@ -1,8 +1,7 @@
 package com.shinhan.dongibuyeo.domain.account.dto.client;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.shinhan.dongibuyeo.domain.account.dto.response.AccountInfo;
-import com.shinhan.dongibuyeo.global.header.GlobalResponseHeader;
+import com.shinhan.dongibuyeo.global.header.GlobalUserHeader;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,9 +9,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ShinhanMakeAccountResponse {
+public class ShinhanGetAccountRequest {
     @JsonProperty("Header")
-    GlobalResponseHeader header;
-    @JsonProperty("REC")
-    AccountInfo rec;
+    private GlobalUserHeader header;
+    private String accountNo;
 }
