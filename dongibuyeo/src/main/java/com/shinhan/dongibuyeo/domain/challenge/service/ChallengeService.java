@@ -1,5 +1,6 @@
 package com.shinhan.dongibuyeo.domain.challenge.service;
 
+import com.shinhan.dongibuyeo.domain.challenge.dto.request.ChallengeModifyRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.ChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.JoinChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.ChallengeResponse;
@@ -118,5 +119,18 @@ public class ChallengeService {
     public MemberChallengeResponse findChallengeByChallengeIdAndMemberId(UUID challengeId, UUID memberId) {
         return memberChallengeRepository.findChallengeByMemberIdAndChallengeId(challengeId, memberId)
                 .orElseThrow(() -> new MemberChallengeNotFoundException(challengeId, memberId));
+    }
+
+    @Transactional
+    public ChallengeResponse updateChallengeByChallengeId(UUID challengeId, ChallengeModifyRequest request) {
+        Challenge challenge = findChallengeById(challengeId);
+
+        challenge.updateChallengeType(request.getType());
+        challenge.updateTitle(request.getTitle());
+        challenge.updateDescription(request.getDescription());
+        challenge.updateStartDate(request.getStartDate());
+        challenge.updateEndDate(request.getEndDate());
+
+        return challengeMapper.toChallengeResponse(challenge);
     }
 }

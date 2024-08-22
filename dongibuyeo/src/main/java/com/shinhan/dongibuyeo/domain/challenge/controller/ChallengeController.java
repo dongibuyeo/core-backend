@@ -1,6 +1,7 @@
 package com.shinhan.dongibuyeo.domain.challenge.controller;
 
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.CancelJoinChallengeRequest;
+import com.shinhan.dongibuyeo.domain.challenge.dto.request.ChallengeModifyRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.ChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.JoinChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.ChallengeResponse;
@@ -39,19 +40,27 @@ public class ChallengeController {
         return ResponseEntity.ok().build();
     }
 
+    @PatchMapping("/{challengeId}")
+    public ResponseEntity<ChallengeResponse> modifyChallengeById(@PathVariable UUID challengeId,
+                                                                 @RequestBody @Valid ChallengeModifyRequest request) {
+        return ResponseEntity.ok(challengeService.updateChallengeByChallengeId(challengeId, request));
+    }
+
     @PostMapping
     public ResponseEntity<ChallengeResponse> makeChallenge(@RequestBody @Valid ChallengeRequest request) {
         return ResponseEntity.ok(challengeService.makeChallenge(request));
     }
 
     @PostMapping("/{challengeId}/join")
-    public ResponseEntity<Void> joinChallenge(@PathVariable UUID challengeId, @RequestBody @Valid JoinChallengeRequest request) {
+    public ResponseEntity<Void> joinChallenge(@PathVariable UUID challengeId,
+                                              @RequestBody @Valid JoinChallengeRequest request) {
         challengeService.joinChallenge(challengeId, request);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/{challengeId}/cancel")
-    public ResponseEntity<Void> cancelJoinChallenge(@PathVariable UUID challengeId, @RequestBody @Valid CancelJoinChallengeRequest request) {
+    public ResponseEntity<Void> cancelJoinChallenge(@PathVariable UUID challengeId,
+                                                    @RequestBody @Valid CancelJoinChallengeRequest request) {
         challengeService.cancelJoinChallenge(challengeId, request.getMemberId());
         return ResponseEntity.ok().build();
     }
@@ -62,7 +71,8 @@ public class ChallengeController {
     }
 
     @GetMapping("/member/{challengeId}")
-    public ResponseEntity<MemberChallengeResponse> getMemberChallengeByChallengeId(@PathVariable UUID challengeId, @RequestParam UUID memberId) {
+    public ResponseEntity<MemberChallengeResponse> getMemberChallengeByChallengeId(@PathVariable UUID challengeId,
+                                                                                   @RequestParam UUID memberId) {
         return ResponseEntity.ok(challengeService.findChallengeByChallengeIdAndMemberId(challengeId, memberId));
     }
 }
