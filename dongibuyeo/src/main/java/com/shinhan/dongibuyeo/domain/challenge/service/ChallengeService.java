@@ -172,6 +172,7 @@ public class ChallengeService {
         challenge.updateTitle(request.getTitle());
         challenge.updateDescription(request.getDescription());
         challenge.updateDate(request.getStartDate(), request.getEndDate());
+        challenge.updateImage(request.getImage());
 
         return challengeMapper.toChallengeResponse(challenge);
     }

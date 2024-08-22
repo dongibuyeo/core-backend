@@ -41,6 +41,7 @@ public class Challenge extends BaseEntity {
 
     private String title;
     private String description;
+    private String image;
 
     private AtomicLong totalDeposit = new AtomicLong(0);
 
@@ -50,7 +51,7 @@ public class Challenge extends BaseEntity {
     private List<MemberChallenge> challengeMembers = new ArrayList<>();
 
     @Builder
-    public Challenge(ChallengeType type, Account account, LocalDate startDate, LocalDate endDate, String title, String description) {
+    public Challenge(ChallengeType type, Account account, LocalDate startDate, LocalDate endDate, String title, String description, String image) {
         this.type = type;
         this.account = account;
         this.startDate = startDate;
@@ -58,6 +59,7 @@ public class Challenge extends BaseEntity {
         this.status = determineStatus();
         this.title = title;
         this.description = description;
+        this.image = image;
     }
 
     public void addMember(MemberChallenge memberChallenge) {
@@ -89,6 +91,10 @@ public class Challenge extends BaseEntity {
 
     public void updateDescription(String description) {
         this.description = description;
+    }
+
+    public void updateImage(String image) {
+        this.image = image;
     }
 
     public void updateDate(LocalDate startDate, LocalDate endDate) {
