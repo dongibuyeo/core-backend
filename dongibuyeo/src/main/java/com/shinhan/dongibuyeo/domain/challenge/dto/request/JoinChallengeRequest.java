@@ -11,6 +11,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class JoinChallengeRequest {
 
+    private UUID challengeId;
     private UUID memberId;
     private Long deposit;
 }

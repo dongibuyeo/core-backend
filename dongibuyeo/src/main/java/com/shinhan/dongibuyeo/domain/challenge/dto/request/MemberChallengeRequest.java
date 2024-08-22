@@ -9,7 +9,8 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CancelJoinChallengeRequest {
+public class MemberChallengeRequest {
 
+    private UUID challengeId;
     private UUID memberId;
 }
