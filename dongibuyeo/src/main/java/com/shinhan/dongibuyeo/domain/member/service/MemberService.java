@@ -128,6 +128,7 @@ public class MemberService {
     }
 
     public Optional<Member> findAdminMemberByEmail() {
+        log.info("[findAdminMemberByEmail] exist admin: {}", memberRepository.findMemberByEmail(adminEmail).isPresent());
         return memberRepository.findMemberByEmail(adminEmail);
     }
 
@@ -135,7 +136,7 @@ public class MemberService {
     public MemberResponse findAdminMember() {
         return findAdminMemberByEmail()
                 .map(memberMapper::toMemberResponse)
-                .orElse(getOrCreateAdminMember());
+                .orElseGet(this::getOrCreateAdminMember);
     }
 
     @Transactional
