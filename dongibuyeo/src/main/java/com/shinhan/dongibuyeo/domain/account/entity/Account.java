@@ -28,6 +28,7 @@ public class Account extends BaseEntity {
 
     private String accountNo;
 
+    @Enumerated(EnumType.STRING)
     private AccountType accountType;
 
     public Account(String accountNo, AccountType accountType) {
