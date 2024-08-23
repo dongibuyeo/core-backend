@@ -11,9 +11,10 @@ spring:
     database: mysql
     show-sql: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
 
 shinhan:
   key: 7c746d26c4a44632a638a88131f0b779
   admin:
     email: "admin@dongibuyeo-test.com"
+    product: "ADMIN_CHALLENGE_PRODUCT"
