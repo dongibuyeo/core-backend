@@ -30,6 +30,8 @@ public class InitService implements ApplicationListener<ContextRefreshedEvent> {
     @Value("${shinhan.key}")
     private String apiKey;
 
+    @Value("${shinhan.admin.product}")
+    private String adminProduct;
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
@@ -47,9 +49,9 @@ public class InitService implements ApplicationListener<ContextRefreshedEvent> {
     }
 
     public void createAdminProduct() {
-        String bankCode = "001";
-        String accountName = "ADMIN_PRODUCT";
-        String accountDescription = "관리자 전용 상품.";
+        String bankCode = "088";
+        String accountName = adminProduct;
+        String accountDescription = "[관리자] 챌린지 계좌 생성 전용 상품";
 
         ShinhanProductRequest tmpRequest = new ShinhanProductRequest(
                 new GlobalAdminHeader("createDemandDeposit", apiKey),
