@@ -1,6 +1,11 @@
 package com.shinhan.dongibuyeo.domain.challenge.service;
 
 import com.shinhan.dongibuyeo.domain.account.dto.request.MakeAccountRequest;
+import com.shinhan.dongibuyeo.domain.account.dto.response.MakeAccountResponse;
+import com.shinhan.dongibuyeo.domain.account.entity.Account;
+import com.shinhan.dongibuyeo.domain.account.exception.AccountNotFoundException;
+import com.shinhan.dongibuyeo.domain.account.mapper.AccountMapper;
+import com.shinhan.dongibuyeo.domain.account.repository.AccountRepository;
 import com.shinhan.dongibuyeo.domain.account.service.AccountService;
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.ChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.JoinChallengeRequest;
@@ -20,7 +25,7 @@ import com.shinhan.dongibuyeo.domain.challenge.repository.MemberChallengeReposit
 import com.shinhan.dongibuyeo.domain.member.dto.response.MemberResponse;
 import com.shinhan.dongibuyeo.domain.member.entity.Member;
 import com.shinhan.dongibuyeo.domain.member.service.MemberService;
-import com.shinhan.dongibuyeo.domain.product.dto.request.MakeProductRequest;
+import com.shinhan.dongibuyeo.domain.product.entity.Product;
 import com.shinhan.dongibuyeo.domain.product.service.ProductService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,14 +46,18 @@ public class ChallengeService {
     private final ChallengeMapper challengeMapper;
     private final AccountService accountService;
     private final ProductService productService;
+    private final AccountMapper accountMapper;
+    private final AccountRepository accountRepository;
 
-    public ChallengeService(MemberService memberService, ChallengeRepository challengeRepository, MemberChallengeRepository memberChallengeRepository, ChallengeMapper challengeMapper, AccountService accountService, ProductService productService) {
+    public ChallengeService(MemberService memberService, ChallengeRepository challengeRepository, MemberChallengeRepository memberChallengeRepository, ChallengeMapper challengeMapper, AccountService accountService, ProductService productService, AccountMapper accountMapper, AccountRepository accountRepository) {
         this.memberService = memberService;
         this.challengeRepository = challengeRepository;
         this.memberChallengeRepository = memberChallengeRepository;
         this.challengeMapper = challengeMapper;
         this.accountService = accountService;
         this.productService = productService;
+        this.accountMapper = accountMapper;
+        this.accountRepository = accountRepository;
     }
 
     private Challenge findChallengeById(UUID challengeId) {
@@ -84,12 +93,19 @@ public class ChallengeService {
 
     @Transactional
     public ChallengeResponse makeChallenge(ChallengeRequest request) {
-        // TODO request의 계좌 ID 기반으로 계좌를 조회해 계좌 연결하는 로직까지 추가
         Challenge challenge = challengeMapper.toChallengeEntity(request);
-        MemberResponse adminMember = memberService.findAdminMember();
-        productService.makeProduct(new MakeProductRequest());
-//        accountService.makeChallengeAccount(new MakeAccountRequest(adminMember.getMemberId(), ));
 
+        // ADMIN 회원으로 챌린지 계좌 생성
+        MemberResponse adminMember = memberService.findAdminMember();
+        Product adminProduct = productService.getAdminProduct();
+        MakeAccountResponse accountResponse = accountService.makeChallengeAccount(
+                new MakeAccountRequest(adminMember.getMemberId(),
+                adminProduct.getAccountTypeUniqueNo()));
+
+        Account account = accountRepository.findById(accountResponse.getAccountId())
+                .orElseThrow(() -> new AccountNotFoundException(accountResponse.getAccountId()));
+
+        challenge.updateAccount(account);
         challengeRepository.save(challenge);
         return challengeMapper.toChallengeResponse(challenge);
     }

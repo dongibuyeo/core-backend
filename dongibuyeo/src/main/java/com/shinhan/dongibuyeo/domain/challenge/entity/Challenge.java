@@ -62,6 +62,10 @@ public class Challenge extends BaseEntity {
         this.image = image;
     }
 
+    public void updateAccount(Account account) {
+        this.account = account;
+    }
+
     public void addMember(MemberChallenge memberChallenge) {
         challengeMembers.add(memberChallenge);
         totalDeposit.getAndAdd(memberChallenge.getDeposit());
