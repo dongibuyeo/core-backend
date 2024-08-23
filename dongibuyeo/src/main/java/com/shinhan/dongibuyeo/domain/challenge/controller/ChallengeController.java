@@ -18,7 +18,7 @@ public class ChallengeController {
 
     private final ChallengeService challengeService;
 
-    public ChallengeController(final ChallengeService challengeService) {
+    public ChallengeController(ChallengeService challengeService) {
         this.challengeService = challengeService;
     }
 

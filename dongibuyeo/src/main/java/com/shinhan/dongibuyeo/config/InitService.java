@@ -49,8 +49,8 @@ public class InitService implements ApplicationListener<ContextRefreshedEvent> {
     }
 
     public void createAdminProduct() {
-        String bankCode = "088";
         String accountName = adminProduct;
+        String bankCode = "088";
         String accountDescription = "[관리자] 챌린지 계좌 생성 전용 상품";
 
         ShinhanProductRequest tmpRequest = new ShinhanProductRequest(
