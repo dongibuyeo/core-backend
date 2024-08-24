@@ -37,8 +37,10 @@ public class QuizService {
     }
 
 
-    public void makeQuiz(QuizMakeRequest request) {
-        quizRepository.save(quizMapper.toQuizEntity(request));
+    @Transactional
+    public QuizResponse makeQuiz(QuizMakeRequest request) {
+        Quiz quiz = quizRepository.save(quizMapper.toQuizEntity(request));
+        return quizMapper.toQuizResponse(quiz);
     }
 
     @Transactional
@@ -77,7 +79,7 @@ public class QuizService {
     @Transactional
     public Boolean alreadyToday(UUID memberId) {
         LocalDateTime now = LocalDateTime.now();
-        return quizMemberRepository.existsByMemberAndDate(memberId,now.getYear(),now.getMonthValue());
+        return quizMemberRepository.existsByMemberAndDate(memberId,now.getYear(),now.getMonthValue(),now.getDayOfMonth());
     }
 
 
