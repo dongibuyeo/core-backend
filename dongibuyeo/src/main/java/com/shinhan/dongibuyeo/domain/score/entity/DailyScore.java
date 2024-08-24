@@ -3,9 +3,8 @@ package com.shinhan.dongibuyeo.domain.score.entity;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.f4b6a3.ulid.UlidCreator;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import com.shinhan.dongibuyeo.domain.challenge.entity.MemberChallenge;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,6 +22,10 @@ public class DailyScore {
     @Id
     @Column(columnDefinition = "BINARY(16)")
     private UUID id = UlidCreator.getMonotonicUlid().toUuid();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_challenge_id")
+    private MemberChallenge memberChallenge;
 
     private LocalDate date;
 
@@ -47,4 +50,10 @@ public class DailyScore {
         }
     }
 
+    public void updateMemberChallenge(MemberChallenge memberChallenge) {
+        this.memberChallenge = memberChallenge;
+        if (memberChallenge != null && !memberChallenge.getDailyScores().contains(this)) {
+            memberChallenge.getDailyScores().add(this);
+        }
+    }
 }

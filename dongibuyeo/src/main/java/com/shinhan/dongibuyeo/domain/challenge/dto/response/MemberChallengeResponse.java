@@ -29,6 +29,7 @@ public class MemberChallengeResponse {
 
     private Boolean isSuccess;
     private Long memberDeposit;
-    private Long reward;
-    private Long points;
+    private Long baseReward;
+    private Long additionalReward;
+    private Long totalPoints;
 }
