@@ -40,7 +40,9 @@ public class MemberChallenge extends BaseEntity {
 
     private Long deposit;
 
-    private Long reward;
+    private Long baseReward;
+
+    private Long additionalReward;
 
     private Long totalPoints;
 
@@ -50,22 +52,27 @@ public class MemberChallenge extends BaseEntity {
         this.challenge = challenge;
         this.isSuccess = false;
         this.deposit = deposit;
-        this.reward = 0L;
+        this.baseReward = 0L;
+        this.additionalReward = 0L;
         this.totalPoints = 0L;
     }
 
     public void addDailyScore(DailyScore dailyScore) {
         this.dailyScores.add(dailyScore);
+        dailyScore.updateMemberChallenge(this);
         this.totalPoints += dailyScore.getTotalScore();
     }
 
-    public void determineSuccess() {
-        // 성공 여부를 결정하는 로직 구현
-        // 예: this.isSuccess = this.totalPoints >= challenge.getSuccessThreshold();
+    public void updateSuccessStatus(boolean isSuccess) {
+        this.isSuccess = isSuccess;
     }
 
-    public void calculateReward() {
-        // 보상을 계산하는 로직 구현
-        // 예: this.reward = isSuccess ? deposit + challenge.getAdditionalReward() : 0;
+    public void updateBaseReward(Long baseReward) {
+        this.baseReward = baseReward;
     }
+
+    public void updateAdditionalReward(Long additionalReward) {
+        this.additionalReward = additionalReward;
+    }
+
 }

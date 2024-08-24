@@ -1,12 +1,10 @@
 package com.shinhan.dongibuyeo.domain.challenge.controller;
 
-import com.shinhan.dongibuyeo.domain.challenge.dto.request.MemberChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.JoinChallengeRequest;
+import com.shinhan.dongibuyeo.domain.challenge.dto.request.MemberChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.ChallengeResponse;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.MemberChallengeResponse;
 import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeStatus;
-import com.shinhan.dongibuyeo.domain.challenge.entity.MemberChallenge;
-import com.shinhan.dongibuyeo.domain.challenge.service.ChallengeService;
 import com.shinhan.dongibuyeo.domain.challenge.service.MemberChallengeService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
