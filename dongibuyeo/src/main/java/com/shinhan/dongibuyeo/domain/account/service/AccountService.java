@@ -54,7 +54,7 @@ public class AccountService {
     public MakeAccountResponse makeChallengeAccount(MakeAccountRequest request) {
         Member member = memberService.getMemberById(request.getMemberId());
         ShinhanMakeAccountResponse shinhanAccount = accountClient.makeAccount(accountMapper.toShinhanMakeAccountRequest(request,apiKey,member));
-        Account account = accountRepository.save(accountMapper.toPersonalAccountEntity(shinhanAccount));
+        Account account = accountRepository.save(accountMapper.toChallengeAccountEntity(shinhanAccount));
         account.updateMember(member);
         return accountMapper.toAccountResponse(account);
     }

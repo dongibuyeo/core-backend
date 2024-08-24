@@ -2,6 +2,7 @@ package com.shinhan.dongibuyeo.domain.member.entity;
 
 import com.github.f4b6a3.ulid.UlidCreator;
 import com.shinhan.dongibuyeo.domain.account.entity.Account;
+import com.shinhan.dongibuyeo.domain.account.entity.AccountType;
 import com.shinhan.dongibuyeo.domain.challenge.entity.MemberChallenge;
 import com.shinhan.dongibuyeo.global.entity.BaseEntity;
 import io.netty.util.internal.ConcurrentSet;
@@ -77,5 +78,16 @@ public class Member extends BaseEntity {
 
     public void changeProfileImage(String profileImage) {
         this.profileImage = profileImage;
+    }
+
+    public Optional<Account> getChallengeAccount() {
+        return accounts.stream()
+                .filter(account -> account.getAccountType() == AccountType.CHALLENGE)
+                .findFirst();
+    }
+
+    public boolean hasChallengeAccount() {
+        return accounts.stream()
+                .anyMatch(account -> account.getAccountType() == AccountType.CHALLENGE);
     }
 }

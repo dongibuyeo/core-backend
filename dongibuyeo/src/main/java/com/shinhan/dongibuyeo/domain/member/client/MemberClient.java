@@ -4,6 +4,7 @@ import com.shinhan.dongibuyeo.domain.member.dto.client.ShinhanMemberRequest;
 import com.shinhan.dongibuyeo.domain.member.dto.client.ShinhanMemberResponse;
 import com.shinhan.dongibuyeo.domain.member.exception.MemberConflictException;
 import com.shinhan.dongibuyeo.domain.member.exception.MemberNotFoundException;
+import com.shinhan.dongibuyeo.global.client.GlobalErrorFilter;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;

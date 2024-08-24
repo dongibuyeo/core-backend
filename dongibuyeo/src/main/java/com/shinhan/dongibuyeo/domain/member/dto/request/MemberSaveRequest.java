@@ -21,6 +21,5 @@ public class MemberSaveRequest {
 
     private String profileImage;
 
-    @NotBlank
     private String deviceToken;
 }
