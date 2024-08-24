@@ -3,7 +3,9 @@ package com.shinhan.dongibuyeo.domain.member.entity;
 import com.github.f4b6a3.ulid.UlidCreator;
 import com.shinhan.dongibuyeo.domain.account.entity.Account;
 import com.shinhan.dongibuyeo.domain.account.entity.AccountType;
+import com.shinhan.dongibuyeo.domain.account.exception.AccountNotFoundException;
 import com.shinhan.dongibuyeo.domain.challenge.entity.MemberChallenge;
+import com.shinhan.dongibuyeo.domain.challenge.exception.ChallengeAccountNotFoundException;
 import com.shinhan.dongibuyeo.domain.quiz.entity.QuizMember;
 import com.shinhan.dongibuyeo.global.entity.BaseEntity;
 import io.netty.util.internal.ConcurrentSet;
@@ -86,10 +88,11 @@ public class Member extends BaseEntity {
         this.profileImage = profileImage;
     }
 
-    public Optional<Account> getChallengeAccount() {
+    public Account getChallengeAccount() {
         return accounts.stream()
                 .filter(account -> account.getAccountType() == AccountType.CHALLENGE)
-                .findFirst();
+                .findFirst()
+                .orElseThrow(() -> new ChallengeAccountNotFoundException(this.id));
     }
 
     public boolean hasChallengeAccount() {
