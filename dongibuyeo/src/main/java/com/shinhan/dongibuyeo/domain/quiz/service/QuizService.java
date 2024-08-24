@@ -36,7 +36,6 @@ public class QuizService {
         this.quizMemberRepository = quizMemberRepository;
     }
 
-
     @Transactional
     public QuizResponse makeQuiz(QuizMakeRequest request) {
         Quiz quiz = quizRepository.save(quizMapper.toQuizEntity(request));
@@ -87,5 +86,10 @@ public class QuizService {
     public List<QuizSolveResponse> getMemberDateSolvedList(UUID memberId, Integer year, Integer month) {
         List<QuizMember> solvedList = quizMemberRepository.findAllByMemberAndDate(year,month,memberId);
         return solvedList.stream().map(x -> quizMapper.toQuizSolveResponse(x)).toList();
+    }
+
+    @Transactional
+    public void getWinnerOfMonth(int year, int month) {
+        // TODO
     }
 }
