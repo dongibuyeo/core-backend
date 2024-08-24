@@ -36,9 +36,10 @@ public class QuizService {
         this.quizMemberRepository = quizMemberRepository;
     }
 
-
-    public void makeQuiz(QuizMakeRequest request) {
-        quizRepository.save(quizMapper.toQuizEntity(request));
+    @Transactional
+    public QuizResponse makeQuiz(QuizMakeRequest request) {
+        Quiz quiz = quizRepository.save(quizMapper.toQuizEntity(request));
+        return quizMapper.toQuizResponse(quiz);
     }
 
     @Transactional
@@ -63,8 +64,9 @@ public class QuizService {
     public QuizSolveResponse solveQuiz(QuizSolveRequest request) {
         Quiz quiz = getQuizById(request.getQuizId());
         Member member = memberService.getMemberById(request.getMemberId());
+
         QuizMember quizMember = new QuizMember(member, quiz);
-        // member add
+        member.getQuizMembers().add(quizMember);
 
         return quizMapper.toQuizSolveResponse(quizMember);
     }
@@ -76,7 +78,7 @@ public class QuizService {
     @Transactional
     public Boolean alreadyToday(UUID memberId) {
         LocalDateTime now = LocalDateTime.now();
-        return quizMemberRepository.existsByMemberAndDate(memberId,now.getYear(),now.getMonthValue());
+        return quizMemberRepository.existsByMemberAndDate(memberId,now.getYear(),now.getMonthValue(),now.getDayOfMonth());
     }
 
 
@@ -84,5 +86,10 @@ public class QuizService {
     public List<QuizSolveResponse> getMemberDateSolvedList(UUID memberId, Integer year, Integer month) {
         List<QuizMember> solvedList = quizMemberRepository.findAllByMemberAndDate(year,month,memberId);
         return solvedList.stream().map(x -> quizMapper.toQuizSolveResponse(x)).toList();
+    }
+
+    @Transactional
+    public void getWinnerOfMonth(int year, int month) {
+        // TODO
     }
 }
