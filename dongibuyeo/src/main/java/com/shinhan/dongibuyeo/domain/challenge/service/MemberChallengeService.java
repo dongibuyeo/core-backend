@@ -17,7 +17,6 @@ import com.shinhan.dongibuyeo.domain.challenge.repository.MemberChallengeReposit
 import com.shinhan.dongibuyeo.domain.member.entity.Member;
 import com.shinhan.dongibuyeo.domain.member.service.MemberService;
 import com.shinhan.dongibuyeo.global.entity.TransferType;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -145,8 +144,7 @@ public class MemberChallengeService {
     }
 
     private Account getMemberChallengeAccount(Member member) {
-        return member.getChallengeAccount()
-                .orElseThrow(() -> new ChallengeAccountNotFoundException(member.getId()));
+        return member.getChallengeAccount();
     }
 
     public MemberChallengeResponse findChallengeByChallengeIdAndMemberId(UUID challengeId, UUID memberId) {

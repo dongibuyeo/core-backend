@@ -44,7 +44,7 @@ public class ChallengeService {
         this.accountRepository = accountRepository;
     }
 
-    private Challenge findChallengeById(UUID challengeId) {
+    public Challenge findChallengeById(UUID challengeId) {
         return challengeRepository.findChallengeById(challengeId)
                 .orElseThrow(() -> new ChallengeNotFoundException(challengeId));
     }
