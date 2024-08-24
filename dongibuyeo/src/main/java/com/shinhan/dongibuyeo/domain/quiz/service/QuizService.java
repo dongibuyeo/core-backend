@@ -63,8 +63,9 @@ public class QuizService {
     public QuizSolveResponse solveQuiz(QuizSolveRequest request) {
         Quiz quiz = getQuizById(request.getQuizId());
         Member member = memberService.getMemberById(request.getMemberId());
+
         QuizMember quizMember = new QuizMember(member, quiz);
-        // member add
+        member.getQuizMembers().add(quizMember);
 
         return quizMapper.toQuizSolveResponse(quizMember);
     }
