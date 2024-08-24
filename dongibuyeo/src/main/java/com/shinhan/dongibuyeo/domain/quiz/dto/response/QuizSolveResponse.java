@@ -4,13 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class QuizResponse {
-    private UUID id;
-    private String question;
-    private Boolean answer;
+public class QuizSolveResponse {
+    private UUID quizMemberId;
+    private LocalDateTime solvedAt;
 }

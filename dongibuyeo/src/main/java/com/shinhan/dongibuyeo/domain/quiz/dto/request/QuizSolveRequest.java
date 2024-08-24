@@ -1,4 +1,4 @@
-package com.shinhan.dongibuyeo.domain.quiz.dto.response;
+package com.shinhan.dongibuyeo.domain.quiz.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,8 +9,7 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class QuizResponse {
-    private UUID id;
-    private String question;
-    private Boolean answer;
+public class QuizSolveRequest {
+    private UUID quizId;
+    private UUID memberId;
 }
