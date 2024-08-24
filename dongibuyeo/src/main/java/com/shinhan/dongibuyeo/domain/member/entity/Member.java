@@ -4,6 +4,7 @@ import com.github.f4b6a3.ulid.UlidCreator;
 import com.shinhan.dongibuyeo.domain.account.entity.Account;
 import com.shinhan.dongibuyeo.domain.account.entity.AccountType;
 import com.shinhan.dongibuyeo.domain.challenge.entity.MemberChallenge;
+import com.shinhan.dongibuyeo.domain.quiz.entity.QuizMember;
 import com.shinhan.dongibuyeo.global.entity.BaseEntity;
 import io.netty.util.internal.ConcurrentSet;
 import jakarta.persistence.*;
@@ -46,6 +47,11 @@ public class Member extends BaseEntity {
             cascade = {CascadeType.PERSIST, CascadeType.MERGE}
     )
     private Set<Account> accounts = new HashSet<>();
+
+    @OneToMany(
+            mappedBy = "member",
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE}
+    )private List<QuizMember> quizMembers = new ArrayList<>();
 
     @Builder
     public Member(String email, String name, String nickname, String profileImage, String deviceToken) {
