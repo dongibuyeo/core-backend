@@ -1,5 +1,6 @@
 package com.shinhan.dongibuyeo.domain.quiz.controller;
 
+import com.shinhan.dongibuyeo.domain.quiz.dto.request.QuizMakeRequest;
 import com.shinhan.dongibuyeo.domain.quiz.dto.request.QuizSolveRequest;
 import com.shinhan.dongibuyeo.domain.quiz.dto.response.QuizResponse;
 import com.shinhan.dongibuyeo.domain.quiz.dto.response.QuizSolveResponse;
@@ -18,6 +19,12 @@ public class QuizController {
     public QuizController(QuizService quizService) {
         this.quizService = quizService;
     }
+
+    @PostMapping
+    public ResponseEntity<QuizResponse> makeQuiz(@RequestBody QuizMakeRequest request) {
+        return ResponseEntity.ok(quizService.makeQuiz(request));
+    }
+
 
     @GetMapping("/{memberId}")
     public ResponseEntity<QuizResponse> getRandomQuiz(@PathVariable("memberId") UUID memberId) {
