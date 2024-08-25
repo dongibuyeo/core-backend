@@ -11,7 +11,7 @@ import java.util.Map;
 @Builder
 @AllArgsConstructor
 public class DailyScoreDetail {
-    private LocalDate date;
+    private String date;
     private int dailyTotalScore;
     private Map<String, Integer> scoreDetails;
 }

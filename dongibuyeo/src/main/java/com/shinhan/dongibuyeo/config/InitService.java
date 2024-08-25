@@ -1,6 +1,7 @@
 package com.shinhan.dongibuyeo.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.shinhan.dongibuyeo.domain.member.service.MemberService;
 import com.shinhan.dongibuyeo.domain.product.client.ProductClient;
 import com.shinhan.dongibuyeo.domain.product.dto.client.ShinhanProductRequest;
@@ -26,7 +27,7 @@ public class InitService implements ApplicationListener<ContextRefreshedEvent> {
 
     @Bean
     public ObjectMapper objectMapper() {
-        return new ObjectMapper();
+        return new ObjectMapper().registerModule(new JavaTimeModule());
     }
 
     private final MemberService memberService;

@@ -131,7 +131,7 @@ public class ScoreCalculationService {
             Map<String, Integer> scoreDetails = parseScoreDetails(dailyScore);
             int totalScore = calculateTotalScore(scoreDetails);
             return new DailyScoreDetail(
-                    dailyScore.getDate(),
+                    dailyScore.getDate().toString(),
                     totalScore,
                     scoreDetails
             );
