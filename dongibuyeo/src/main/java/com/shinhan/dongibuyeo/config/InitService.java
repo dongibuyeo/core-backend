@@ -1,5 +1,6 @@
 package com.shinhan.dongibuyeo.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shinhan.dongibuyeo.domain.member.service.MemberService;
 import com.shinhan.dongibuyeo.domain.product.client.ProductClient;
 import com.shinhan.dongibuyeo.domain.product.dto.client.ShinhanProductRequest;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +23,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @RequiredArgsConstructor
 public class InitService implements ApplicationListener<ContextRefreshedEvent> {
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
+    }
 
     private final MemberService memberService;
     private final ProductRepository productRepository;

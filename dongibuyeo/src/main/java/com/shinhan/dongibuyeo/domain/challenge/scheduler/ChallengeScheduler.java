@@ -3,7 +3,7 @@ package com.shinhan.dongibuyeo.domain.challenge.scheduler;
 import com.shinhan.dongibuyeo.domain.challenge.entity.Challenge;
 import com.shinhan.dongibuyeo.domain.challenge.repository.ChallengeRepository;
 import com.shinhan.dongibuyeo.domain.challenge.service.ChallengeRewardService;
-import com.shinhan.dongibuyeo.domain.score.service.ScoreCalculationService;
+import com.shinhan.dongibuyeo.domain.challenge.service.ScoreCalculationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;

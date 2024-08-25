@@ -4,11 +4,10 @@ import com.shinhan.dongibuyeo.domain.account.service.AccountService;
 import com.shinhan.dongibuyeo.domain.challenge.entity.Challenge;
 import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeStatus;
 import com.shinhan.dongibuyeo.domain.challenge.entity.MemberChallenge;
-import com.shinhan.dongibuyeo.domain.challenge.exception.ChallengeNotFoundException;
 import com.shinhan.dongibuyeo.domain.challenge.exception.ChallengeNotEndedException;
+import com.shinhan.dongibuyeo.domain.challenge.exception.ChallengeNotFoundException;
 import com.shinhan.dongibuyeo.domain.challenge.repository.ChallengeRepository;
 import com.shinhan.dongibuyeo.domain.challenge.repository.MemberChallengeRepository;
-import com.shinhan.dongibuyeo.domain.score.entity.DailyScore;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,13 +21,15 @@ public class ChallengeRewardService {
     private final ChallengeRepository challengeRepository;
     private final MemberChallengeRepository memberChallengeRepository;
     private final AccountService accountService;
+    private final ScoreCalculationService scoreCalculationService;
 
     public ChallengeRewardService(ChallengeRepository challengeRepository,
                                   MemberChallengeRepository memberChallengeRepository,
-                                  AccountService accountService) {
+                                  AccountService accountService, ScoreCalculationService scoreCalculationService) {
         this.challengeRepository = challengeRepository;
         this.memberChallengeRepository = memberChallengeRepository;
         this.accountService = accountService;
+        this.scoreCalculationService = scoreCalculationService;
     }
 
     @Transactional
@@ -39,8 +40,6 @@ public class ChallengeRewardService {
 
         processBaseRewards(memberChallenges, challenge);
         distributeAdditionalRewards(memberChallenges, totalDepositPool);
-
-        memberChallengeRepository.saveAll(memberChallenges);
     }
 
     private Challenge findAndValidateChallenge(UUID challengeId) {
@@ -97,13 +96,14 @@ public class ChallengeRewardService {
         long othersPool = remainingPool - topPerformersPool;
 
         List<MemberChallenge> sortedChallenges = memberChallenges.stream()
-                .sorted(Comparator.comparingInt(this::calculateTotalScore).reversed())
+                .sorted(Comparator.comparingInt(scoreCalculationService::calculateTotalScore).reversed())
                 .toList();
 
         int topPerformersCount = (int) Math.ceil(sortedChallenges.size() * 0.1);
         distributeRewardsToGroup(sortedChallenges, 0, topPerformersCount, topPerformersPool);
         distributeRewardsToGroup(sortedChallenges, topPerformersCount, sortedChallenges.size(), othersPool);
     }
+
 
     private void distributeRewardsToGroup(List<MemberChallenge> sortedChallenges, int startIndex, int endIndex, long rewardPool) {
         long groupDepositTotal = calculateGroupDepositTotal(sortedChallenges, startIndex, endIndex);
@@ -126,11 +126,5 @@ public class ChallengeRewardService {
                 .mapToLong(MemberChallenge::getBaseReward)
                 .sum();
         return totalDepositPool - totalBaseRewards;
-    }
-
-    private int calculateTotalScore(MemberChallenge memberChallenge) {
-        return memberChallenge.getDailyScores().stream()
-                .mapToInt(DailyScore::getTotalScore)
-                .sum();
     }
 }

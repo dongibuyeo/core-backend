@@ -2,7 +2,6 @@ package com.shinhan.dongibuyeo.domain.challenge.entity;
 
 import com.github.f4b6a3.ulid.UlidCreator;
 import com.shinhan.dongibuyeo.domain.member.entity.Member;
-import com.shinhan.dongibuyeo.domain.score.entity.DailyScore;
 import com.shinhan.dongibuyeo.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -57,10 +56,10 @@ public class MemberChallenge extends BaseEntity {
         this.totalPoints = 0L;
     }
 
-    public void addDailyScore(DailyScore dailyScore) {
+    public void addDailyScore(DailyScore dailyScore, int totalScore) {
         this.dailyScores.add(dailyScore);
         dailyScore.updateMemberChallenge(this);
-        this.totalPoints += dailyScore.getTotalScore();
+        this.totalPoints += totalScore;
     }
 
     public void updateSuccessStatus(boolean isSuccess) {

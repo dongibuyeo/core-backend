@@ -1,15 +1,17 @@
 package com.shinhan.dongibuyeo.domain.challenge.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shinhan.dongibuyeo.domain.account.dto.request.TransferRequest;
 import com.shinhan.dongibuyeo.domain.account.entity.Account;
 import com.shinhan.dongibuyeo.domain.account.service.AccountService;
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.JoinChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.ChallengeResponse;
+import com.shinhan.dongibuyeo.domain.challenge.dto.response.DailyScoreDetail;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.MemberChallengeResponse;
-import com.shinhan.dongibuyeo.domain.challenge.entity.Challenge;
-import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeStatus;
-import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeType;
-import com.shinhan.dongibuyeo.domain.challenge.entity.MemberChallenge;
+import com.shinhan.dongibuyeo.domain.challenge.dto.response.ScoreDetailResponse;
+import com.shinhan.dongibuyeo.domain.challenge.entity.*;
 import com.shinhan.dongibuyeo.domain.challenge.exception.*;
 import com.shinhan.dongibuyeo.domain.challenge.mapper.ChallengeMapper;
 import com.shinhan.dongibuyeo.domain.challenge.repository.ChallengeRepository;
@@ -21,25 +23,29 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class MemberChallengeService {
+
+    private final ObjectMapper objectMapper;
 
     private final MemberService memberService;
     private final ChallengeRepository challengeRepository;
     private final MemberChallengeRepository memberChallengeRepository;
     private final ChallengeMapper challengeMapper;
     private final AccountService accountService;
+    private final ScoreCalculationService scoreCalculationService;
 
-    public MemberChallengeService(MemberService memberService, ChallengeRepository challengeRepository, MemberChallengeRepository memberChallengeRepository, ChallengeMapper challengeMapper, AccountService accountService) {
+    public MemberChallengeService(ObjectMapper objectMapper, MemberService memberService, ChallengeRepository challengeRepository, MemberChallengeRepository memberChallengeRepository, ChallengeMapper challengeMapper, AccountService accountService, ScoreCalculationService scoreCalculationService) {
+        this.objectMapper = objectMapper;
         this.memberService = memberService;
         this.challengeRepository = challengeRepository;
         this.memberChallengeRepository = memberChallengeRepository;
         this.challengeMapper = challengeMapper;
         this.accountService = accountService;
+        this.scoreCalculationService = scoreCalculationService;
     }
 
     private Challenge findChallengeById(UUID challengeId) {
@@ -133,7 +139,7 @@ public class MemberChallengeService {
     }
 
     private void validateChallengeWithdrawal(Challenge challenge) {
-        if(challenge.getType() != ChallengeType.SAVINGS_SEVEN) {
+        if (challenge.getType() != ChallengeType.SAVINGS_SEVEN) {
             throw new ChallengeCannotWithdrawException(challenge.getType());
         }
     }
@@ -154,5 +160,19 @@ public class MemberChallengeService {
 
     public List<ChallengeResponse> findAllChallengesByMemberIdAndStatus(UUID memberId, ChallengeStatus status) {
         return challengeRepository.findChallengesByMemberIdAndStatus(memberId, status);
+    }
+
+    @Transactional(readOnly = true)
+    public ScoreDetailResponse getChallengeScoreDetail(UUID memberId, UUID challengeId) {
+
+        MemberChallenge memberChallenge = memberChallengeRepository.findMemberChallengeByChallengeIdAndMemberId(challengeId, memberId)
+                .orElseThrow(() -> new MemberChallengeNotFoundException(challengeId, memberId));
+
+        List<DailyScoreDetail> dailyScores = memberChallenge.getDailyScores().stream()
+                .map(scoreCalculationService::convertToDailyScoreDetail)
+                .sorted(Comparator.comparing(DailyScoreDetail::getDate).reversed())
+                .collect(Collectors.toList());
+
+        return new ScoreDetailResponse(memberChallenge.getTotalPoints(), dailyScores);
     }
 }

@@ -1,4 +1,4 @@
-package com.shinhan.dongibuyeo.domain.score.strategy;
+package com.shinhan.dongibuyeo.domain.challenge.strategy;
 
 import com.shinhan.dongibuyeo.domain.account.dto.response.TransactionHistory;
 import com.shinhan.dongibuyeo.global.entity.TransferType;
@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;

@@ -4,6 +4,7 @@ import com.shinhan.dongibuyeo.domain.challenge.dto.request.JoinChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.MemberChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.ChallengeResponse;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.MemberChallengeResponse;
+import com.shinhan.dongibuyeo.domain.challenge.dto.response.ScoreDetailResponse;
 import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeStatus;
 import com.shinhan.dongibuyeo.domain.challenge.service.MemberChallengeService;
 import jakarta.validation.Valid;
@@ -55,5 +56,10 @@ public class MemberChallengeController {
     public ResponseEntity<Void> withdrawChallenge(@RequestBody @Valid MemberChallengeRequest request) {
         memberChallengeService.withdrawChallenge(request.getChallengeId(), request.getChallengeId());
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/score-details")
+    public ResponseEntity<ScoreDetailResponse> getChallengeScoreDetail(@RequestBody @Valid MemberChallengeRequest request) {
+        return ResponseEntity.ok(memberChallengeService.getChallengeScoreDetail(request.getMemberId(), request.getChallengeId()));
     }
 }

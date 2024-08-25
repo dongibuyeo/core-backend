@@ -1,4 +1,4 @@
-package com.shinhan.dongibuyeo.domain.score.strategy;
+package com.shinhan.dongibuyeo.domain.challenge.strategy;
 
 import com.shinhan.dongibuyeo.domain.account.dto.response.TransactionHistory;
 
