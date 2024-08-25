@@ -13,10 +13,9 @@ import com.shinhan.dongibuyeo.domain.challenge.entity.MemberChallenge;
 import com.shinhan.dongibuyeo.domain.challenge.service.ChallengeService;
 import com.shinhan.dongibuyeo.domain.member.entity.Member;
 import com.shinhan.dongibuyeo.domain.score.entity.DailyScore;
+import com.shinhan.dongibuyeo.domain.score.exception.ScoreStrategyNotFoundException;
 import com.shinhan.dongibuyeo.domain.score.strategy.ScoringStrategy;
-import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,18 +24,23 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-@RequiredArgsConstructor
+@Slf4j
 public class ScoreCalculationService {
-
-    private static final Logger logger = LoggerFactory.getLogger(ScoreCalculationService.class);
-
+    
     private final AccountService accountService;
     private final Map<ChallengeType, ScoringStrategy> scoringStrategies;
     private final ChallengeService challengeService;
     private final ObjectMapper objectMapper;
 
+    public ScoreCalculationService(AccountService accountService, Map<ChallengeType, ScoringStrategy> scoringStrategies, ChallengeService challengeService, ObjectMapper objectMapper) {
+        this.accountService = accountService;
+        this.scoringStrategies = scoringStrategies;
+        this.challengeService = challengeService;
+        this.objectMapper = objectMapper;
+    }
+
     @Transactional
-    public void calculateScoresForDate(LocalDate date) {
+    public void calculateDailyScores(LocalDate date) {
         List<ChallengeResponse> activeChallenges = challengeService.findAllChallengesByStatus(ChallengeStatus.IN_PROGRESS);
 
         for (ChallengeResponse challengeResponse : activeChallenges) {
@@ -47,7 +51,7 @@ public class ScoreCalculationService {
                     calculateScoreForMemberChallenge(memberChallenge, date);
                 }
             } catch (Exception e) {
-                logger.error("Error calculating scores for challenge: {}", challengeResponse.getChallengeId(), e);
+                log.error("Error calculating scores for challenge: {}", challengeResponse.getChallengeId(), e);
             }
         }
     }
@@ -72,21 +76,21 @@ public class ScoreCalculationService {
             ScoringStrategy strategy = scoringStrategies.get(challengeType);
 
             if (strategy == null) {
-                logger.error("No scoring strategy found for challenge type: {}", challengeType);
-                return;
+                throw new ScoreStrategyNotFoundException(challengeType);
             }
 
             Map<String, Integer> scores = strategy.calculateScore(transactions, date);
-
             DailyScore dailyScore = new DailyScore(date, objectMapper.writeValueAsString(scores));
             memberChallenge.addDailyScore(dailyScore);
 
-            logger.info("Calculated score for member: {}, challenge: {}, date: {}",
+            log.info("Calculated score for member: {}, challenge: {}, date: {}",
                     member.getId(), memberChallenge.getChallenge().getId(), date);
         } catch (JsonProcessingException e) {
-            logger.error("Error processing JSON for member challenge: {}", memberChallenge.getId(), e);
+            log.error("Error processing JSON for member challenge: {}", memberChallenge.getId(), e);
+        } catch (ScoreStrategyNotFoundException e) {
+            log.error(e.getMessage());
         } catch (Exception e) {
-            logger.error("Error calculating score for member challenge: {}", memberChallenge.getId(), e);
+            log.error("Error calculating score for member challenge: {}", memberChallenge.getId(), e);
         }
     }
 }
