@@ -4,14 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.time.LocalDate;
-import java.util.Map;
+import java.util.List;
 
 @Getter
 @Builder
 @AllArgsConstructor
 public class DailyScoreDetail {
     private String date;
-    private int dailyTotalScore;
-    private Map<String, Integer> scoreDetails;
+    private List<ScoreEntry> entries;
 }
