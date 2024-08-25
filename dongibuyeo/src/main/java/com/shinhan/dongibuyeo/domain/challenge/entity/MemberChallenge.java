@@ -43,7 +43,7 @@ public class MemberChallenge extends BaseEntity {
 
     private Long additionalReward;
 
-    private Long totalPoints;
+    private Integer totalPoints;
 
     @Builder
     public MemberChallenge(Member member, Challenge challenge, Long deposit) {
@@ -53,7 +53,7 @@ public class MemberChallenge extends BaseEntity {
         this.deposit = deposit;
         this.baseReward = 0L;
         this.additionalReward = 0L;
-        this.totalPoints = 0L;
+        this.totalPoints = 0;
     }
 
     public void addDailyScore(DailyScore dailyScore, int totalScore) {

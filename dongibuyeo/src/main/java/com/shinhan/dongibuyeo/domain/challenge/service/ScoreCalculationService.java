@@ -8,7 +8,11 @@ import com.shinhan.dongibuyeo.domain.account.dto.response.TransactionHistory;
 import com.shinhan.dongibuyeo.domain.account.service.AccountService;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.ChallengeResponse;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.DailyScoreDetail;
-import com.shinhan.dongibuyeo.domain.challenge.entity.*;
+import com.shinhan.dongibuyeo.domain.challenge.dto.response.ScoreEntry;
+import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeStatus;
+import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeType;
+import com.shinhan.dongibuyeo.domain.challenge.entity.DailyScore;
+import com.shinhan.dongibuyeo.domain.challenge.entity.MemberChallenge;
 import com.shinhan.dongibuyeo.domain.challenge.exception.ChallengeScoringException;
 import com.shinhan.dongibuyeo.domain.challenge.exception.ScoringParsingException;
 import com.shinhan.dongibuyeo.domain.challenge.exception.ScoringStrategyNotFoundException;
@@ -19,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -47,11 +52,10 @@ public class ScoreCalculationService {
 
         for (ChallengeResponse challengeResponse : activeChallenges) {
             try {
-                Challenge challenge = challengeService.findChallengeById(challengeResponse.getChallengeId());
-                List<MemberChallenge> challengeMembers = challenge.getChallengeMembers();
-                for (MemberChallenge memberChallenge : challengeMembers) {
-                    calculateScoreForMemberChallenge(memberChallenge, date);
-                }
+                challengeService.findChallengeById(challengeResponse.getChallengeId())
+                        .getChallengeMembers()
+                        .forEach(memberChallenge -> calculateScoreForMemberChallenge(memberChallenge, date));
+
             } catch (Exception e) {
                 log.error("Error calculating scores for challenge: {}", challengeResponse.getChallengeId(), e);
             }
@@ -60,6 +64,7 @@ public class ScoreCalculationService {
 
     private void calculateScoreForMemberChallenge(MemberChallenge memberChallenge, LocalDate date) {
         try {
+            // 거래내역 조회
             Member member = memberChallenge.getMember();
             String accountNumber = member.getChallengeAccount().getAccountNo();
 
@@ -74,70 +79,61 @@ public class ScoreCalculationService {
 
             List<TransactionHistory> transactions = accountService.getMemberTransactionHistory(request).getTransactions();
 
+            // 챌린지 정산 전략 조회
             ChallengeType challengeType = memberChallenge.getChallenge().getType();
             ScoringStrategy strategy = scoringStrategies.get(challengeType);
-
             if (strategy == null) {
                 throw new ScoringStrategyNotFoundException(challengeType);
             }
 
             Map<String, Integer> scores = strategy.calculateScore(transactions, date);
-            int totalScore = calculateTotalScore(scores);
-            DailyScore dailyScore = new DailyScore(date, objectMapper.writeValueAsString(scores));
-            memberChallenge.addDailyScore(dailyScore, totalScore);
+            int dailyTotalScore = calculateTotalScore(scores);
+            List<ScoreEntry> scoreEntries = createScoreEntries(scores, memberChallenge.getTotalPoints());
+            String scoreDetailsJson = objectMapper.writeValueAsString(scoreEntries);
 
-            log.info("Calculated score for member: {}, challenge: {}, date: {}, totalScore: {}",
-                    member.getId(), memberChallenge.getChallenge().getId(), date, totalScore);
-        } catch (JsonProcessingException e) {
-            log.error("Error processing JSON for member challenge: {}", memberChallenge.getId(), e);
-        } catch (ScoringStrategyNotFoundException e) {
-            log.error(e.getMessage());
+            DailyScore dailyScore = new DailyScore(date, scoreDetailsJson, dailyTotalScore);
+            memberChallenge.addDailyScore(dailyScore, dailyTotalScore);
+
         } catch (Exception e) {
             log.error("Error calculating score for member challenge: {}", memberChallenge.getId(), e);
         }
     }
 
-    public int calculateTotalScore(MemberChallenge memberChallenge) {
-        return memberChallenge.getDailyScores().stream()
-                .mapToInt(this::calculateDailyScore)
+    public int calculateTotalScore(Map<String, Integer> scores) {
+        return scores.values().stream()
+                .mapToInt(Integer::intValue)
                 .sum();
     }
 
-    public int calculateDailyScore(DailyScore dailyScore) {
-        try {
-            Map<String, Integer> scoreDetails = parseScoreDetails(dailyScore);
-            return calculateTotalScore(scoreDetails);
-        } catch (Exception e) {
-            log.error("Error calculating daily score for score ID: {}", dailyScore.getId(), e);
-            return 0;
+    private List<ScoreEntry> createScoreEntries(Map<String, Integer> scores, int initialTotalScore) {
+        List<ScoreEntry> entries = new ArrayList<>();
+        int runningTotal = initialTotalScore;
+        for (Map.Entry<String, Integer> score : scores.entrySet()) {
+            runningTotal += score.getValue();
+            entries.add(new ScoreEntry(score.getKey(), score.getValue(), runningTotal));
         }
-    }
-
-    public Map<String, Integer> parseScoreDetails(DailyScore dailyScore) {
-        try {
-            return objectMapper.readValue(dailyScore.getScoreDetails(), new TypeReference<>() {});
-        } catch (JsonProcessingException e) {
-            log.error("Error parsing score details for score ID: {}", dailyScore.getId(), e);
-            throw new ScoringParsingException(dailyScore.getId());
-        }
-    }
-
-    private int calculateTotalScore(Map<String, Integer> scoreDetails) {
-        return scoreDetails.values().stream().mapToInt(Integer::intValue).sum();
+        return entries;
     }
 
     public DailyScoreDetail convertToDailyScoreDetail(DailyScore dailyScore) {
         try {
-            Map<String, Integer> scoreDetails = parseScoreDetails(dailyScore);
-            int totalScore = calculateTotalScore(scoreDetails);
+            List<ScoreEntry> scoreEntries = parseScoreEntries(dailyScore);
             return new DailyScoreDetail(
                     dailyScore.getDate().toString(),
-                    totalScore,
-                    scoreDetails
+                    scoreEntries
             );
         } catch (Exception e) {
             log.error("Error converting daily score to detail for score ID: {}", dailyScore.getId(), e);
             throw new ChallengeScoringException(dailyScore.getId());
+        }
+    }
+
+    public List<ScoreEntry> parseScoreEntries(DailyScore dailyScore) {
+        try {
+            return objectMapper.readValue(dailyScore.getScoreDetails(), new TypeReference<>() {});
+        } catch (JsonProcessingException e) {
+            log.error("Error parsing score entries for score ID: {}", dailyScore.getId(), e);
+            throw new ScoringParsingException(dailyScore.getId());
         }
     }
 }
