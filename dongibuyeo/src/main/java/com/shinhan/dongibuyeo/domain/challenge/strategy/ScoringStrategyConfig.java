@@ -1,10 +1,6 @@
-package com.shinhan.dongibuyeo.domain.score.config;
+package com.shinhan.dongibuyeo.domain.challenge.strategy;
 
 import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeType;
-import com.shinhan.dongibuyeo.domain.score.strategy.ConsumptionCoffeeStrategy;
-import com.shinhan.dongibuyeo.domain.score.strategy.ConsumptionDeliveryStrategy;
-import com.shinhan.dongibuyeo.domain.score.strategy.ConsumptionDrinkStrategy;
-import com.shinhan.dongibuyeo.domain.score.strategy.ScoringStrategy;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

@@ -1,20 +1,19 @@
-package com.shinhan.dongibuyeo.domain.score.service;
+package com.shinhan.dongibuyeo.domain.challenge.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shinhan.dongibuyeo.domain.account.dto.request.TransactionHistoryRequest;
 import com.shinhan.dongibuyeo.domain.account.dto.response.TransactionHistory;
 import com.shinhan.dongibuyeo.domain.account.service.AccountService;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.ChallengeResponse;
-import com.shinhan.dongibuyeo.domain.challenge.entity.Challenge;
-import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeStatus;
-import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeType;
-import com.shinhan.dongibuyeo.domain.challenge.entity.MemberChallenge;
-import com.shinhan.dongibuyeo.domain.challenge.service.ChallengeService;
+import com.shinhan.dongibuyeo.domain.challenge.dto.response.DailyScoreDetail;
+import com.shinhan.dongibuyeo.domain.challenge.entity.*;
+import com.shinhan.dongibuyeo.domain.challenge.exception.ChallengeScoringException;
+import com.shinhan.dongibuyeo.domain.challenge.exception.ScoringParsingException;
+import com.shinhan.dongibuyeo.domain.challenge.exception.ScoringStrategyNotFoundException;
+import com.shinhan.dongibuyeo.domain.challenge.strategy.ScoringStrategy;
 import com.shinhan.dongibuyeo.domain.member.entity.Member;
-import com.shinhan.dongibuyeo.domain.score.entity.DailyScore;
-import com.shinhan.dongibuyeo.domain.score.exception.ScoreStrategyNotFoundException;
-import com.shinhan.dongibuyeo.domain.score.strategy.ScoringStrategy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,13 +25,16 @@ import java.util.Map;
 @Service
 @Slf4j
 public class ScoreCalculationService {
-    
+
     private final AccountService accountService;
     private final Map<ChallengeType, ScoringStrategy> scoringStrategies;
     private final ChallengeService challengeService;
     private final ObjectMapper objectMapper;
 
-    public ScoreCalculationService(AccountService accountService, Map<ChallengeType, ScoringStrategy> scoringStrategies, ChallengeService challengeService, ObjectMapper objectMapper) {
+    public ScoreCalculationService(AccountService accountService,
+                                   Map<ChallengeType, ScoringStrategy> scoringStrategies,
+                                   ChallengeService challengeService,
+                                   ObjectMapper objectMapper) {
         this.accountService = accountService;
         this.scoringStrategies = scoringStrategies;
         this.challengeService = challengeService;
@@ -76,21 +78,66 @@ public class ScoreCalculationService {
             ScoringStrategy strategy = scoringStrategies.get(challengeType);
 
             if (strategy == null) {
-                throw new ScoreStrategyNotFoundException(challengeType);
+                throw new ScoringStrategyNotFoundException(challengeType);
             }
 
             Map<String, Integer> scores = strategy.calculateScore(transactions, date);
+            int totalScore = calculateTotalScore(scores);
             DailyScore dailyScore = new DailyScore(date, objectMapper.writeValueAsString(scores));
-            memberChallenge.addDailyScore(dailyScore);
+            memberChallenge.addDailyScore(dailyScore, totalScore);
 
-            log.info("Calculated score for member: {}, challenge: {}, date: {}",
-                    member.getId(), memberChallenge.getChallenge().getId(), date);
+            log.info("Calculated score for member: {}, challenge: {}, date: {}, totalScore: {}",
+                    member.getId(), memberChallenge.getChallenge().getId(), date, totalScore);
         } catch (JsonProcessingException e) {
             log.error("Error processing JSON for member challenge: {}", memberChallenge.getId(), e);
-        } catch (ScoreStrategyNotFoundException e) {
+        } catch (ScoringStrategyNotFoundException e) {
             log.error(e.getMessage());
         } catch (Exception e) {
             log.error("Error calculating score for member challenge: {}", memberChallenge.getId(), e);
+        }
+    }
+
+    public int calculateTotalScore(MemberChallenge memberChallenge) {
+        return memberChallenge.getDailyScores().stream()
+                .mapToInt(this::calculateDailyScore)
+                .sum();
+    }
+
+    public int calculateDailyScore(DailyScore dailyScore) {
+        try {
+            Map<String, Integer> scoreDetails = parseScoreDetails(dailyScore);
+            return calculateTotalScore(scoreDetails);
+        } catch (Exception e) {
+            log.error("Error calculating daily score for score ID: {}", dailyScore.getId(), e);
+            return 0;
+        }
+    }
+
+    public Map<String, Integer> parseScoreDetails(DailyScore dailyScore) {
+        try {
+            return objectMapper.readValue(dailyScore.getScoreDetails(), new TypeReference<>() {});
+        } catch (JsonProcessingException e) {
+            log.error("Error parsing score details for score ID: {}", dailyScore.getId(), e);
+            throw new ScoringParsingException(dailyScore.getId());
+        }
+    }
+
+    private int calculateTotalScore(Map<String, Integer> scoreDetails) {
+        return scoreDetails.values().stream().mapToInt(Integer::intValue).sum();
+    }
+
+    public DailyScoreDetail convertToDailyScoreDetail(DailyScore dailyScore) {
+        try {
+            Map<String, Integer> scoreDetails = parseScoreDetails(dailyScore);
+            int totalScore = calculateTotalScore(scoreDetails);
+            return new DailyScoreDetail(
+                    dailyScore.getDate(),
+                    totalScore,
+                    scoreDetails
+            );
+        } catch (Exception e) {
+            log.error("Error converting daily score to detail for score ID: {}", dailyScore.getId(), e);
+            throw new ChallengeScoringException(dailyScore.getId());
         }
     }
 }
