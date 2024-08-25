@@ -80,7 +80,7 @@ public class ChallengeScheduler {
         LocalDate yesterday = LocalDate.now().minusDays(1);
         log.info("Starting daily score calculation for date: {}", yesterday);
         try {
-            scoreCalculationService.calculateScoresForDate(yesterday);
+            scoreCalculationService.calculateDailyScores(yesterday);
             log.info("Completed daily score calculation for date: {}", yesterday);
         } catch (Exception e) {
             log.error("Error calculating daily scores for date {}: {}", yesterday, e.getMessage(), e);
