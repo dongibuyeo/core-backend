@@ -20,7 +20,7 @@ public interface MemberChallengeRepository extends JpaRepository<MemberChallenge
             "JOIN FETCH MemberChallenge mc " +
             "ON mc.challenge.id = c.id " +
             "WHERE mc.member.id = :memberId ")
-    Optional<List<Challenge>> findChallengesByMemberId(UUID memberId);
+    List<Challenge> findChallengesByMemberId(UUID memberId);
 
     @Query("SELECT c, mc.isSuccess, mc.deposit memberDeposit, mc.baseReward, mc.additionalReward, mc.totalScore " +
             "FROM Challenge c " +

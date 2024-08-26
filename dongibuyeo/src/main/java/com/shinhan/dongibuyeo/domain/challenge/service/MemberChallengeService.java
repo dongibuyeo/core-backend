@@ -53,7 +53,6 @@ public class MemberChallengeService {
 
     public List<ChallengeResponse> findAllChallengesByMemberId(UUID memberId) {
         return memberChallengeRepository.findChallengesByMemberId(memberId)
-                .orElseGet(ArrayList::new)
                 .stream()
                 .map(challengeMapper::toChallengeResponse)
                 .toList();
@@ -77,6 +76,15 @@ public class MemberChallengeService {
         }
         if (!member.hasChallengeAccount()) {
             throw new ChallengeCannotJoinException(member.getId());
+        }
+
+        Optional<Challenge> existingChallenge = memberChallengeRepository.findChallengesByMemberId(member.getId())
+                .stream()
+                .filter(findChallenge -> findChallenge.getId().equals(challenge.getId()))
+                .findAny();
+
+        if (existingChallenge.isPresent()) {
+            throw new ChallengeAlreadyJoinedException(challenge.getId(), member.getId());
         }
     }
 
