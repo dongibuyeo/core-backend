@@ -36,12 +36,12 @@ public class QuizController {
         return ResponseEntity.ok(quizService.solveQuiz(request));
     }
 
-    @GetMapping("date/{memberId}")
+    @GetMapping("/date/{memberId}")
     public ResponseEntity<List<QuizSolveResponse>> getMemberMonthSolvedList(@PathVariable UUID memberId,@RequestParam Integer year, @RequestParam Integer month) {
         return ResponseEntity.ok(quizService.getMemberDateSolvedList(memberId,year,month));
     }
 
-    @GetMapping("already/{memberId}")
+    @GetMapping("/already/{memberId}")
     public ResponseEntity<Boolean> getMemberAlreadySolved(@PathVariable UUID memberId) {
         return ResponseEntity.ok(quizService.alreadyToday(memberId));
     }
