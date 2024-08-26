@@ -1,6 +1,5 @@
 package com.shinhan.dongibuyeo.domain.challenge.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shinhan.dongibuyeo.domain.account.dto.request.TransferRequest;
 import com.shinhan.dongibuyeo.domain.account.entity.Account;
 import com.shinhan.dongibuyeo.domain.account.service.AccountService;
@@ -16,6 +15,8 @@ import com.shinhan.dongibuyeo.domain.challenge.repository.ChallengeRepository;
 import com.shinhan.dongibuyeo.domain.challenge.repository.MemberChallengeRepository;
 import com.shinhan.dongibuyeo.domain.member.entity.Member;
 import com.shinhan.dongibuyeo.domain.member.service.MemberService;
+import com.shinhan.dongibuyeo.domain.savings.dto.response.SavingAccountsDetail;
+import com.shinhan.dongibuyeo.domain.savings.service.SavingsService;
 import com.shinhan.dongibuyeo.global.entity.TransferType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,21 +28,20 @@ import java.util.stream.Collectors;
 @Service
 public class MemberChallengeService {
 
-    private final ObjectMapper objectMapper;
-
     private final MemberService memberService;
     private final ChallengeRepository challengeRepository;
     private final MemberChallengeRepository memberChallengeRepository;
     private final ChallengeMapper challengeMapper;
     private final AccountService accountService;
+    private final SavingsService savingsService;
 
-    public MemberChallengeService(ObjectMapper objectMapper, MemberService memberService, ChallengeRepository challengeRepository, MemberChallengeRepository memberChallengeRepository, ChallengeMapper challengeMapper, AccountService accountService) {
-        this.objectMapper = objectMapper;
+    public MemberChallengeService(MemberService memberService, ChallengeRepository challengeRepository, MemberChallengeRepository memberChallengeRepository, ChallengeMapper challengeMapper, AccountService accountService, SavingsService savingsService) {
         this.memberService = memberService;
         this.challengeRepository = challengeRepository;
         this.memberChallengeRepository = memberChallengeRepository;
         this.challengeMapper = challengeMapper;
         this.accountService = accountService;
+        this.savingsService = savingsService;
     }
 
     private Challenge findChallengeById(UUID challengeId) {
@@ -134,12 +134,23 @@ public class MemberChallengeService {
         Member member = memberService.getMemberById(memberId);
         MemberChallenge memberChallenge = getMemberChallenge(challengeId, memberId);
 
+        // 적금의 경우만 중도해지 가능
         validateChallengeWithdrawal(challenge);
 
+        // 예치금 환급
         transferDepositBack(member, challenge, memberChallenge.getDeposit());
         removeMemberFromChallenge(member, challenge, memberChallenge);
 
-        // TODO: 적금 해지 후 환급 로직 (유저 적금 계좌 -> 유저 챌린지 계좌)
+        // 적금 해지 후 자동 환급(유저 적금 계좌 -> 유저 적금 납입 계좌)
+        Optional<SavingAccountsDetail> savingChallengeAccount = savingsService.getAllSavingsByMemberId(memberId)
+                .stream()
+                .filter(savings -> savings.getAccountName().equals(challenge.getTitle()))
+                .findFirst();
+
+        if (savingChallengeAccount.isPresent()) {
+            String accountNo = savingChallengeAccount.get().getAccountNo();
+            savingsService.deleteSavingAccounts(memberId, accountNo);
+        }
     }
 
     private void validateChallengeWithdrawal(Challenge challenge) {
