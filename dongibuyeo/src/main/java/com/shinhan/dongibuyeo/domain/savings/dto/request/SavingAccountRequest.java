@@ -11,5 +11,5 @@ import java.util.UUID;
 @AllArgsConstructor
 public class SavingAccountRequest {
     private UUID memberId;
-    private String AccountNo;
+    private String accountNo;
 }
