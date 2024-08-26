@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -26,14 +28,13 @@ public class DailyScore {
     private LocalDate date;
     private int totalScore;
 
-    @Column(columnDefinition = "JSON")
-    private String scoreDetails;  // JSON 형식으로 점수 세부 정보 저장
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "score_entries", joinColumns = @JoinColumn(name = "daily_score_id"))
+    private List<ScoreDetail> scoreDetails = new ArrayList<>();
 
     @Builder
-    public DailyScore(LocalDate date, String scoreDetails, int totalScore) {
+    public DailyScore(LocalDate date) {
         this.date = date;
-        this.scoreDetails = scoreDetails;
-        this.totalScore = totalScore;
     }
 
     public void updateMemberChallenge(MemberChallenge memberChallenge) {
@@ -43,11 +44,10 @@ public class DailyScore {
         }
     }
 
-    public void updateDailyTotalScore(int score, String item) {
-        this.totalScore += score;
-    }
-
-    public void updateScoreDetails(String scoreDetails) {
-        this.scoreDetails = scoreDetails;
+    public void updateScoreDetails(ScoreDetail scoreDetail) {
+        this.scoreDetails.add(scoreDetail);
+        int scoreDifference = scoreDetail.getScore();
+        this.totalScore += scoreDifference;
+        this.memberChallenge.updateTotalScore(scoreDifference);
     }
 }

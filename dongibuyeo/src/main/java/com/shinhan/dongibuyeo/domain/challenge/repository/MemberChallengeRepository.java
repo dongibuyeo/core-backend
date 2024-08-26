@@ -3,6 +3,7 @@ package com.shinhan.dongibuyeo.domain.challenge.repository;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.MemberChallengeResponse;
 import com.shinhan.dongibuyeo.domain.challenge.entity.Challenge;
 import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeStatus;
+import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeType;
 import com.shinhan.dongibuyeo.domain.challenge.entity.MemberChallenge;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -22,7 +23,7 @@ public interface MemberChallengeRepository extends JpaRepository<MemberChallenge
             "WHERE mc.member.id = :memberId ")
     List<Challenge> findChallengesByMemberId(UUID memberId);
 
-    @Query("SELECT c, mc.isSuccess, mc.deposit memberDeposit, mc.baseReward, mc.additionalReward, mc.totalScore " +
+    @Query("SELECT c, mc.isSuccess, mc.deposit as memberDeposit, mc.baseReward, mc.additionalReward, mc.totalScore " +
             "FROM Challenge c " +
             "JOIN FETCH MemberChallenge mc " +
             "ON mc.challenge.id = c.id " +
@@ -38,4 +39,14 @@ public interface MemberChallengeRepository extends JpaRepository<MemberChallenge
     List<MemberChallenge> findAllByChallengeStatus(ChallengeStatus status);
 
     List<MemberChallenge> findAllByChallengeId(UUID challengeId);
+
+    List<MemberChallenge> findByMemberId(UUID memberId);
+
+    @Query("SELECT mc " +
+            "FROM MemberChallenge mc " +
+            "JOIN FETCH Challenge c " +
+            "ON mc.challenge.id = c.id " +
+            "WHERE mc.member.id = :memerId " +
+            "AND c.type = :challengeType ")
+    Optional<MemberChallenge> findByMemberIdAndChallengeType(UUID memberId, ChallengeType challengeType);
 }

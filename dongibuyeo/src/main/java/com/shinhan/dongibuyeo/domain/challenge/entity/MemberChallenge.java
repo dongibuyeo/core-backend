@@ -60,10 +60,13 @@ public class MemberChallenge extends BaseEntity {
         this.status = MemberChallengeStatus.BEFORE_CALCULATION;
     }
 
-    public void addDailyScore(DailyScore dailyScore, int totalScore) {
+    public void updateTotalScore(int scoreDifference) {
+        this.totalScore += scoreDifference;
+    }
+
+    public void addDailyScore(DailyScore dailyScore) {
         this.dailyScores.add(dailyScore);
         dailyScore.updateMemberChallenge(this);
-        this.totalScore += totalScore;
     }
 
     public void updateSuccessStatus(boolean isSuccess) {
