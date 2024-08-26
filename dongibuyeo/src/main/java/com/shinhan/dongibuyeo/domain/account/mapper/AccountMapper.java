@@ -11,6 +11,7 @@ import com.shinhan.dongibuyeo.domain.account.entity.Account;
 import com.shinhan.dongibuyeo.domain.account.entity.AccountType;
 import com.shinhan.dongibuyeo.domain.member.entity.Member;
 import com.shinhan.dongibuyeo.domain.savings.dto.client.ShinhanMakeSavingAccountResponse;
+import com.shinhan.dongibuyeo.domain.savings.dto.response.SavingAccountsDetail;
 import com.shinhan.dongibuyeo.global.header.GlobalUserHeader;
 import org.springframework.stereotype.Component;
 
@@ -70,6 +71,13 @@ public class AccountMapper {
     public Account detailToPersonalAccountEntity(AccountDetailInfo info) {
         return new Account(
                 info.getAccountNo(),
+                AccountType.PRIVATE
+        );
+    }
+
+    public Account detailToPersonalAccountEntity(SavingAccountsDetail accountsDetail) {
+        return new Account(
+                accountsDetail.getAccountNo(),
                 AccountType.PRIVATE
         );
     }

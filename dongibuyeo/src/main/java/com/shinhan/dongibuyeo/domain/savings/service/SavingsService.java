@@ -7,14 +7,12 @@ import com.shinhan.dongibuyeo.domain.account.service.AccountService;
 import com.shinhan.dongibuyeo.domain.member.entity.Member;
 import com.shinhan.dongibuyeo.domain.member.service.MemberService;
 import com.shinhan.dongibuyeo.domain.savings.client.SavingsClient;
+import com.shinhan.dongibuyeo.domain.savings.dto.client.ShinhanGetSavingAccountsResponse;
 import com.shinhan.dongibuyeo.domain.savings.dto.client.ShinhanGetSavingsRequest;
 import com.shinhan.dongibuyeo.domain.savings.dto.client.ShinhanMakeSavingAccountResponse;
 import com.shinhan.dongibuyeo.domain.savings.dto.request.MakeSavingAccountRequest;
 import com.shinhan.dongibuyeo.domain.savings.dto.request.SavingProductRequest;
-import com.shinhan.dongibuyeo.domain.savings.dto.response.DeleteSavingInfo;
-import com.shinhan.dongibuyeo.domain.savings.dto.response.SavingAccountInfo;
-import com.shinhan.dongibuyeo.domain.savings.dto.response.SavingInfo;
-import com.shinhan.dongibuyeo.domain.savings.dto.response.SavingPaymentInfo;
+import com.shinhan.dongibuyeo.domain.savings.dto.response.*;
 import com.shinhan.dongibuyeo.domain.savings.mapper.SavingsMapper;
 import com.shinhan.dongibuyeo.global.header.GlobalAdminHeader;
 import jakarta.transaction.Transactional;
@@ -91,4 +89,17 @@ public class SavingsService {
                 )
         ).getRec();
     }
+
+    @Transactional
+    public List<SavingAccountsDetail> getAllSavingsByMemberId(UUID memberId) {
+        Member member = memberService.getMemberById(memberId);
+        ShinhanGetSavingAccountsResponse savingAccounts = savingsClient.getAllSavingAccountsByMemberId(
+                savingsMapper.toShinhanGetMemberSavingsRequest(apiKey, member.getUserKey()));
+
+        savingAccounts.getRec().getSavingDetails().forEach(
+                x -> member.getAccounts().add(accountMapper.detailToPersonalAccountEntity(x))
+        );
+        return savingAccounts.getRec().getSavingDetails();
+    }
+
 }
