@@ -1,14 +1,13 @@
-package com.shinhan.dongibuyeo.domain.challenge.scheduler;
+package com.shinhan.dongibuyeo.domain.challenge.score.scheduler;
 
-import com.shinhan.dongibuyeo.domain.challenge.entity.Challenge;
-import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeStatus;
-import com.shinhan.dongibuyeo.domain.challenge.entity.DailyScore;
-import com.shinhan.dongibuyeo.domain.challenge.entity.MemberChallenge;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.shinhan.dongibuyeo.domain.challenge.entity.*;
 import com.shinhan.dongibuyeo.domain.challenge.repository.ChallengeRepository;
 import com.shinhan.dongibuyeo.domain.challenge.repository.DailyScoreRepository;
 import com.shinhan.dongibuyeo.domain.challenge.repository.MemberChallengeRepository;
 import com.shinhan.dongibuyeo.domain.challenge.service.ChallengeRewardService;
 import com.shinhan.dongibuyeo.domain.challenge.service.ScoreCalculationService;
+import com.shinhan.dongibuyeo.domain.challenge.service.DailyScoreService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -23,20 +22,24 @@ import java.util.List;
 @Slf4j
 public class ChallengeScheduler {
 
+    private final ObjectMapper objectMapper;
     private final ChallengeRepository challengeRepository;
     private final ChallengeRewardService challengeRewardService;
     private final ScoreCalculationService scoreCalculationService;
     private final DailyScoreRepository dailyScoreRepository;
     private final MemberChallengeRepository memberChallengeRepository;
+    private final DailyScoreService dailyScoreService;
 
-    public ChallengeScheduler(ChallengeRepository challengeRepository,
+    public ChallengeScheduler(ObjectMapper objectMapper, ChallengeRepository challengeRepository,
                               ChallengeRewardService challengeRewardService,
-                              ScoreCalculationService scoreCalculationService, DailyScoreRepository dailyScoreRepository, MemberChallengeRepository memberChallengeRepository) {
+                              ScoreCalculationService scoreCalculationService, DailyScoreRepository dailyScoreRepository, MemberChallengeRepository memberChallengeRepository, DailyScoreService dailyScoreService) {
+        this.objectMapper = objectMapper;
         this.challengeRepository = challengeRepository;
         this.challengeRewardService = challengeRewardService;
         this.scoreCalculationService = scoreCalculationService;
         this.dailyScoreRepository = dailyScoreRepository;
         this.memberChallengeRepository = memberChallengeRepository;
+        this.dailyScoreService = dailyScoreService;
     }
 
     /**
@@ -49,15 +52,17 @@ public class ChallengeScheduler {
         log.info("Starting daily challenge update and score creation for date: {}", today);
 
         challengeRepository.findAll().forEach(challenge -> {
+            // 챌린지 상태 변경
             challenge.updateStatus();
 
-            List<MemberChallenge> memberChallenges = memberChallengeRepository.findAllByChallengeId(challenge.getId());
-
-
+            // 진행 중인 챌린지 일일 점수 생성
             if (challenge.getStatus() == ChallengeStatus.IN_PROGRESS) {
                 challenge.getChallengeMembers().forEach(memberChallenge -> {
-                    DailyScore dailyScore = new DailyScore(today, "{}", 10);
-                    memberChallenge.addDailyScore(dailyScore, 10);
+                    try {
+                        dailyScoreService.getOrCreateDailyScore(memberChallenge, today);
+                    } catch (Exception e) {
+                        log.error("Error creating daily score for challenge member: {}", memberChallenge.getId(), e);
+                    }
                 });
             }
         });
@@ -65,7 +70,7 @@ public class ChallengeScheduler {
 
     /**
      * 완료 챌린지 정산
-     * 매일 새벽 4시 실행 (일일 점수 계산 이후)
+     * 매일 새벽 4시 실행 (최종 피버타임 이후)
      */
     @Scheduled(cron = "0 0 4 * * ?")
     @Transactional
@@ -90,19 +95,5 @@ public class ChallengeScheduler {
         log.info("Finished checking for ended challenges");
     }
 
-    /**
-     * 일일 점수 계산
-     * 매일 새벽 3시 실행
-     */
-    @Scheduled(cron = "0 0 3 * * ?")
-    public void calculateDailyScores() {
-        LocalDate yesterday = LocalDate.now().minusDays(1);
-        log.info("Starting daily score calculation for date: {}", yesterday);
-        try {
-            scoreCalculationService.calculateDailyScores(yesterday);
-            log.info("Completed daily score calculation for date: {}", yesterday);
-        } catch (Exception e) {
-            log.error("Error calculating daily scores for date {}: {}", yesterday, e.getMessage(), e);
-        }
-    }
+
 }

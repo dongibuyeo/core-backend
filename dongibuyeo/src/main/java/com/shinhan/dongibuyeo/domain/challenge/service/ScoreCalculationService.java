@@ -84,11 +84,11 @@ public class ScoreCalculationService {
 
             Map<String, Integer> scores = strategy.calculateScore(transactions, date);
             int dailyTotalScore = calculateTotalScore(scores);
-            List<ScoreEntry> scoreEntries = createScoreEntries(scores, memberChallenge.getTotalScore());
+            List<ScoreDetail> scoreEntries = createScoreEntries(scores, memberChallenge.getTotalScore());
             String scoreDetailsJson = objectMapper.writeValueAsString(scoreEntries);
 
-            DailyScore dailyScore = new DailyScore(date, scoreDetailsJson, dailyTotalScore);
-            memberChallenge.addDailyScore(dailyScore, dailyTotalScore);
+            DailyScore dailyScore = new DailyScore(date);
+            memberChallenge.addDailyScore(dailyScore);
 
         } catch (Exception e) {
             log.error("Error calculating score for member challenge: {}", memberChallenge.getId(), e);
@@ -101,19 +101,19 @@ public class ScoreCalculationService {
                 .sum();
     }
 
-    private List<ScoreEntry> createScoreEntries(Map<String, Integer> scores, int initialTotalScore) {
-        List<ScoreEntry> entries = new ArrayList<>();
+    private List<ScoreDetail> createScoreEntries(Map<String, Integer> scores, int initialTotalScore) {
+        List<ScoreDetail> entries = new ArrayList<>();
         int runningTotal = initialTotalScore;
         for (Map.Entry<String, Integer> score : scores.entrySet()) {
             runningTotal += score.getValue();
-            entries.add(new ScoreEntry(score.getKey(), score.getValue(), runningTotal));
+            entries.add(new ScoreDetail(score.getKey(), score.getValue(), runningTotal));
         }
         return entries;
     }
 
     public DailyScoreDetail convertToDailyScoreDetail(DailyScore dailyScore) {
         try {
-            List<ScoreEntry> scoreEntries = parseScoreEntries(dailyScore);
+            List<ScoreDetail> scoreEntries = parseScoreEntries(dailyScore);
             return new DailyScoreDetail(
                     dailyScore.getDate().toString(),
                     scoreEntries
@@ -124,7 +124,7 @@ public class ScoreCalculationService {
         }
     }
 
-    public List<ScoreEntry> parseScoreEntries(DailyScore dailyScore) {
+    public List<ScoreDetail> parseScoreEntries(DailyScore dailyScore) {
         try {
             return objectMapper.readValue(dailyScore.getScoreDetails(), new TypeReference<>() {});
         } catch (JsonProcessingException e) {

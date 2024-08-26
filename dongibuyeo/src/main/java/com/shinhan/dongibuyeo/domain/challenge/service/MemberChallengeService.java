@@ -181,4 +181,13 @@ public class MemberChallengeService {
 
         return new ScoreDetailResponse(memberChallenge.getTotalScore(), dailyScores);
     }
+
+    public List<MemberChallenge> findByMemberId(UUID memberId) {
+        return memberChallengeRepository.findByMemberId(memberId);
+    }
+
+    public MemberChallenge findByMemberIdAndChallengeType(UUID memberId, ChallengeType challengeType) {
+        return  memberChallengeRepository.findByMemberIdAndChallengeType(memberId, challengeType)
+                .orElseThrow(() -> new MemberChallengeNotFoundException(memberId, challengeType));
+    }
 }

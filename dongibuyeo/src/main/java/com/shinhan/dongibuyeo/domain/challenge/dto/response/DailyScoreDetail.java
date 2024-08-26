@@ -1,6 +1,6 @@
 package com.shinhan.dongibuyeo.domain.challenge.dto.response;
 
-import com.shinhan.dongibuyeo.domain.challenge.entity.ScoreEntry;
+import com.shinhan.dongibuyeo.domain.challenge.entity.ScoreDetail;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,5 +12,5 @@ import java.util.List;
 @AllArgsConstructor
 public class DailyScoreDetail {
     private String date;
-    private List<ScoreEntry> entries;
+    private List<ScoreDetail> entries;
 }
