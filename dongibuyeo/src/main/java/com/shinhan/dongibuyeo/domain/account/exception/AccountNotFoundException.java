@@ -10,8 +10,16 @@ public class AccountNotFoundException extends NotFoundException {
     public AccountNotFoundException(UUID accountId) {
         super(
                 "NOT_FOUND_ACCOUNT_01",
-                "계좌를 찾을 수 없습니다.",
+                "해당 ID로 계좌를 찾을 수 없습니다.",
                 Map.of("accountId", String.valueOf(accountId))
+        );
+    }
+
+    public AccountNotFoundException(String accountNo) {
+        super(
+                "NOT_FOUND_ACCOUNT_02",
+                "해당 계좌번호로 계좌를 찾을 수 없습니다.",
+                Map.of("accountNo", accountNo)
         );
     }
 }
