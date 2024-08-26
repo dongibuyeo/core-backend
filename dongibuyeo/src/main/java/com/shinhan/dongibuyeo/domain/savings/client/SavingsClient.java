@@ -42,19 +42,19 @@ public class SavingsClient {
                 .orElseThrow();
     }
 
-    public ShinhanMakeSavingResponse makeSavingAccount(ShinhanMakeSavingAccountRequest request) {
+    public ShinhanMakeSavingAccountResponse makeSavingAccount(ShinhanMakeSavingAccountRequest request) {
         return webClient.post()
                 .uri("/edu/savings/createProduct")
                 .accept(MediaType.APPLICATION_JSON)
                 .acceptCharset(StandardCharsets.UTF_8)
                 .bodyValue(request)
                 .retrieve()
-                .bodyToMono(ShinhanMakeSavingResponse.class)
+                .bodyToMono(ShinhanMakeSavingAccountResponse.class)
                 .blockOptional()
                 .orElseThrow();
     }
 
-    public ShinhanGetSavingPaymentResponse getSavingPayment(ShinhanGetAccountRequest request) {
+    public ShinhanGetSavingPaymentResponse getSavingPayment(ShinhanSavingRequest request) {
         return webClient.post()
                 .uri("/edu/savings/inquirePayment")
                 .accept(MediaType.APPLICATION_JSON)
@@ -66,14 +66,14 @@ public class SavingsClient {
                 .orElseThrow();
     }
 
-    public ShinhanGetSavingPaymentResponse deleteSavingAccount(ShinhanGetAccountRequest request) {
+    public ShinhanDeleteSavingResponse deleteSavingAccount(ShinhanSavingRequest request) {
         return webClient.post()
                 .uri("/edu/savings/deleteAccount")
                 .accept(MediaType.APPLICATION_JSON)
                 .acceptCharset(StandardCharsets.UTF_8)
                 .bodyValue(request)
                 .retrieve()
-                .bodyToMono(ShinhanGetSavingPaymentResponse.class)
+                .bodyToMono(ShinhanDeleteSavingResponse.class)
                 .blockOptional()
                 .orElseThrow();
     }
