@@ -3,6 +3,7 @@ package com.shinhan.dongibuyeo.domain.savings.service;
 import com.shinhan.dongibuyeo.domain.account.entity.Account;
 import com.shinhan.dongibuyeo.domain.account.mapper.AccountMapper;
 import com.shinhan.dongibuyeo.domain.account.repository.AccountRepository;
+import com.shinhan.dongibuyeo.domain.account.service.AccountService;
 import com.shinhan.dongibuyeo.domain.member.entity.Member;
 import com.shinhan.dongibuyeo.domain.member.service.MemberService;
 import com.shinhan.dongibuyeo.domain.savings.client.SavingsClient;
@@ -27,6 +28,7 @@ import java.util.UUID;
 public class SavingsService {
 
     private final SavingsClient savingsClient;
+    private final AccountService accountService;
     @Value("${shinhan.key}")
     private String apiKey;
 
@@ -37,12 +39,13 @@ public class SavingsService {
     private final MemberService memberService;
     private final SavingsMapper savingsMapper;
 
-    public SavingsService(AccountRepository accountRepository, AccountMapper accountMapper, MemberService memberService, SavingsMapper savingsMapper, SavingsClient savingsClient) {
+    public SavingsService(AccountRepository accountRepository, AccountMapper accountMapper, MemberService memberService, SavingsMapper savingsMapper, SavingsClient savingsClient, AccountService accountService) {
         this.accountRepository = accountRepository;
         this.accountMapper = accountMapper;
         this.memberService = memberService;
         this.savingsMapper = savingsMapper;
         this.savingsClient = savingsClient;
+        this.accountService = accountService;
     }
 
     @Transactional
@@ -65,8 +68,10 @@ public class SavingsService {
     @Transactional
     public DeleteSavingInfo deleteSavingAccounts(UUID memberId, String accountNo) {
         Member member = memberService.getMemberById(memberId);
+
+        accountService.deleteAccountByAccountNo(accountNo);
         return savingsClient.deleteSavingAccount(
-                savingsMapper.toShinhanSavingRequest("inquireEarlyTerminationInterest", apiKey, member, accountNo))
+                        savingsMapper.toShinhanSavingRequest("deleteAccount", apiKey, member, accountNo))
                 .getRec();
     }
 
