@@ -1,16 +1,18 @@
 package com.shinhan.dongibuyeo.domain.challenge.service;
 
-import com.shinhan.dongibuyeo.domain.account.service.AccountService;
+import com.shinhan.dongibuyeo.domain.account.dto.request.TransactionHistoryRequest;
 import com.shinhan.dongibuyeo.domain.challenge.entity.Challenge;
-import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeStatus;
 import com.shinhan.dongibuyeo.domain.challenge.entity.MemberChallenge;
-import com.shinhan.dongibuyeo.domain.challenge.exception.ChallengeNotEndedException;
-import com.shinhan.dongibuyeo.domain.challenge.exception.ChallengeNotFoundException;
-import com.shinhan.dongibuyeo.domain.challenge.repository.ChallengeRepository;
-import com.shinhan.dongibuyeo.domain.challenge.repository.MemberChallengeRepository;
+import com.shinhan.dongibuyeo.domain.challenge.entity.MemberChallengeStatus;
+import com.shinhan.dongibuyeo.domain.consume.dto.request.ConsumtionRequest;
+import com.shinhan.dongibuyeo.domain.consume.dto.response.ConsumtionResponse;
+import com.shinhan.dongibuyeo.domain.consume.service.ConsumeService;
+import com.shinhan.dongibuyeo.global.entity.TransferType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -18,50 +20,55 @@ import java.util.UUID;
 @Service
 public class ChallengeRewardService {
 
-    private final ChallengeRepository challengeRepository;
+    private final ChallengeService challengeService;
+    private final ConsumeService consumeService;
 
-    public ChallengeRewardService(ChallengeRepository challengeRepository) {
-        this.challengeRepository = challengeRepository;
+    public ChallengeRewardService(ChallengeService challengeService, ConsumeService consumeService) {
+        this.challengeService = challengeService;
+        this.consumeService = consumeService;
     }
 
+
     /**
-     * 종료된 챌린지의 환급 처리 메서드
+     * 종료된 소비 챌린지의 환급 처리 메서드
      * 기본 환급액과 추가 환급액을 계산
      *
      * @param challengeId 종료된 챌린지의 UUID
      */
     @Transactional
-    public void processChallengeRewards(UUID challengeId) {
-        Challenge challenge = findAndValidateChallenge(challengeId);
-        List<MemberChallenge> memberChallenges = challenge.getChallengeMembers();
-        long totalDepositPool = calculateTotalDepositPool(memberChallenges);
+    public void processConsumptionChallengeRewards(UUID challengeId) {
+        Challenge challenge = challengeService.findChallengeById(challengeId);
 
-        processBaseRewards(memberChallenges, challenge);
-        distributeAdditionalRewards(memberChallenges, totalDepositPool);
-    }
+        List<MemberChallenge> memberChallenges = challenge.getChallengeMembers().stream()
+                .filter(memberChallenge -> memberChallenge.getStatus().equals(MemberChallengeStatus.BEFORE_CALCULATION))
+                .toList();
 
-    private Challenge findAndValidateChallenge(UUID challengeId) {
-        Challenge challenge = challengeRepository.findById(challengeId)
-                .orElseThrow(() -> new ChallengeNotFoundException(challengeId));
-
-        if (challenge.getStatus() == ChallengeStatus.IN_PROGRESS) {
-            throw new ChallengeNotEndedException(challengeId);
+        if (!memberChallenges.isEmpty()) {
+            long totalDepositPool = calculateTotalDepositPool(memberChallenges);
+            getConsumptionBaseRewards(memberChallenges, challenge);
+            getConsumptionAdditionalRewards(memberChallenges, totalDepositPool);
         }
-        return challenge;
     }
 
     /**
-     * 기본 환급액 조회 메서드
+     * 소비 챌린지의 기본 환급액 조회 메서드
      * - 챌린지 성공 여부 판별 후 기본 환급액 계산
      *
      * @param memberChallenges
      * @param challenge
      */
-    private void processBaseRewards(List<MemberChallenge> memberChallenges, Challenge challenge) {
+    private void getConsumptionBaseRewards(List<MemberChallenge> memberChallenges, Challenge challenge) {
         for (MemberChallenge memberChallenge : memberChallenges) {
-            // TODO 직전달, 이번달 소비량 계산 로직 추가
-            long previousMonthConsumption = 0L;
-            long currentMonthConsumption = 0L;
+
+            LocalDate now = LocalDate.now();
+            LocalDate firstDayOfCurrentMonth = now.withDayOfMonth(1);
+            LocalDate firstDayOfPreviousMonth = firstDayOfCurrentMonth.minusMonths(1);
+            LocalDate lastDayOfPreviousMonth = firstDayOfCurrentMonth.minusDays(1);
+
+            UUID memberId = memberChallenge.getMember().getId();
+            TransferType transferType = challenge.getType().getTransferType();
+            long previousMonthConsumption = getTotalConsumption(memberId, firstDayOfPreviousMonth, lastDayOfPreviousMonth, transferType);
+            long currentMonthConsumption = getTotalConsumption(memberId, firstDayOfCurrentMonth, now, transferType);
 
             boolean isSuccess = currentMonthConsumption < previousMonthConsumption;
             long baseReward = calculateBaseReward(isSuccess, memberChallenge, previousMonthConsumption, currentMonthConsumption);
@@ -71,6 +78,22 @@ public class ChallengeRewardService {
         }
     }
 
+    private long getTotalConsumption(UUID memberId, LocalDate startDate, LocalDate endDate, TransferType transferType) {
+        ConsumtionRequest request = createConsumtionRequest(memberId, startDate, endDate, transferType);
+        ConsumtionResponse response = consumeService.getTotalConsumtion(request);
+        return response.getTotalConsumtion();
+    }
+
+    private ConsumtionRequest createConsumtionRequest(UUID memberId, LocalDate startDate, LocalDate endDate, TransferType transferType) {
+        TransactionHistoryRequest historyRequest = TransactionHistoryRequest.builder()
+                .memberId(memberId)
+                .startDate(startDate.format(DateTimeFormatter.ofPattern("yyyyMMdd")))
+                .endDate(endDate.format(DateTimeFormatter.ofPattern("yyyyMMdd")))
+                .build();
+
+        return new ConsumtionRequest(transferType, historyRequest);
+    }
+
     private long calculateBaseReward(boolean isSuccess, MemberChallenge memberChallenge, long previousMonthConsumption, long currentMonthConsumption) {
         if (isSuccess) {
             return memberChallenge.getDeposit();
@@ -78,7 +101,7 @@ public class ChallengeRewardService {
 
         // 실패시 성공률에 따른 기본 환급액 계산
         double increaseRate = calculateIncreaseRate(previousMonthConsumption, currentMonthConsumption);
-        return memberChallenge.getDeposit() - (long)(memberChallenge.getDeposit() * increaseRate);
+        return memberChallenge.getDeposit() - (long) (memberChallenge.getDeposit() * increaseRate);
     }
 
     private double calculateIncreaseRate(long prev, long cur) {
@@ -99,9 +122,9 @@ public class ChallengeRewardService {
     /**
      * 추가 환급금 계산 메서드
      * - 상위 10%의 유저들과 상위 90%유저들이 상금의 50%씩을 분배받는다.
-     *   단, 환급금 분배의 경우 각 그룹 내 해당 유저의 예치금 비율에 따라 산정된다.
+     * 단, 환급금 분배의 경우 각 그룹 내 해당 유저의 예치금 비율에 따라 산정된다.
      */
-    private void distributeAdditionalRewards(List<MemberChallenge> memberChallenges, long totalDepositPool) {
+    private void getConsumptionAdditionalRewards(List<MemberChallenge> memberChallenges, long totalDepositPool) {
         long remainingPool = calculateRemainingPool(memberChallenges, totalDepositPool);
         long topPerformersPool = remainingPool / 2;
         long othersPool = remainingPool - topPerformersPool;

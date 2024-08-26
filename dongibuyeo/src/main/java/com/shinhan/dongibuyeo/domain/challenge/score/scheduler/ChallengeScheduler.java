@@ -70,7 +70,7 @@ public class ChallengeScheduler {
         for (Challenge challenge : endedChallenges) {
             try {
                 log.info("Processing ended challenge: {}", challenge.getId());
-                challengeRewardService.processChallengeRewards(challenge.getId());
+                challengeRewardService.processConsumptionChallengeRewards(challenge.getId());
                 challenge.updateStatus();
                 challengeRepository.save(challenge);
                 log.info("Challenge {} completed and rewards processed", challenge.getId());
