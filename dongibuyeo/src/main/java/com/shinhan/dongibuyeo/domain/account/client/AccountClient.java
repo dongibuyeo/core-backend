@@ -62,7 +62,6 @@ public class AccountClient {
                 .bodyValue(request)
                 .retrieve()
                 .bodyToMono(ShinhanTransferResponse.class)
-                .doOnError(e -> log.info("[accountTransfer] header: {}", request))
                 .blockOptional()
                 .orElseThrow();
     }
