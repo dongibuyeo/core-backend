@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ScoreEntry {
-    private String item;
+    private String description;
     private int score;
     private int currentTotalScore;
 }
