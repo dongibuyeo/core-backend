@@ -4,7 +4,6 @@ import com.shinhan.dongibuyeo.domain.challenge.dto.response.MemberChallengeRespo
 import com.shinhan.dongibuyeo.domain.challenge.entity.Challenge;
 import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeStatus;
 import com.shinhan.dongibuyeo.domain.challenge.entity.MemberChallenge;
-import org.aspectj.apache.bcel.classfile.LineNumberTable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -23,7 +22,7 @@ public interface MemberChallengeRepository extends JpaRepository<MemberChallenge
             "WHERE mc.member.id = :memberId ")
     Optional<List<Challenge>> findChallengesByMemberId(UUID memberId);
 
-    @Query("SELECT c, mc.isSuccess, mc.deposit memberDeposit, mc.baseReward, mc.additionalReward, mc.totalPoints " +
+    @Query("SELECT c, mc.isSuccess, mc.deposit memberDeposit, mc.baseReward, mc.additionalReward, mc.totalScore " +
             "FROM Challenge c " +
             "JOIN FETCH MemberChallenge mc " +
             "ON mc.challenge.id = c.id " +
@@ -31,4 +30,12 @@ public interface MemberChallengeRepository extends JpaRepository<MemberChallenge
             "AND mc.challenge.id = :challengeId")
     Optional<MemberChallengeResponse> findChallengeByMemberIdAndChallengeId(UUID memberId, UUID challengeId);
 
+    @Query("SELECT mc " +
+            "FROM MemberChallenge mc " +
+            "JOIN FETCH Challenge c " +
+            "ON mc.challenge.id = c.id " +
+            "WHERE c.status = :status ")
+    List<MemberChallenge> findAllByChallengeStatus(ChallengeStatus status);
+
+    List<MemberChallenge> findAllByChallengeId(UUID challengeId);
 }

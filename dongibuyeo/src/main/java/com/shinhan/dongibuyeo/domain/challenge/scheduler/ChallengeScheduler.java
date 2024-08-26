@@ -1,7 +1,12 @@
 package com.shinhan.dongibuyeo.domain.challenge.scheduler;
 
 import com.shinhan.dongibuyeo.domain.challenge.entity.Challenge;
+import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeStatus;
+import com.shinhan.dongibuyeo.domain.challenge.entity.DailyScore;
+import com.shinhan.dongibuyeo.domain.challenge.entity.MemberChallenge;
 import com.shinhan.dongibuyeo.domain.challenge.repository.ChallengeRepository;
+import com.shinhan.dongibuyeo.domain.challenge.repository.DailyScoreRepository;
+import com.shinhan.dongibuyeo.domain.challenge.repository.MemberChallengeRepository;
 import com.shinhan.dongibuyeo.domain.challenge.service.ChallengeRewardService;
 import com.shinhan.dongibuyeo.domain.challenge.service.ScoreCalculationService;
 import lombok.extern.slf4j.Slf4j;
@@ -21,27 +26,41 @@ public class ChallengeScheduler {
     private final ChallengeRepository challengeRepository;
     private final ChallengeRewardService challengeRewardService;
     private final ScoreCalculationService scoreCalculationService;
+    private final DailyScoreRepository dailyScoreRepository;
+    private final MemberChallengeRepository memberChallengeRepository;
 
     public ChallengeScheduler(ChallengeRepository challengeRepository,
                               ChallengeRewardService challengeRewardService,
-                              ScoreCalculationService scoreCalculationService) {
+                              ScoreCalculationService scoreCalculationService, DailyScoreRepository dailyScoreRepository, MemberChallengeRepository memberChallengeRepository) {
         this.challengeRepository = challengeRepository;
         this.challengeRewardService = challengeRewardService;
         this.scoreCalculationService = scoreCalculationService;
+        this.dailyScoreRepository = dailyScoreRepository;
+        this.memberChallengeRepository = memberChallengeRepository;
     }
 
     /**
-     * 모든 챌린지 상태 변경 메서드
-     * 매일 자정 1분 후 실행
+     * 매일 자정 모든 챌린지 상태 변경 및 일일 점수 생성
      */
-    @Scheduled(cron = "0 1 0 * * ?")
+    @Scheduled(cron = "0 0 0 * * ?")
     @Transactional
-    public void updateAllChallengeStatuses() {
+    public void updateChallengeStatusesAndCreateDailyScores() {
         LocalDate today = LocalDate.now();
-        log.info("Starting daily challenge status update for date: {}", today);
+        log.info("Starting daily challenge update and score creation for date: {}", today);
 
-        challengeRepository.findAll()
-                .forEach(Challenge::updateStatus);
+        challengeRepository.findAll().forEach(challenge -> {
+            challenge.updateStatus();
+
+            List<MemberChallenge> memberChallenges = memberChallengeRepository.findAllByChallengeId(challenge.getId());
+
+
+            if (challenge.getStatus() == ChallengeStatus.IN_PROGRESS) {
+                challenge.getChallengeMembers().forEach(memberChallenge -> {
+                    DailyScore dailyScore = new DailyScore(today, "{}", 10);
+                    memberChallenge.addDailyScore(dailyScore, 10);
+                });
+            }
+        });
     }
 
     /**

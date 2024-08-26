@@ -116,7 +116,7 @@ public class ChallengeRewardService {
         long othersPool = remainingPool - topPerformersPool;
 
         List<MemberChallenge> sortedChallenges = memberChallenges.stream()
-                .sorted(Comparator.comparingInt(MemberChallenge::getTotalPoints).reversed())
+                .sorted(Comparator.comparingInt(MemberChallenge::getTotalScore).reversed())
                 .toList();
 
         int topPerformersCount = (int) Math.ceil(sortedChallenges.size() * 0.1);
