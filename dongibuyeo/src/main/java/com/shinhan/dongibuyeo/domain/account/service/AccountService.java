@@ -8,6 +8,7 @@ import com.shinhan.dongibuyeo.domain.account.dto.request.TransactionHistoryReque
 import com.shinhan.dongibuyeo.domain.account.dto.request.TransferRequest;
 import com.shinhan.dongibuyeo.domain.account.dto.response.*;
 import com.shinhan.dongibuyeo.domain.account.entity.Account;
+import com.shinhan.dongibuyeo.domain.account.exception.AccountNotFoundException;
 import com.shinhan.dongibuyeo.domain.account.mapper.AccountMapper;
 import com.shinhan.dongibuyeo.domain.account.repository.AccountRepository;
 import com.shinhan.dongibuyeo.domain.member.entity.Member;
@@ -110,5 +111,13 @@ public class AccountService {
         );
 
         return historys.getRec();
+    }
+
+    @Transactional
+    public void deleteAccountByAccountNo(String accountNo) {
+        Account account = accountRepository.findByAccountNo(accountNo)
+                .orElseThrow(() -> new AccountNotFoundException(accountNo));
+
+        account.softDelete();
     }
 }
