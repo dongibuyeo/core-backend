@@ -18,8 +18,8 @@ public class ChallengeResponse {
     private ChallengeType type;
     private ChallengeStatus status;
     private String accountNo;
-    private LocalDate startDate;
-    private LocalDate endDate;
+    private String startDate;
+    private String endDate;
 
     private String title;
     private String description;

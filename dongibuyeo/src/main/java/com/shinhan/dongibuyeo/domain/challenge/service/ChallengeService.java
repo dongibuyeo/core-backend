@@ -44,7 +44,7 @@ public class ChallengeService {
         this.accountRepository = accountRepository;
     }
 
-    private Challenge findChallengeById(UUID challengeId) {
+    public Challenge findChallengeById(UUID challengeId) {
         return challengeRepository.findChallengeById(challengeId)
                 .orElseThrow(() -> new ChallengeNotFoundException(challengeId));
     }
@@ -71,9 +71,11 @@ public class ChallengeService {
     public ChallengeResponse makeChallenge(ChallengeRequest request) {
         Challenge challenge = challengeMapper.toChallengeEntity(request);
 
+        // TODO 로직 개선
         // ADMIN 회원으로 챌린지 계좌 생성
         MemberResponse adminMember = memberService.findAdminMember();
         Product adminProduct = productService.getAdminProduct();
+
         MakeAccountResponse accountResponse = accountService.makeChallengeAccount(
                 new MakeAccountRequest(adminMember.getMemberId(),
                 adminProduct.getAccountTypeUniqueNo()));
