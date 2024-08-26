@@ -82,7 +82,7 @@ public class MemberChallenge extends BaseEntity {
     }
 
     public void completeRefund() {
-        this.status = MemberChallengeStatus.REFUNDED;
+        this.status = MemberChallengeStatus.REWARDED;
     }
 
     public void updateStatus(MemberChallengeStatus status) {
