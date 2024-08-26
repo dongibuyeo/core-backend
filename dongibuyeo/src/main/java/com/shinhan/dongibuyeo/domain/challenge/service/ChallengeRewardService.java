@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -53,28 +54,31 @@ public class ChallengeRewardService {
     /**
      * 소비 챌린지의 기본 환급액 조회 메서드
      * - 챌린지 성공 여부 판별 후 기본 환급액 계산
-     *
-     * @param memberChallenges
-     * @param challenge
      */
     private void getConsumptionBaseRewards(List<MemberChallenge> memberChallenges, Challenge challenge) {
+
+        LocalDate challengeStartDate = challenge.getStartDate();
+        LocalDate challengeEndDate = challenge.getEndDate();
+
+        // 챌린지 기간과 동일한 길이의 직전 기간 계산
+        long challengeDuration = ChronoUnit.DAYS.between(challengeStartDate, challengeEndDate);
+        LocalDate previousPeriodStartDate = challengeStartDate.minusDays(challengeDuration);
+        LocalDate previousPeriodEndDate = challengeStartDate.minusDays(1);
+
+        TransferType transferType = challenge.getType().getTransferType();
+
         for (MemberChallenge memberChallenge : memberChallenges) {
-
-            LocalDate now = LocalDate.now();
-            LocalDate firstDayOfCurrentMonth = now.withDayOfMonth(1);
-            LocalDate firstDayOfPreviousMonth = firstDayOfCurrentMonth.minusMonths(1);
-            LocalDate lastDayOfPreviousMonth = firstDayOfCurrentMonth.minusDays(1);
-
             UUID memberId = memberChallenge.getMember().getId();
-            TransferType transferType = challenge.getType().getTransferType();
-            long previousMonthConsumption = getTotalConsumption(memberId, firstDayOfPreviousMonth, lastDayOfPreviousMonth, transferType);
-            long currentMonthConsumption = getTotalConsumption(memberId, firstDayOfCurrentMonth, now, transferType);
 
-            boolean isSuccess = currentMonthConsumption < previousMonthConsumption;
-            long baseReward = calculateBaseReward(isSuccess, memberChallenge, previousMonthConsumption, currentMonthConsumption);
+            long currentPeriodConsumption = getTotalConsumption(memberId, challengeStartDate, challengeEndDate, transferType);
+            long previousPeriodConsumption = getTotalConsumption(memberId, previousPeriodStartDate, previousPeriodEndDate, transferType);
+
+            boolean isSuccess = currentPeriodConsumption < previousPeriodConsumption;
+            long baseReward = calculateBaseReward(isSuccess, memberChallenge, previousPeriodConsumption, currentPeriodConsumption);
 
             memberChallenge.updateSuccessStatus(isSuccess);
             memberChallenge.updateBaseReward(baseReward);
+            memberChallenge.updateStatus(MemberChallengeStatus.CALCULATED);
         }
     }
 
