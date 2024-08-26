@@ -1,7 +1,5 @@
 package com.shinhan.dongibuyeo.domain.challenge.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shinhan.dongibuyeo.domain.account.dto.request.TransferRequest;
 import com.shinhan.dongibuyeo.domain.account.entity.Account;
@@ -173,6 +171,6 @@ public class MemberChallengeService {
                 .sorted(Comparator.comparing(DailyScoreDetail::getDate).reversed())
                 .collect(Collectors.toList());
 
-        return new ScoreDetailResponse(memberChallenge.getTotalPoints(), dailyScores);
+        return new ScoreDetailResponse(memberChallenge.getTotalScore(), dailyScores);
     }
 }

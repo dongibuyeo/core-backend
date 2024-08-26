@@ -88,7 +88,7 @@ public class ScoreCalculationService {
 
             Map<String, Integer> scores = strategy.calculateScore(transactions, date);
             int dailyTotalScore = calculateTotalScore(scores);
-            List<ScoreEntry> scoreEntries = createScoreEntries(scores, memberChallenge.getTotalPoints());
+            List<ScoreEntry> scoreEntries = createScoreEntries(scores, memberChallenge.getTotalScore());
             String scoreDetailsJson = objectMapper.writeValueAsString(scoreEntries);
 
             DailyScore dailyScore = new DailyScore(date, scoreDetailsJson, dailyTotalScore);
