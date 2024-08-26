@@ -19,15 +19,9 @@ import java.util.UUID;
 public class ChallengeRewardService {
 
     private final ChallengeRepository challengeRepository;
-    private final MemberChallengeRepository memberChallengeRepository;
-    private final AccountService accountService;
 
-    public ChallengeRewardService(ChallengeRepository challengeRepository,
-                                  MemberChallengeRepository memberChallengeRepository,
-                                  AccountService accountService) {
+    public ChallengeRewardService(ChallengeRepository challengeRepository) {
         this.challengeRepository = challengeRepository;
-        this.memberChallengeRepository = memberChallengeRepository;
-        this.accountService = accountService;
     }
 
     /**
@@ -106,9 +100,6 @@ public class ChallengeRewardService {
      * 추가 환급금 계산 메서드
      * - 상위 10%의 유저들과 상위 90%유저들이 상금의 50%씩을 분배받는다.
      *   단, 환급금 분배의 경우 각 그룹 내 해당 유저의 예치금 비율에 따라 산정된다.
-     *
-     * @param memberChallenges
-     * @param totalDepositPool
      */
     private void distributeAdditionalRewards(List<MemberChallenge> memberChallenges, long totalDepositPool) {
         long remainingPool = calculateRemainingPool(memberChallenges, totalDepositPool);
