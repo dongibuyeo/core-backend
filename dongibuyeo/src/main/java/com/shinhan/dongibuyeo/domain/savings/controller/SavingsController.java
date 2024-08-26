@@ -43,7 +43,7 @@ public class SavingsController {
         return ResponseEntity.ok(savingsService.deleteSavingAccounts(request.getMemberId(), request.getAccountNo()));
     }
 
-    @GetMapping("/payment")
+    @PostMapping("/payment")
     public ResponseEntity<List<SavingPaymentInfo>> getSavingPayment(@RequestBody SavingAccountRequest request) {
         return ResponseEntity.ok(savingsService.getSavingPayment(request.getMemberId(), request.getAccountNo()));
     }
