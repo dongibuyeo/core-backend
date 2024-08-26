@@ -44,7 +44,7 @@ public class SavingsClient {
 
     public ShinhanMakeSavingAccountResponse makeSavingAccount(ShinhanMakeSavingAccountRequest request) {
         return webClient.post()
-                .uri("/edu/savings/createProduct")
+                .uri("/edu/savings/createAccount")
                 .accept(MediaType.APPLICATION_JSON)
                 .acceptCharset(StandardCharsets.UTF_8)
                 .bodyValue(request)
