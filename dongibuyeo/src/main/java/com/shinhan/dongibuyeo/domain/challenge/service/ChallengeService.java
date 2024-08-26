@@ -10,6 +10,7 @@ import com.shinhan.dongibuyeo.domain.challenge.dto.request.ChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.ChallengeResponse;
 import com.shinhan.dongibuyeo.domain.challenge.entity.Challenge;
 import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeStatus;
+import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeType;
 import com.shinhan.dongibuyeo.domain.challenge.exception.ChallengeNotFoundException;
 import com.shinhan.dongibuyeo.domain.challenge.mapper.ChallengeMapper;
 import com.shinhan.dongibuyeo.domain.challenge.repository.ChallengeRepository;
@@ -61,7 +62,7 @@ public class ChallengeService {
     }
 
     public List<ChallengeResponse> findAllChallengesByStatus(ChallengeStatus status) {
-        return challengeRepository.findChallengesByStatus(status)
+        return findAllByStatus(status)
                 .stream()
                 .map(challengeMapper::toChallengeResponse)
                 .toList();
@@ -107,4 +108,7 @@ public class ChallengeService {
         return challengeMapper.toChallengeResponse(challenge);
     }
 
+    public List<Challenge> findAllByStatus(ChallengeStatus status) {
+        return challengeRepository.findAllChallengesByStatus(status);
+    }
 }
