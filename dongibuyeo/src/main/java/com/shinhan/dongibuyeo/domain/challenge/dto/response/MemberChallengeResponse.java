@@ -18,8 +18,8 @@ public class MemberChallengeResponse {
     private ChallengeType type;
     private ChallengeStatus status;
     private String accountNo;
-    private LocalDate startDate;
-    private LocalDate endDate;
+    private String startDate;
+    private String endDate;
 
     private String title;
     private String description;
@@ -29,6 +29,7 @@ public class MemberChallengeResponse {
 
     private Boolean isSuccess;
     private Long memberDeposit;
-    private Long reward;
-    private Long points;
+    private Long baseReward;
+    private Long additionalReward;
+    private Long totalPoints;
 }

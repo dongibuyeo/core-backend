@@ -10,6 +10,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLRestriction;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -30,13 +32,18 @@ public class MemberChallenge extends BaseEntity {
     @JoinColumn(name = "challenge_id")
     private Challenge challenge;
 
+    @OneToMany(mappedBy = "memberChallenge", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DailyScore> dailyScores = new ArrayList<>();
+
     private Boolean isSuccess;
 
     private Long deposit;
 
-    private Long reward;
+    private Long baseReward;
 
-    private Long points;
+    private Long additionalReward;
+
+    private Integer totalPoints;
 
     @Builder
     public MemberChallenge(Member member, Challenge challenge, Long deposit) {
@@ -44,7 +51,27 @@ public class MemberChallenge extends BaseEntity {
         this.challenge = challenge;
         this.isSuccess = false;
         this.deposit = deposit;
-        this.reward = 0L;
-        this.points = 0L;
+        this.baseReward = 0L;
+        this.additionalReward = 0L;
+        this.totalPoints = 0;
     }
+
+    public void addDailyScore(DailyScore dailyScore, int totalScore) {
+        this.dailyScores.add(dailyScore);
+        dailyScore.updateMemberChallenge(this);
+        this.totalPoints += totalScore;
+    }
+
+    public void updateSuccessStatus(boolean isSuccess) {
+        this.isSuccess = isSuccess;
+    }
+
+    public void updateBaseReward(Long baseReward) {
+        this.baseReward = baseReward;
+    }
+
+    public void updateAdditionalReward(Long additionalReward) {
+        this.additionalReward = additionalReward;
+    }
+
 }
