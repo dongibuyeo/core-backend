@@ -1,12 +1,9 @@
 package com.shinhan.dongibuyeo.domain.challenge.score.scheduler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.shinhan.dongibuyeo.domain.challenge.entity.*;
+import com.shinhan.dongibuyeo.domain.challenge.entity.Challenge;
+import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeStatus;
 import com.shinhan.dongibuyeo.domain.challenge.repository.ChallengeRepository;
-import com.shinhan.dongibuyeo.domain.challenge.repository.DailyScoreRepository;
-import com.shinhan.dongibuyeo.domain.challenge.repository.MemberChallengeRepository;
 import com.shinhan.dongibuyeo.domain.challenge.service.ChallengeRewardService;
-import com.shinhan.dongibuyeo.domain.challenge.service.ScoreCalculationService;
 import com.shinhan.dongibuyeo.domain.challenge.service.DailyScoreService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -22,23 +19,13 @@ import java.util.List;
 @Slf4j
 public class ChallengeScheduler {
 
-    private final ObjectMapper objectMapper;
     private final ChallengeRepository challengeRepository;
     private final ChallengeRewardService challengeRewardService;
-    private final ScoreCalculationService scoreCalculationService;
-    private final DailyScoreRepository dailyScoreRepository;
-    private final MemberChallengeRepository memberChallengeRepository;
     private final DailyScoreService dailyScoreService;
 
-    public ChallengeScheduler(ObjectMapper objectMapper, ChallengeRepository challengeRepository,
-                              ChallengeRewardService challengeRewardService,
-                              ScoreCalculationService scoreCalculationService, DailyScoreRepository dailyScoreRepository, MemberChallengeRepository memberChallengeRepository, DailyScoreService dailyScoreService) {
-        this.objectMapper = objectMapper;
+    public ChallengeScheduler(ChallengeRepository challengeRepository, ChallengeRewardService challengeRewardService, DailyScoreService dailyScoreService) {
         this.challengeRepository = challengeRepository;
         this.challengeRewardService = challengeRewardService;
-        this.scoreCalculationService = scoreCalculationService;
-        this.dailyScoreRepository = dailyScoreRepository;
-        this.memberChallengeRepository = memberChallengeRepository;
         this.dailyScoreService = dailyScoreService;
     }
 

@@ -34,16 +34,14 @@ public class MemberChallengeService {
     private final MemberChallengeRepository memberChallengeRepository;
     private final ChallengeMapper challengeMapper;
     private final AccountService accountService;
-    private final ScoreCalculationService scoreCalculationService;
 
-    public MemberChallengeService(ObjectMapper objectMapper, MemberService memberService, ChallengeRepository challengeRepository, MemberChallengeRepository memberChallengeRepository, ChallengeMapper challengeMapper, AccountService accountService, ScoreCalculationService scoreCalculationService) {
+    public MemberChallengeService(ObjectMapper objectMapper, MemberService memberService, ChallengeRepository challengeRepository, MemberChallengeRepository memberChallengeRepository, ChallengeMapper challengeMapper, AccountService accountService) {
         this.objectMapper = objectMapper;
         this.memberService = memberService;
         this.challengeRepository = challengeRepository;
         this.memberChallengeRepository = memberChallengeRepository;
         this.challengeMapper = challengeMapper;
         this.accountService = accountService;
-        this.scoreCalculationService = scoreCalculationService;
     }
 
     private Challenge findChallengeById(UUID challengeId) {
@@ -170,16 +168,22 @@ public class MemberChallengeService {
 
     @Transactional(readOnly = true)
     public ScoreDetailResponse getChallengeScoreDetail(UUID memberId, UUID challengeId) {
-
         MemberChallenge memberChallenge = memberChallengeRepository.findMemberChallengeByChallengeIdAndMemberId(challengeId, memberId)
                 .orElseThrow(() -> new MemberChallengeNotFoundException(challengeId, memberId));
 
         List<DailyScoreDetail> dailyScores = memberChallenge.getDailyScores().stream()
-                .map(scoreCalculationService::convertToDailyScoreDetail)
+                .map(this::convertToDailyScoreDetail)
                 .sorted(Comparator.comparing(DailyScoreDetail::getDate).reversed())
                 .collect(Collectors.toList());
 
         return new ScoreDetailResponse(memberChallenge.getTotalScore(), dailyScores);
+    }
+
+    private DailyScoreDetail convertToDailyScoreDetail(DailyScore dailyScore) {
+        return DailyScoreDetail.builder()
+                .date(dailyScore.getDate().toString())
+                .entries(dailyScore.getScoreDetails())
+                .build();
     }
 
     public List<MemberChallenge> findByMemberId(UUID memberId) {
@@ -189,5 +193,9 @@ public class MemberChallengeService {
     public MemberChallenge findByMemberIdAndChallengeType(UUID memberId, ChallengeType challengeType) {
         return  memberChallengeRepository.findByMemberIdAndChallengeType(memberId, challengeType)
                 .orElseThrow(() -> new MemberChallengeNotFoundException(memberId, challengeType));
+    }
+
+    public List<MemberChallenge> findsByChallengeTypeAndStatus(ChallengeType challengeType, ChallengeStatus challengeStatus) {
+        return memberChallengeRepository.findAllByChallengeTypeAndChallengeStatus(challengeType, challengeStatus);
     }
 }
