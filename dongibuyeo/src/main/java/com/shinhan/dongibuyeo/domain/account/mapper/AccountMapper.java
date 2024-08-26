@@ -5,10 +5,12 @@ import com.shinhan.dongibuyeo.domain.account.dto.request.DepositRequest;
 import com.shinhan.dongibuyeo.domain.account.dto.request.MakeAccountRequest;
 import com.shinhan.dongibuyeo.domain.account.dto.request.TransactionHistoryRequest;
 import com.shinhan.dongibuyeo.domain.account.dto.request.TransferRequest;
-import com.shinhan.dongibuyeo.domain.account.dto.response.*;
+import com.shinhan.dongibuyeo.domain.account.dto.response.AccountDetailInfo;
+import com.shinhan.dongibuyeo.domain.account.dto.response.MakeAccountResponse;
 import com.shinhan.dongibuyeo.domain.account.entity.Account;
 import com.shinhan.dongibuyeo.domain.account.entity.AccountType;
 import com.shinhan.dongibuyeo.domain.member.entity.Member;
+import com.shinhan.dongibuyeo.domain.savings.dto.client.ShinhanMakeSavingAccountResponse;
 import com.shinhan.dongibuyeo.global.header.GlobalUserHeader;
 import org.springframework.stereotype.Component;
 
@@ -82,6 +84,13 @@ public class AccountMapper {
     public Account toPersonalAccountEntity(ShinhanMakeAccountResponse request) {
         return new Account(
                 request.getRec().getAccountNo(),
+                AccountType.PRIVATE
+        );
+    }
+
+    public Account toPersonalAccountEntity(ShinhanMakeSavingAccountResponse response) {
+        return new Account(
+                response.getRec().getAccountNo(),
                 AccountType.PRIVATE
         );
     }
