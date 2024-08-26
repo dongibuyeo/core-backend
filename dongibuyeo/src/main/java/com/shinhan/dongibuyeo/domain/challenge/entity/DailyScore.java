@@ -43,7 +43,11 @@ public class DailyScore {
         }
     }
 
-    public void updateDailyTotalScore(int score) {
+    public void updateDailyTotalScore(int score, String item) {
         this.totalScore += score;
+    }
+
+    public void updateScoreDetails(String scoreDetails) {
+        this.scoreDetails = scoreDetails;
     }
 }
