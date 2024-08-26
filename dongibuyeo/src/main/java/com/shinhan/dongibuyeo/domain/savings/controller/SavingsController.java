@@ -3,15 +3,13 @@ package com.shinhan.dongibuyeo.domain.savings.controller;
 import com.shinhan.dongibuyeo.domain.savings.dto.request.MakeSavingAccountRequest;
 import com.shinhan.dongibuyeo.domain.savings.dto.request.SavingAccountRequest;
 import com.shinhan.dongibuyeo.domain.savings.dto.request.SavingProductRequest;
-import com.shinhan.dongibuyeo.domain.savings.dto.response.DeleteSavingInfo;
-import com.shinhan.dongibuyeo.domain.savings.dto.response.SavingAccountInfo;
-import com.shinhan.dongibuyeo.domain.savings.dto.response.SavingInfo;
-import com.shinhan.dongibuyeo.domain.savings.dto.response.SavingPaymentInfo;
+import com.shinhan.dongibuyeo.domain.savings.dto.response.*;
 import com.shinhan.dongibuyeo.domain.savings.service.SavingsService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/savings")
@@ -48,4 +46,8 @@ public class SavingsController {
         return ResponseEntity.ok(savingsService.getSavingPayment(request.getMemberId(), request.getAccountNo()));
     }
 
+    @GetMapping("/all/{memberId}")
+    public ResponseEntity<List<SavingAccountsDetail>> getAllSavingsByMemberId(@PathVariable("memberId") UUID memberId) {
+        return ResponseEntity.ok(savingsService.getAllSavingsByMemberId(memberId));
+    }
 }

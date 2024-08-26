@@ -1,10 +1,10 @@
 package com.shinhan.dongibuyeo.domain.savings.mapper;
 
 import com.shinhan.dongibuyeo.domain.member.entity.Member;
-import com.shinhan.dongibuyeo.domain.savings.dto.client.ShinhanSavingRequest;
+import com.shinhan.dongibuyeo.domain.savings.dto.client.ShinhanGetUserSavingsRequest;
 import com.shinhan.dongibuyeo.domain.savings.dto.client.ShinhanMakeSavingAccountRequest;
 import com.shinhan.dongibuyeo.domain.savings.dto.client.ShinhanMakeSavingRequest;
-import com.shinhan.dongibuyeo.domain.savings.dto.request.SavingAccountRequest;
+import com.shinhan.dongibuyeo.domain.savings.dto.client.ShinhanSavingRequest;
 import com.shinhan.dongibuyeo.domain.savings.dto.request.MakeSavingAccountRequest;
 import com.shinhan.dongibuyeo.domain.savings.dto.request.SavingProductRequest;
 import com.shinhan.dongibuyeo.global.header.GlobalAdminHeader;
@@ -41,6 +41,12 @@ public class SavingsMapper {
         return new ShinhanSavingRequest(
                 new GlobalUserHeader(apiName, apiKey, member.getUserKey()),
                 accountNo
+        );
+    }
+
+    public ShinhanGetUserSavingsRequest toShinhanGetMemberSavingsRequest(String apiKey, String userKey) {
+        return new ShinhanGetUserSavingsRequest(
+                new GlobalUserHeader("inquireAccountList",apiKey,userKey)
         );
     }
 }

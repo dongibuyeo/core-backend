@@ -1,6 +1,5 @@
 package com.shinhan.dongibuyeo.domain.savings.client;
 
-import com.shinhan.dongibuyeo.domain.account.dto.client.*;
 import com.shinhan.dongibuyeo.domain.savings.dto.client.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -78,4 +77,15 @@ public class SavingsClient {
                 .orElseThrow();
     }
 
+    public ShinhanGetSavingAccountsResponse getAllSavingAccountsByMemberId(ShinhanGetUserSavingsRequest request) {
+        return webClient.post()
+                .uri("/edu/savings/inquireAccountList")
+                .accept(MediaType.APPLICATION_JSON)
+                .acceptCharset(StandardCharsets.UTF_8)
+                .bodyValue(request)
+                .retrieve()
+                .bodyToMono(ShinhanGetSavingAccountsResponse.class)
+                .blockOptional()
+                .orElseThrow();
+    }
 }
