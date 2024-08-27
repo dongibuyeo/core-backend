@@ -202,6 +202,7 @@ public class MemberChallengeService {
         return memberChallengeRepository.findAllByChallengeTypeAndChallengeStatus(challengeType, challengeStatus);
     }
 
+    @Transactional
     public RewardResponse getReward(UUID memberId, UUID challengeId) {
         Member member = memberService.getMemberById(memberId);
         Challenge challenge = challengeService.findChallengeById(challengeId);
