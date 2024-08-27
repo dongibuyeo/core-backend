@@ -11,6 +11,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class MakeSevenSavingAccountRequest {
     private UUID challengeId;
+    private String challengeTitle;
     private UUID memberId;
     private String withdrawalAccountNo;
     private Long depositBalance;
