@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 
@@ -143,10 +144,12 @@ public class ChallengeService {
     }
 
     private void createSavingsProduct(Challenge challenge) {
+        String accountName = challenge.getType().toString() + challenge.getStartDate().format(DateTimeFormatter.ofPattern("yyMMdd"));
+        System.out.println("!!!!!!!!!!! acountName: " + accountName + "!!!!!!!!!!!!!!!!!");
         savingsService.makeSavingProduct(
                 SavingProductRequest.builder()
                         .bankCode(bankCode)
-                        .accountName(challenge.getId() + challenge.getTitle())
+                        .accountName(accountName)
                         .accountDescription(challenge.getTitle() + " 전용 계좌")
                         .subscriptionPeriod(subscriptionPeriod)
                         .minSubscriptionBalance(minBalance)

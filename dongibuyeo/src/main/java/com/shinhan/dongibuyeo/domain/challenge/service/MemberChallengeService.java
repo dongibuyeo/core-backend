@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -160,11 +161,12 @@ public class MemberChallengeService {
             throw new ChallengeAlreadyJoinedException(challenge.getId(), member.getId());
         }
 
+        String accountName = challenge.getType().toString() + challenge.getStartDate().format(DateTimeFormatter.ofPattern("yyMMdd"));
         // 적금 챌린지에서 적금 계좌가 없는 경우 참여 불가
         if (challenge.getType() == ChallengeType.SAVINGS_SEVEN) {
             Optional<SavingAccountsDetail> memberSavingAccount = savingsService.findMemberSavingAccountByAccountName(
                     member.getId(),
-                    challenge.getId() + challenge.getTitle());
+                    accountName);
 
             if (memberSavingAccount.isEmpty()) {
                 throw new SavingAccountNotFoundException(challenge.getTitle());

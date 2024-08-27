@@ -44,9 +44,9 @@ public class MemberService {
         this.memberClient = memberClient;
     }
 
-    @Transactional(readOnly = true)
     public Member getMemberById(UUID id) {
-        return memberRepository.findById(id).orElseThrow(() -> new MemberNotFoundException(id));
+        return memberRepository.findMemberById(id)
+                .orElseThrow(() -> new MemberNotFoundException(id));
     }
 
     public Member getMemberByEmail(String email) {
