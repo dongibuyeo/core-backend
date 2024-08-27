@@ -3,10 +3,7 @@ package com.shinhan.dongibuyeo.domain.challenge.controller;
 import com.shinhan.dongibuyeo.domain.account.dto.response.MakeAccountResponse;
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.JoinChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.MemberChallengeRequest;
-import com.shinhan.dongibuyeo.domain.challenge.dto.response.ChallengeResponse;
-import com.shinhan.dongibuyeo.domain.challenge.dto.response.MemberChallengeResponse;
-import com.shinhan.dongibuyeo.domain.challenge.dto.response.RewardResponse;
-import com.shinhan.dongibuyeo.domain.challenge.dto.response.ScoreDetailResponse;
+import com.shinhan.dongibuyeo.domain.challenge.dto.response.*;
 import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeStatus;
 import com.shinhan.dongibuyeo.domain.challenge.service.MemberChallengeService;
 import jakarta.validation.Valid;
@@ -34,6 +31,11 @@ public class MemberChallengeController {
     @GetMapping("/status")
     public ResponseEntity<List<ChallengeResponse>> getMemberChallengesByStatus(@RequestParam UUID memberId, @RequestParam ChallengeStatus status) {
         return ResponseEntity.ok(memberChallengeService.findAllChallengesByMemberIdAndStatus(memberId, status));
+    }
+
+    @GetMapping("/status-count")
+    public ResponseEntity<ChallengeStatusCountResponse> getChallengeStatusCount(@RequestParam UUID memberId) {
+        return ResponseEntity.ok(memberChallengeService.getChallengeStatusCount(memberId));
     }
 
     @GetMapping("/{challengeId}")

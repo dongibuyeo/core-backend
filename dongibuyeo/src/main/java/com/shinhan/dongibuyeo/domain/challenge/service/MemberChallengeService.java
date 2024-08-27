@@ -333,4 +333,22 @@ public class MemberChallengeService {
         memberChallenge.updateStatus(MemberChallengeStatus.REWARDED);
         return new RewardResponse(baseReward, additionalReward);
     }
+
+    public ChallengeStatusCountResponse getChallengeStatusCount(UUID memberId) {
+        List<ChallengeResponse> challenges = findAllChallengesByMemberId(memberId);
+
+        int scheduledCount = 0;
+        int inProgressCount = 0;
+        int completedCount = 0;
+
+        for (ChallengeResponse challenge : challenges) {
+            switch (challenge.getStatus()) {
+                case SCHEDULED -> scheduledCount++;
+                case IN_PROGRESS -> inProgressCount++;
+                case COMPLETED -> completedCount++;
+            }
+        }
+
+        return ChallengeStatusCountResponse.of(scheduledCount, inProgressCount, completedCount);
+    }
 }
