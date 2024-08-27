@@ -60,17 +60,14 @@ public class MemberChallenge extends BaseEntity {
         this.status = MemberChallengeStatus.BEFORE_CALCULATION;
     }
 
-    public void updateTotalScore(int scoreDifference) {
-        this.totalScore += scoreDifference;
-    }
-
     public void addDailyScore(DailyScore dailyScore) {
         if (!this.dailyScores.contains(dailyScore)) {
             this.dailyScores.add(dailyScore);
-            if (dailyScore.getMemberChallenge() != this) {
-                dailyScore.updateMemberChallenge(this);
-            }
         }
+    }
+
+    public void addTotalScore(int scoreDifference) {
+        this.totalScore += scoreDifference;
     }
 
     public void updateSuccessStatus(boolean isSuccess) {

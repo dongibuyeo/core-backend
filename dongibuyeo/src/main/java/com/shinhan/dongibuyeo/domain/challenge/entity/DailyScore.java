@@ -45,11 +45,11 @@ public class DailyScore {
         }
     }
 
-    public void updateScoreDetails(ScoreDetail scoreDetail) {
+    public void addScoreDetail(ScoreDetail scoreDetail) {
         this.scoreDetails.add(scoreDetail);
         int scoreDifference = scoreDetail.getScore();
         this.totalScore += scoreDifference;
-        this.memberChallenge.updateTotalScore(scoreDifference);
+        this.memberChallenge.addTotalScore(scoreDifference);
     }
 
     @Override
