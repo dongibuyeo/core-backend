@@ -1,6 +1,5 @@
 package com.shinhan.dongibuyeo.domain.challenge.controller;
 
-import com.shinhan.dongibuyeo.domain.challenge.dto.request.ChallengeModifyRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.ChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.ChallengeResponse;
 import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeStatus;
@@ -38,7 +37,7 @@ public class ChallengeController {
     }
 
     @GetMapping("/status")
-    public ResponseEntity<List<ChallengeResponse>> getChallengeByStatus(@RequestParam ChallengeStatus status) {
+    public ResponseEntity<List<ChallengeResponse>> getChallengesByStatus(@RequestParam ChallengeStatus status) {
         return ResponseEntity.ok(challengeService.findAllChallengesByStatus(status));
 
     }

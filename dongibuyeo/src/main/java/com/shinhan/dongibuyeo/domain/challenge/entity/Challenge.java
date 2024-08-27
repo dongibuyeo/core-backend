@@ -43,9 +43,9 @@ public class Challenge extends BaseEntity {
     private String description;
     private String image;
 
-    private AtomicLong totalDeposit = new AtomicLong(0);
+    private Long totalDeposit = 0L;
 
-    private AtomicInteger participants = new AtomicInteger(0);
+    private Integer participants = 0;
 
     @OneToMany(mappedBy = "challenge")
     private List<MemberChallenge> challengeMembers = new ArrayList<>();
@@ -68,14 +68,14 @@ public class Challenge extends BaseEntity {
 
     public void addMember(MemberChallenge memberChallenge) {
         challengeMembers.add(memberChallenge);
-        totalDeposit.getAndAdd(memberChallenge.getDeposit());
-        participants.incrementAndGet();
+        totalDeposit += memberChallenge.getDeposit();;
+        participants++;
     }
 
     public void removeMember(MemberChallenge memberChallenge) {
         challengeMembers.remove(memberChallenge);
-        totalDeposit.getAndAdd(-memberChallenge.getDeposit());
-        participants.decrementAndGet();
+        totalDeposit -= memberChallenge.getDeposit();;
+        participants--;
     }
 
     public void updateStatus() {

@@ -1,9 +1,12 @@
 package com.shinhan.dongibuyeo.domain.challenge.controller;
 
+import com.shinhan.dongibuyeo.domain.account.dto.request.MakeAccountRequest;
+import com.shinhan.dongibuyeo.domain.account.dto.response.MakeAccountResponse;
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.JoinChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.MemberChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.ChallengeResponse;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.MemberChallengeResponse;
+import com.shinhan.dongibuyeo.domain.challenge.dto.response.RewardResponse;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.ScoreDetailResponse;
 import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeStatus;
 import com.shinhan.dongibuyeo.domain.challenge.service.MemberChallengeService;
@@ -46,6 +49,11 @@ public class MemberChallengeController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/account")
+    public ResponseEntity<MakeAccountResponse> makeMemberChallengeAccount(@RequestParam @Valid UUID memberId) {
+        return ResponseEntity.ok(memberChallengeService.makeMemberChallengeAccount(memberId));
+    }
+
     @PostMapping("/cancel")
     public ResponseEntity<Void> cancelJoinChallenge(@RequestBody @Valid MemberChallengeRequest request) {
         memberChallengeService.cancelJoinChallenge(request.getMemberId(), request.getChallengeId());
@@ -58,8 +66,13 @@ public class MemberChallengeController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/score-details")
+    @PostMapping("/score-details")
     public ResponseEntity<ScoreDetailResponse> getChallengeScoreDetail(@RequestBody @Valid MemberChallengeRequest request) {
         return ResponseEntity.ok(memberChallengeService.getChallengeScoreDetail(request.getMemberId(), request.getChallengeId()));
+    }
+
+    @PostMapping("/reward")
+    public ResponseEntity<RewardResponse> getReward(@RequestBody @Valid MemberChallengeRequest request) {
+        return ResponseEntity.ok(memberChallengeService.getReward(request.getMemberId(), request.getChallengeId()));
     }
 }
