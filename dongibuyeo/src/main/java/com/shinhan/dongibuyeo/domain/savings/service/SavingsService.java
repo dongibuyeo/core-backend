@@ -4,7 +4,6 @@ import com.shinhan.dongibuyeo.domain.account.entity.Account;
 import com.shinhan.dongibuyeo.domain.account.mapper.AccountMapper;
 import com.shinhan.dongibuyeo.domain.account.repository.AccountRepository;
 import com.shinhan.dongibuyeo.domain.account.service.AccountService;
-import com.shinhan.dongibuyeo.domain.challenge.entity.Challenge;
 import com.shinhan.dongibuyeo.domain.member.entity.Member;
 import com.shinhan.dongibuyeo.domain.member.service.MemberService;
 import com.shinhan.dongibuyeo.domain.savings.client.SavingsClient;
@@ -12,15 +11,19 @@ import com.shinhan.dongibuyeo.domain.savings.dto.client.ShinhanGetSavingAccounts
 import com.shinhan.dongibuyeo.domain.savings.dto.client.ShinhanGetSavingsRequest;
 import com.shinhan.dongibuyeo.domain.savings.dto.client.ShinhanMakeSavingAccountResponse;
 import com.shinhan.dongibuyeo.domain.savings.dto.request.MakeSavingAccountRequest;
+import com.shinhan.dongibuyeo.domain.savings.dto.request.MakeSevenSavingAccountRequest;
 import com.shinhan.dongibuyeo.domain.savings.dto.request.SavingProductRequest;
 import com.shinhan.dongibuyeo.domain.savings.dto.response.*;
+import com.shinhan.dongibuyeo.domain.savings.exception.SavingAccountAlreadyExistsException;
+import com.shinhan.dongibuyeo.domain.savings.exception.SavingProductNotFoundException;
 import com.shinhan.dongibuyeo.domain.savings.mapper.SavingsMapper;
 import com.shinhan.dongibuyeo.global.header.GlobalAdminHeader;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -50,7 +53,7 @@ public class SavingsService {
     @Transactional
     public SavingInfo makeSavingProduct(SavingProductRequest request) {
         return savingsClient.makeSavingProduct(
-                savingsMapper.toShinhanMakeSavingRequest(request, apiKey))
+                        savingsMapper.toShinhanMakeSavingRequest(request, apiKey))
                 .getRec();
     }
 
@@ -79,7 +82,7 @@ public class SavingsService {
         Member member = memberService.getMemberById(memberId);
 
         return savingsClient.getSavingPayment(
-                savingsMapper.toShinhanSavingRequest("inquirePayment", apiKey, member, accountNo))
+                        savingsMapper.toShinhanSavingRequest("inquirePayment", apiKey, member, accountNo))
                 .getRec();
     }
 
@@ -101,5 +104,48 @@ public class SavingsService {
                 x -> member.getAccounts().add(accountMapper.detailToPersonalAccountEntity(x))
         );
         return savingAccounts.getRec().getSavingDetails();
+    }
+
+    @Transactional
+    public SavingAccountInfo makeSevenSavingAccount(MakeSevenSavingAccountRequest request) {
+        String challengeTitle = request.getChallengeTitle();
+        UUID memberId = request.getMemberId();
+        String withdrawalAccountNo = request.getWithdrawalAccountNo();
+        Long depositBalance = request.getDepositBalance();
+
+        SavingInfo sevenSavingProduct = findSavingsAccountTypeUniqueNo(challengeTitle);
+
+
+        Optional<SavingAccountsDetail> memberSavingAccount = findMemberSavingAccountByAccountName(memberId, challengeTitle);
+        if (memberSavingAccount.isPresent()) {
+            throw new SavingAccountAlreadyExistsException(challengeTitle);
+        }
+
+        // 해당 상품 가입
+        return makeSavingAccount(
+                new MakeSavingAccountRequest(
+                        memberId,
+                        withdrawalAccountNo,
+                        sevenSavingProduct.getAccountTypeUniqueNo(),
+                        depositBalance
+                )
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<SavingAccountsDetail> findMemberSavingAccountByAccountName(UUID memberId, String accountName) {
+        return getAllSavingsByMemberId(memberId)
+                .stream()
+                .filter(savingInfo -> savingInfo.getAccountName().equals(accountName))
+                .findFirst();
+    }
+
+    public SavingInfo findSavingsAccountTypeUniqueNo(String challengeTitle) {
+        // 챌린지명과 일치하는 적금 상품 찾기
+        return getSavingProducts()
+                .stream()
+                .filter(savingInfo -> savingInfo.getAccountName().equals(challengeTitle))
+                .findFirst()
+                .orElseThrow(() -> new SavingProductNotFoundException(challengeTitle));
     }
 }

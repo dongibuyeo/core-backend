@@ -1,6 +1,7 @@
 package com.shinhan.dongibuyeo.domain.savings.controller;
 
 import com.shinhan.dongibuyeo.domain.savings.dto.request.MakeSavingAccountRequest;
+import com.shinhan.dongibuyeo.domain.savings.dto.request.MakeSevenSavingAccountRequest;
 import com.shinhan.dongibuyeo.domain.savings.dto.request.SavingAccountRequest;
 import com.shinhan.dongibuyeo.domain.savings.dto.request.SavingProductRequest;
 import com.shinhan.dongibuyeo.domain.savings.dto.response.*;
@@ -49,5 +50,10 @@ public class SavingsController {
     @GetMapping("/all/{memberId}")
     public ResponseEntity<List<SavingAccountsDetail>> getAllSavingsByMemberId(@PathVariable("memberId") UUID memberId) {
         return ResponseEntity.ok(savingsService.getAllSavingsByMemberId(memberId));
+    }
+
+    @PostMapping("/account/seven")
+    public ResponseEntity<SavingAccountInfo> makeSevenSavingAccount(@RequestBody MakeSevenSavingAccountRequest request) {
+        return ResponseEntity.ok(savingsService.makeSevenSavingAccount(request));
     }
 }

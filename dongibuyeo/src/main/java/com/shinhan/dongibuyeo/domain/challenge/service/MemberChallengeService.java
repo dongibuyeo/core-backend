@@ -11,7 +11,10 @@ import com.shinhan.dongibuyeo.domain.challenge.repository.ChallengeRepository;
 import com.shinhan.dongibuyeo.domain.challenge.repository.MemberChallengeRepository;
 import com.shinhan.dongibuyeo.domain.member.entity.Member;
 import com.shinhan.dongibuyeo.domain.member.service.MemberService;
+import com.shinhan.dongibuyeo.domain.savings.dto.request.MakeSavingAccountRequest;
 import com.shinhan.dongibuyeo.domain.savings.dto.response.SavingAccountsDetail;
+import com.shinhan.dongibuyeo.domain.savings.dto.response.SavingInfo;
+import com.shinhan.dongibuyeo.domain.savings.exception.SavingAccountNotFoundException;
 import com.shinhan.dongibuyeo.domain.savings.service.SavingsService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,17 +33,15 @@ public class MemberChallengeService {
     private final ChallengeRepository challengeRepository;
     private final MemberChallengeRepository memberChallengeRepository;
     private final ChallengeMapper challengeMapper;
-    private final AccountService accountService;
     private final SavingsService savingsService;
     private final ChallengeRewardService challengeRewardService;
     private final ChallengeService challengeService;
 
-    public MemberChallengeService(MemberService memberService, ChallengeRepository challengeRepository, MemberChallengeRepository memberChallengeRepository, ChallengeMapper challengeMapper, AccountService accountService, SavingsService savingsService, ChallengeRewardService challengeRewardService, ChallengeService challengeService, ChallengeService challengeService1) {
+    public MemberChallengeService(MemberService memberService, ChallengeRepository challengeRepository, MemberChallengeRepository memberChallengeRepository, ChallengeMapper challengeMapper, SavingsService savingsService, ChallengeRewardService challengeRewardService, ChallengeService challengeService, ChallengeService challengeService1) {
         this.memberService = memberService;
         this.challengeRepository = challengeRepository;
         this.memberChallengeRepository = memberChallengeRepository;
         this.challengeMapper = challengeMapper;
-        this.accountService = accountService;
         this.savingsService = savingsService;
         this.challengeRewardService = challengeRewardService;
         this.challengeService = challengeService1;
@@ -58,6 +59,13 @@ public class MemberChallengeService {
                 .toList();
     }
 
+    /**
+     * 회원의 챌린지 참여 메서드
+     * - 챌린지 시작 전, 챌린지 계좌가 존재하는 회원에 한해 참여가 가능 (중복 참여 불가)
+     * - 적금의 경우만 별도의 적금 가입 로직 필요
+     *
+     * @param request 회원 ID, 챌린지 ID, 예치금
+     */
     @Transactional
     public void joinChallenge(JoinChallengeRequest request) {
         Member member = memberService.getMemberById(request.getMemberId());
@@ -70,14 +78,19 @@ public class MemberChallengeService {
         member.addChallenge(memberChallenge);
     }
 
+
     private void validateChallengeJoin(Challenge challenge, Member member) {
+        // 이미 시작된 챌린지 참여 불가
         if (LocalDate.now().isAfter(challenge.getStartDate())) {
             throw new ChallengeAlreadyStartedException(challenge.getId());
         }
+
+        // 챌린지 계정이 없는 경우 참여 불가
         if (!member.hasChallengeAccount()) {
             throw new ChallengeCannotJoinException(member.getId());
         }
 
+        // 이미 참여 중인 챌린지 참여 불가
         Optional<Challenge> existingChallenge = memberChallengeRepository.findChallengesByMemberId(member.getId())
                 .stream()
                 .filter(findChallenge -> findChallenge.getId().equals(challenge.getId()))
@@ -85,6 +98,17 @@ public class MemberChallengeService {
 
         if (existingChallenge.isPresent()) {
             throw new ChallengeAlreadyJoinedException(challenge.getId(), member.getId());
+        }
+
+        // 적금 챌린지에서 적금 계좌가 없는 경우 참여 불가
+        if (challenge.getType() == ChallengeType.SAVINGS_SEVEN) {
+            Optional<SavingAccountsDetail> memberSavingAccount = savingsService.findMemberSavingAccountByAccountName(
+                    member.getId(),
+                    challenge.getTitle());
+
+            if (memberSavingAccount.isEmpty()) {
+                throw new SavingAccountNotFoundException(challenge.getTitle());
+            }
         }
     }
 
@@ -101,6 +125,12 @@ public class MemberChallengeService {
         Member member = memberService.getMemberById(memberId);
         Challenge challenge = findChallengeById(challengeId);
         MemberChallenge memberChallenge = getMemberChallenge(challengeId, memberId);
+
+        // 적금 챌린지의 경우 별도의 해지 로직 수행
+        if (challenge.getType() == ChallengeType.SAVINGS_SEVEN) {
+            withdrawChallenge(challengeId, memberId);
+            return;
+        }
 
         validateChallengeCancellation(challenge);
 
@@ -155,10 +185,6 @@ public class MemberChallengeService {
     private MemberChallenge getMemberChallenge(UUID challengeId, UUID memberId) {
         return memberChallengeRepository.findMemberChallengeByChallengeIdAndMemberId(challengeId, memberId)
                 .orElseThrow(() -> new MemberChallengeNotFoundException(challengeId, memberId));
-    }
-
-    private Account getMemberChallengeAccount(Member member) {
-        return member.getChallengeAccount();
     }
 
     public MemberChallengeResponse findChallengeByChallengeIdAndMemberId(UUID challengeId, UUID memberId) {
