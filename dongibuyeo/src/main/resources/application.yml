@@ -18,3 +18,13 @@ shinhan:
   admin:
     email: "admin@dongibuyeo-test.com"
     product: "ADMIN_CH_PRODUCT"
+  savings:
+    seven:
+      bank-code: 088
+      subscription-period: 49
+      min-balance: 10000
+      max-balance: 1000000
+      interest-rate: 7.7
+  quiz:
+    deposit: 10000
+    head-count: 10
