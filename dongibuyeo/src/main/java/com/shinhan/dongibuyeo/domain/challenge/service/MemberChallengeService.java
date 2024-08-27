@@ -2,6 +2,7 @@ package com.shinhan.dongibuyeo.domain.challenge.service;
 
 import com.shinhan.dongibuyeo.domain.account.dto.request.MakeAccountRequest;
 import com.shinhan.dongibuyeo.domain.account.dto.request.TransferRequest;
+import com.shinhan.dongibuyeo.domain.account.dto.response.MakeAccountResponse;
 import com.shinhan.dongibuyeo.domain.account.service.AccountService;
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.JoinChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.*;
@@ -81,13 +82,13 @@ public class MemberChallengeService {
      * - 챌린지 계정 하나당 하나의 챌린지 계좌 존재
      */
     @Transactional
-    public void makeMemberChallengeAccount(UUID memberId) {
+    public MakeAccountResponse makeMemberChallengeAccount(UUID memberId) {
         Member member = memberService.getMemberById(memberId);
         if(member.hasChallengeAccount()) {
             throw new MemberChallengeAccoutAlreadyExistsException(memberId);
         }
 
-        accountService.makeChallengeAccount(
+        return accountService.makeChallengeAccount(
                 new MakeAccountRequest(
                         memberId,
                         memberChallengeAccountCode
@@ -266,12 +267,15 @@ public class MemberChallengeService {
     }
 
     public MemberChallengeResponse findChallengeByChallengeIdAndMemberId(UUID challengeId, UUID memberId) {
-        return memberChallengeRepository.findChallengeByMemberIdAndChallengeId(challengeId, memberId)
+        return memberChallengeRepository.findChallengeByMemberIdAndChallengeId(memberId, challengeId)
                 .orElseThrow(() -> new MemberChallengeNotFoundException(challengeId, memberId));
     }
 
     public List<ChallengeResponse> findAllChallengesByMemberIdAndStatus(UUID memberId, ChallengeStatus status) {
-        return challengeRepository.findChallengesByMemberIdAndStatus(memberId, status);
+        return challengeRepository.findChallengesByMemberIdAndStatus(memberId, status)
+                .stream()
+                .map(challengeMapper::toChallengeResponse)
+                .toList();
     }
 
     @Transactional(readOnly = true)

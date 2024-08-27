@@ -65,8 +65,12 @@ public class MemberChallenge extends BaseEntity {
     }
 
     public void addDailyScore(DailyScore dailyScore) {
-        this.dailyScores.add(dailyScore);
-        dailyScore.updateMemberChallenge(this);
+        if (!this.dailyScores.contains(dailyScore)) {
+            this.dailyScores.add(dailyScore);
+            if (dailyScore.getMemberChallenge() != this) {
+                dailyScore.updateMemberChallenge(this);
+            }
+        }
     }
 
     public void updateSuccessStatus(boolean isSuccess) {

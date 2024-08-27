@@ -36,22 +36,14 @@ public class DailyScoreService {
 
     @Transactional
     public DailyScore getOrCreateDailyScore(MemberChallenge memberChallenge, LocalDate date) {
-        Optional<DailyScore> existingDailyScore = dailyScoreRepository
-                .findByMemberChallengeAndDate(memberChallenge, date);
-
-        if (existingDailyScore.isPresent()) {
-            log.info("DailyScore already exists for date: {} and memberChallenge: {}",
-                    date, memberChallenge.getId());
-            return existingDailyScore.get();
-        }
-
-        DailyScore newDailyScore = new DailyScore(date);
-        newDailyScore.updateScoreDetails(new ScoreDetail("Daily Base Score", 10, 10));
-        memberChallenge.addDailyScore(newDailyScore);
-
-        log.info("Created new DailyScore for date: {} and memberChallenge: {}",
-                date, memberChallenge.getId());
-        return dailyScoreRepository.save(newDailyScore);
+        return dailyScoreRepository.findByMemberChallengeAndDate(memberChallenge, date)
+                .orElseGet(() -> {
+                    DailyScore newDailyScore = new DailyScore(date);
+                    newDailyScore.updateMemberChallenge(memberChallenge);
+                    newDailyScore.updateScoreDetails(new ScoreDetail("Daily Base Score", 10, 10));
+                    memberChallenge.addDailyScore(newDailyScore);
+                    return dailyScoreRepository.save(newDailyScore);
+                });
     }
 
     @Transactional
@@ -132,5 +124,13 @@ public class DailyScoreService {
                     );
                     return !transactionDateTime.isBefore(start) && !transactionDateTime.isAfter(end);
                 });
+    }
+
+    @Transactional
+    public void updateDailyScore(MemberChallenge memberChallenge, LocalDate date, String description, int score) {
+        DailyScore dailyScore = getOrCreateDailyScore(memberChallenge, date);
+        int currentScore = dailyScore.getTotalScore();
+        ScoreDetail scoreDetail = new ScoreDetail(description, score, currentScore + score);
+        dailyScore.updateScoreDetails(scoreDetail);
     }
 }

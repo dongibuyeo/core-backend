@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 @Getter
@@ -31,5 +32,30 @@ public class MemberChallengeResponse {
     private Long memberDeposit;
     private Long baseReward;
     private Long additionalReward;
-    private Long totalPoints;
+    private Integer totalScore;
+
+    public MemberChallengeResponse(UUID challengeId, ChallengeType type, ChallengeStatus status,
+                                   String accountNo, LocalDate startDate, LocalDate endDate,
+                                   String title, String description, Long totalDeposit,
+                                   Integer participants, Boolean isSuccess, Long memberDeposit,
+                                   Long baseReward, Long additionalReward, Integer totalScore) {
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        this.challengeId = challengeId;
+        this.type = type;
+        this.status = status;
+        this.accountNo = accountNo;
+        this.startDate = (startDate != null) ? startDate.format(formatter) : null;
+        this.endDate = (endDate != null) ? endDate.format(formatter) : null;
+        this.title = title;
+        this.description = description;
+        this.totalDeposit = totalDeposit;
+        this.participants = participants;
+        this.isSuccess = isSuccess;
+        this.memberDeposit = memberDeposit;
+        this.baseReward = baseReward;
+        this.additionalReward = additionalReward;
+        this.totalScore = totalScore;
+    }
 }
