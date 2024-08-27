@@ -3,10 +3,7 @@ package com.shinhan.dongibuyeo.domain.challenge.service;
 import com.shinhan.dongibuyeo.domain.account.entity.Account;
 import com.shinhan.dongibuyeo.domain.account.service.AccountService;
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.JoinChallengeRequest;
-import com.shinhan.dongibuyeo.domain.challenge.dto.response.ChallengeResponse;
-import com.shinhan.dongibuyeo.domain.challenge.dto.response.DailyScoreDetail;
-import com.shinhan.dongibuyeo.domain.challenge.dto.response.MemberChallengeResponse;
-import com.shinhan.dongibuyeo.domain.challenge.dto.response.ScoreDetailResponse;
+import com.shinhan.dongibuyeo.domain.challenge.dto.response.*;
 import com.shinhan.dongibuyeo.domain.challenge.entity.*;
 import com.shinhan.dongibuyeo.domain.challenge.exception.*;
 import com.shinhan.dongibuyeo.domain.challenge.mapper.ChallengeMapper;
@@ -36,8 +33,9 @@ public class MemberChallengeService {
     private final AccountService accountService;
     private final SavingsService savingsService;
     private final ChallengeRewardService challengeRewardService;
+    private final ChallengeService challengeService;
 
-    public MemberChallengeService(MemberService memberService, ChallengeRepository challengeRepository, MemberChallengeRepository memberChallengeRepository, ChallengeMapper challengeMapper, AccountService accountService, SavingsService savingsService, ChallengeRewardService challengeRewardService) {
+    public MemberChallengeService(MemberService memberService, ChallengeRepository challengeRepository, MemberChallengeRepository memberChallengeRepository, ChallengeMapper challengeMapper, AccountService accountService, SavingsService savingsService, ChallengeRewardService challengeRewardService, ChallengeService challengeService, ChallengeService challengeService1) {
         this.memberService = memberService;
         this.challengeRepository = challengeRepository;
         this.memberChallengeRepository = memberChallengeRepository;
@@ -45,6 +43,7 @@ public class MemberChallengeService {
         this.accountService = accountService;
         this.savingsService = savingsService;
         this.challengeRewardService = challengeRewardService;
+        this.challengeService = challengeService1;
     }
 
     private Challenge findChallengeById(UUID challengeId) {
@@ -201,5 +200,24 @@ public class MemberChallengeService {
 
     public List<MemberChallenge> findsByChallengeTypeAndStatus(ChallengeType challengeType, ChallengeStatus challengeStatus) {
         return memberChallengeRepository.findAllByChallengeTypeAndChallengeStatus(challengeType, challengeStatus);
+    }
+
+    public RewardResponse getReward(UUID memberId, UUID challengeId) {
+        Member member = memberService.getMemberById(memberId);
+        Challenge challenge = challengeService.findChallengeById(challengeId);
+        MemberChallenge memberChallenge = getMemberChallenge(challengeId, memberId);
+        MemberChallengeStatus status = memberChallenge.getStatus();
+
+        if (status != MemberChallengeStatus.CALCULATED) {
+            throw new MemberChallengeCannotRewardException(status);
+        }
+
+        Long baseReward = memberChallenge.getBaseReward();
+        Long additionalReward = memberChallenge.getAdditionalReward();
+        challengeRewardService.transferFromChallengeAccountToMemberAccount(member, challenge, baseReward);
+        challengeRewardService.transferFromChallengeAccountToMemberAccount(member, challenge, additionalReward);
+
+        memberChallenge.updateStatus(MemberChallengeStatus.REWARDED);
+        return new RewardResponse(baseReward, additionalReward);
     }
 }
