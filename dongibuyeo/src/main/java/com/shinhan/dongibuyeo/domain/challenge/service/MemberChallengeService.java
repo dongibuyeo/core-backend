@@ -131,7 +131,8 @@ public class MemberChallengeService {
 
         // 예치금 환급
         challengeRewardService.transferFromChallengeAccountToMemberAccount(member, challenge, memberChallenge.getDeposit());
-        removeMemberFromChallenge(member, challenge, memberChallenge);
+        memberChallenge.updateStatus(MemberChallengeStatus.REWARDED);
+        memberChallenge.softDelete();
 
         // 적금 해지(유저 적금 계좌 -> 유저 적금 납입 계좌로 자동 환급됨)
         Optional<SavingAccountsDetail> savingChallengeAccount = savingsService.getAllSavingsByMemberId(memberId)
