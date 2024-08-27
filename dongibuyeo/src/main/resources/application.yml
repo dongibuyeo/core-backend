@@ -11,7 +11,7 @@ spring:
     database: mysql
     show-sql: true
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
 
 shinhan:
   key: 7c746d26c4a44632a638a88131f0b779

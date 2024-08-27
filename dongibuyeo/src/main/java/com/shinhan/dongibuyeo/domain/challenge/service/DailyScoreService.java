@@ -39,8 +39,8 @@ public class DailyScoreService {
                 .orElseGet(() -> {
                     log.info("[getOrCreateDailyScore] Create DailyScore");
                     DailyScore newDailyScore = new DailyScore(date);
-                    newDailyScore.addScoreDetail(new ScoreDetail("DAILY_SCORE", 10, 10));
                     newDailyScore.updateMemberChallenge(memberChallenge);
+                    newDailyScore.addScoreDetail(new ScoreDetail("DAILY_SCORE", 10, 10));
                     memberChallenge.addDailyScore(newDailyScore);
                     return newDailyScore;
                 });
@@ -129,6 +129,16 @@ public class DailyScoreService {
     @Transactional
     public void updateDailyScore(MemberChallenge memberChallenge, LocalDate date, String description, int score) {
         DailyScore dailyScore = getOrCreateDailyScore(memberChallenge, date);
+
+        // 중복항목 추가 방지
+        boolean descriptionExists = dailyScore.getScoreDetails().stream()
+                .anyMatch(detail -> detail.getDescription().equals(description));
+
+        if (descriptionExists) {
+            log.info("Score detail for description '{}' already exists for date {}. Skipping.", description, date);
+            return;
+        }
+
         int currentScore = dailyScore.getTotalScore();
         ScoreDetail scoreDetail = new ScoreDetail(description, score, currentScore + score);
         dailyScore.addScoreDetail(scoreDetail);

@@ -8,10 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Getter
@@ -50,6 +47,10 @@ public class DailyScore {
         int scoreDifference = scoreDetail.getScore();
         this.totalScore += scoreDifference;
         this.memberChallenge.addTotalScore(scoreDifference);
+    }
+
+    public List<ScoreDetail> getScoreDetails() {
+        return Collections.unmodifiableList(scoreDetails);
     }
 
     @Override

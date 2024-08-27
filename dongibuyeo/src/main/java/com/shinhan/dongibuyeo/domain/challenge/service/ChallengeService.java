@@ -146,7 +146,7 @@ public class ChallengeService {
         savingsService.makeSavingProduct(
                 SavingProductRequest.builder()
                         .bankCode(bankCode)
-                        .accountName(challenge.getTitle())
+                        .accountName(challenge.getId() + challenge.getTitle())
                         .accountDescription(challenge.getTitle() + " 전용 계좌")
                         .subscriptionPeriod(subscriptionPeriod)
                         .minSubscriptionBalance(minBalance)
