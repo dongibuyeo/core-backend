@@ -1,6 +1,5 @@
 package com.shinhan.dongibuyeo.domain.challenge.service;
 
-import com.shinhan.dongibuyeo.domain.account.dto.request.TransferRequest;
 import com.shinhan.dongibuyeo.domain.account.entity.Account;
 import com.shinhan.dongibuyeo.domain.account.service.AccountService;
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.JoinChallengeRequest;
@@ -17,12 +16,14 @@ import com.shinhan.dongibuyeo.domain.member.entity.Member;
 import com.shinhan.dongibuyeo.domain.member.service.MemberService;
 import com.shinhan.dongibuyeo.domain.savings.dto.response.SavingAccountsDetail;
 import com.shinhan.dongibuyeo.domain.savings.service.SavingsService;
-import com.shinhan.dongibuyeo.global.entity.TransferType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,14 +35,16 @@ public class MemberChallengeService {
     private final ChallengeMapper challengeMapper;
     private final AccountService accountService;
     private final SavingsService savingsService;
+    private final ChallengeRewardService challengeRewardService;
 
-    public MemberChallengeService(MemberService memberService, ChallengeRepository challengeRepository, MemberChallengeRepository memberChallengeRepository, ChallengeMapper challengeMapper, AccountService accountService, SavingsService savingsService) {
+    public MemberChallengeService(MemberService memberService, ChallengeRepository challengeRepository, MemberChallengeRepository memberChallengeRepository, ChallengeMapper challengeMapper, AccountService accountService, SavingsService savingsService, ChallengeRewardService challengeRewardService) {
         this.memberService = memberService;
         this.challengeRepository = challengeRepository;
         this.memberChallengeRepository = memberChallengeRepository;
         this.challengeMapper = challengeMapper;
         this.accountService = accountService;
         this.savingsService = savingsService;
+        this.challengeRewardService = challengeRewardService;
     }
 
     private Challenge findChallengeById(UUID challengeId) {
@@ -102,8 +105,8 @@ public class MemberChallengeService {
 
         validateChallengeCancellation(challenge);
 
+        challengeRewardService.transferFromChallengeAccountToMemberAccount(member, challenge, memberChallenge.getDeposit());
         removeMemberFromChallenge(member, challenge, memberChallenge);
-        transferDepositBack(member, challenge, memberChallenge.getDeposit());
     }
 
     private void validateChallengeCancellation(Challenge challenge) {
@@ -117,17 +120,7 @@ public class MemberChallengeService {
         member.removeChallenge(memberChallenge);
         memberChallenge.softDelete();
     }
-
-    private void transferDepositBack(Member member, Challenge challenge, Long deposit) {
-        Account memberChallengeAccount = getMemberChallengeAccount(member);
-        accountService.accountTransfer(new TransferRequest(
-                member.getId(),
-                memberChallengeAccount.getAccountNo(),
-                challenge.getAccount().getAccountNo(),
-                deposit,
-                TransferType.CHALLENGE));
-    }
-
+    
     @Transactional
     public void withdrawChallenge(UUID challengeId, UUID memberId) {
         Challenge challenge = findChallengeById(challengeId);
@@ -138,10 +131,10 @@ public class MemberChallengeService {
         validateChallengeWithdrawal(challenge);
 
         // 예치금 환급
-        transferDepositBack(member, challenge, memberChallenge.getDeposit());
+        challengeRewardService.transferFromChallengeAccountToMemberAccount(member, challenge, memberChallenge.getDeposit());
         removeMemberFromChallenge(member, challenge, memberChallenge);
 
-        // 적금 해지 후 자동 환급(유저 적금 계좌 -> 유저 적금 납입 계좌)
+        // 적금 해지(유저 적금 계좌 -> 유저 적금 납입 계좌로 자동 환급됨)
         Optional<SavingAccountsDetail> savingChallengeAccount = savingsService.getAllSavingsByMemberId(memberId)
                 .stream()
                 .filter(savings -> savings.getAccountName().equals(challenge.getTitle()))
