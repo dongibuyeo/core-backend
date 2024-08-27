@@ -48,8 +48,8 @@ public class InitService implements ApplicationListener<ContextRefreshedEvent> {
 
     @Transactional
     public void createAdminAccountAndProduct() {
-//        createAdminAccount();
-//        createAdminProduct();
+        createAdminAccount();
+        createAdminProduct();
     }
 
     private void createAdminAccount() {
