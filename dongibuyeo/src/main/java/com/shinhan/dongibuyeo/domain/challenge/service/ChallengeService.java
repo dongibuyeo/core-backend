@@ -170,7 +170,9 @@ public class ChallengeService {
     @Transactional
     public void deleteChallengeByChallengeId(UUID challengeId) {
         Challenge challenge = findChallengeById(challengeId);
-        challenge.softDelete();
+        if (challenge.getStatus() == ChallengeStatus.SCHEDULED) {
+            challenge.softDelete();
+        }
     }
 
     @Transactional
