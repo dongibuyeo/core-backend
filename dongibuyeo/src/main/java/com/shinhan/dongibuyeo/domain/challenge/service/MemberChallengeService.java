@@ -1,5 +1,8 @@
 package com.shinhan.dongibuyeo.domain.challenge.service;
 
+import com.shinhan.dongibuyeo.domain.account.dto.request.MakeAccountRequest;
+import com.shinhan.dongibuyeo.domain.account.dto.response.MakeAccountResponse;
+import com.shinhan.dongibuyeo.domain.account.service.AccountService;
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.JoinChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.*;
 import com.shinhan.dongibuyeo.domain.challenge.entity.*;
@@ -12,6 +15,7 @@ import com.shinhan.dongibuyeo.domain.member.service.MemberService;
 import com.shinhan.dongibuyeo.domain.savings.dto.response.SavingAccountsDetail;
 import com.shinhan.dongibuyeo.domain.savings.exception.SavingAccountNotFoundException;
 import com.shinhan.dongibuyeo.domain.savings.service.SavingsService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +29,18 @@ import java.util.stream.Collectors;
 @Service
 public class MemberChallengeService {
 
+    @Value("${shinhan.challenge.member-account}")
+    private String memberChallengeAccountCode;
+
+    @Value("${shinhan.deposit.min}")
+    private Long minDeposit;
+
+    @Value("${shinhan.deposit.max}")
+    private Long maxDeposit;
+
+    @Value("${shinhan.deposit.unit}")
+    private Long depositUnit;
+
     private final MemberService memberService;
     private final ChallengeRepository challengeRepository;
     private final MemberChallengeRepository memberChallengeRepository;
@@ -32,8 +48,9 @@ public class MemberChallengeService {
     private final SavingsService savingsService;
     private final ChallengeRewardService challengeRewardService;
     private final ChallengeService challengeService;
+    private final AccountService accountService;
 
-    public MemberChallengeService(MemberService memberService, ChallengeRepository challengeRepository, MemberChallengeRepository memberChallengeRepository, ChallengeMapper challengeMapper, SavingsService savingsService, ChallengeRewardService challengeRewardService, ChallengeService challengeService, ChallengeService challengeService1) {
+    public MemberChallengeService(MemberService memberService, ChallengeRepository challengeRepository, MemberChallengeRepository memberChallengeRepository, ChallengeMapper challengeMapper, SavingsService savingsService, ChallengeRewardService challengeRewardService, ChallengeService challengeService, ChallengeService challengeService1, AccountService accountService) {
         this.memberService = memberService;
         this.challengeRepository = challengeRepository;
         this.memberChallengeRepository = memberChallengeRepository;
@@ -41,6 +58,7 @@ public class MemberChallengeService {
         this.savingsService = savingsService;
         this.challengeRewardService = challengeRewardService;
         this.challengeService = challengeService1;
+        this.accountService = accountService;
     }
 
     private Challenge findChallengeById(UUID challengeId) {
@@ -56,6 +74,25 @@ public class MemberChallengeService {
     }
 
     /**
+     * 회원의 챌린지 계좌 생성 메서드
+     * - 챌린지 계정 하나당 하나의 챌린지 계좌 존재
+     */
+    @Transactional
+    public void makeMemberChallengeAccount(MakeAccountRequest request) {
+        Member member = memberService.getMemberById(request.getMemberId());
+        if(member.hasChallengeAccount()) {
+            throw new MemberChallengeAccoutAlreadyExistsException(request.getMemberId());
+        }
+
+        accountService.makeChallengeAccount(
+                new MakeAccountRequest(
+                        request.getMemberId(),
+                        memberChallengeAccountCode
+                )
+        );
+    }
+
+    /**
      * 회원의 챌린지 참여 메서드
      * - 챌린지 시작 전, 챌린지 계좌가 존재하는 회원에 한해 참여가 가능 (중복 참여 불가)
      * - 적금의 경우만 별도의 적금 가입 로직 필요
@@ -68,12 +105,32 @@ public class MemberChallengeService {
         Challenge challenge = findChallengeById(request.getChallengeId());
 
         validateChallengeJoin(challenge, member);
+        validateDeposit(request.getDeposit());
+
+
 
         MemberChallenge memberChallenge = createMemberChallenge(member, challenge, request.getDeposit());
         challenge.addMember(memberChallenge);
         member.addChallenge(memberChallenge);
     }
 
+    private void validateDeposit(Long deposit) {
+        if (deposit == null) {
+            throw new IllegalArgumentException("Deposit amount cannot be null");
+        }
+
+        if (deposit < minDeposit) {
+            throw new IllegalArgumentException("Deposit amount must be at least " + minDeposit + " won");
+        }
+
+        if (deposit > maxDeposit) {
+            throw new IllegalArgumentException("Deposit amount cannot exceed " + MAX_DEPOSIT + " won");
+        }
+
+        if (deposit % depositUnit != 0) {
+            throw new IllegalArgumentException("Deposit amount must be in units of " + depositUnit + " won");
+        }
+    }
 
     private void validateChallengeJoin(Challenge challenge, Member member) {
         // 이미 시작된 챌린지 참여 불가
@@ -83,7 +140,7 @@ public class MemberChallengeService {
 
         // 챌린지 계정이 없는 경우 참여 불가
         if (!member.hasChallengeAccount()) {
-            throw new ChallengeCannotJoinException(member.getId());
+            throw new MemberChallengeAccoutNotFoundException(member.getId());
         }
 
         // 이미 참여 중인 챌린지 참여 불가
