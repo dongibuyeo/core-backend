@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
@@ -196,4 +197,7 @@ public class ChallengeService {
         return challengeRepository.findAllChallengesByStatus(status);
     }
 
+    public List<Challenge> findAllChallengesByStatusAndDate(ChallengeType type, LocalDate curDay) {
+        return challengeRepository.findAllChallengesByStatusAndDate(type, curDay);
+    }
 }
