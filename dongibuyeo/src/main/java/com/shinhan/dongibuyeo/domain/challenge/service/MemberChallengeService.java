@@ -124,7 +124,7 @@ public class MemberChallengeService {
         }
 
         if (deposit > maxDeposit) {
-            throw new IllegalArgumentException("Deposit amount cannot exceed " + MAX_DEPOSIT + " won");
+            throw new IllegalArgumentException("Deposit amount cannot exceed " + maxDeposit + " won");
         }
 
         if (deposit % depositUnit != 0) {
