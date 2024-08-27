@@ -90,7 +90,7 @@ public class ScoreAspect {
 
         int currentScore = todayScore.getTotalScore();
         ScoreDetail scoreDetail = new ScoreDetail("SOLVE_QUIZ", +5, currentScore + 5);
-        todayScore.updateScoreDetails(scoreDetail);
+        todayScore.addScoreDetail(scoreDetail);
         dailyScoreRepository.save(todayScore);
     }
 }

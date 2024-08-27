@@ -18,7 +18,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -36,13 +35,14 @@ public class DailyScoreService {
 
     @Transactional
     public DailyScore getOrCreateDailyScore(MemberChallenge memberChallenge, LocalDate date) {
-        return dailyScoreRepository.findByMemberChallengeAndDate(memberChallenge, date)
+        return dailyScoreRepository.findByMemberChallengeIdAndDate(memberChallenge.getId(), date)
                 .orElseGet(() -> {
+                    log.info("[getOrCreateDailyScore] Create DailyScore");
                     DailyScore newDailyScore = new DailyScore(date);
+                    newDailyScore.addScoreDetail(new ScoreDetail("DAILY_SCORE", 10, 10));
                     newDailyScore.updateMemberChallenge(memberChallenge);
-                    newDailyScore.updateScoreDetails(new ScoreDetail("Daily Base Score", 10, 10));
                     memberChallenge.addDailyScore(newDailyScore);
-                    return dailyScoreRepository.save(newDailyScore);
+                    return newDailyScore;
                 });
     }
 
@@ -57,8 +57,8 @@ public class DailyScoreService {
                     DailyScore dailyScore = getOrCreateDailyScore(challenge, LocalDate.now());
                     String description = feverTime.getDescription();
                     int score = feverTime.getScore();
-                    dailyScore.updateScoreDetails(new ScoreDetail(description, score, dailyScore.getTotalScore() + score));
-                    dailyScoreRepository.save(dailyScore);
+                    dailyScore.addScoreDetail(new ScoreDetail(description, score, dailyScore.getTotalScore() + score));
+                    challenge.addDailyScore(dailyScore);
                 }
             }
         }
@@ -131,6 +131,7 @@ public class DailyScoreService {
         DailyScore dailyScore = getOrCreateDailyScore(memberChallenge, date);
         int currentScore = dailyScore.getTotalScore();
         ScoreDetail scoreDetail = new ScoreDetail(description, score, currentScore + score);
-        dailyScore.updateScoreDetails(scoreDetail);
+        dailyScore.addScoreDetail(scoreDetail);
+        memberChallenge.addDailyScore(dailyScore);
     }
 }
