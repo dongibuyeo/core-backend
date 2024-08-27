@@ -1,7 +1,7 @@
 package com.shinhan.dongibuyeo.domain.challenge.service;
 
 import com.shinhan.dongibuyeo.domain.account.dto.request.MakeAccountRequest;
-import com.shinhan.dongibuyeo.domain.account.dto.response.MakeAccountResponse;
+import com.shinhan.dongibuyeo.domain.account.dto.request.TransferRequest;
 import com.shinhan.dongibuyeo.domain.account.service.AccountService;
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.JoinChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.*;
@@ -15,6 +15,8 @@ import com.shinhan.dongibuyeo.domain.member.service.MemberService;
 import com.shinhan.dongibuyeo.domain.savings.dto.response.SavingAccountsDetail;
 import com.shinhan.dongibuyeo.domain.savings.exception.SavingAccountNotFoundException;
 import com.shinhan.dongibuyeo.domain.savings.service.SavingsService;
+import com.shinhan.dongibuyeo.global.entity.TransferType;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +28,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class MemberChallengeService {
 
@@ -78,15 +81,15 @@ public class MemberChallengeService {
      * - 챌린지 계정 하나당 하나의 챌린지 계좌 존재
      */
     @Transactional
-    public void makeMemberChallengeAccount(MakeAccountRequest request) {
-        Member member = memberService.getMemberById(request.getMemberId());
+    public void makeMemberChallengeAccount(UUID memberId) {
+        Member member = memberService.getMemberById(memberId);
         if(member.hasChallengeAccount()) {
-            throw new MemberChallengeAccoutAlreadyExistsException(request.getMemberId());
+            throw new MemberChallengeAccoutAlreadyExistsException(memberId);
         }
 
         accountService.makeChallengeAccount(
                 new MakeAccountRequest(
-                        request.getMemberId(),
+                        memberId,
                         memberChallengeAccountCode
                 )
         );
@@ -103,15 +106,18 @@ public class MemberChallengeService {
     public void joinChallenge(JoinChallengeRequest request) {
         Member member = memberService.getMemberById(request.getMemberId());
         Challenge challenge = findChallengeById(request.getChallengeId());
+        Long deposit = request.getDeposit();
 
         validateChallengeJoin(challenge, member);
-        validateDeposit(request.getDeposit());
+        validateDeposit(deposit);
 
+        // 예치금 입금 (유저 챌린지 계좌 -> 챌린지 전용 계좌)
+        transferDeposit(member, challenge.getAccount().getAccountNo(), deposit);
 
-
-        MemberChallenge memberChallenge = createMemberChallenge(member, challenge, request.getDeposit());
+        MemberChallenge memberChallenge = createMemberChallenge(member, challenge, deposit);
         challenge.addMember(memberChallenge);
         member.addChallenge(memberChallenge);
+        memberChallengeRepository.save(memberChallenge);
     }
 
     private void validateDeposit(Long deposit) {
@@ -163,6 +169,25 @@ public class MemberChallengeService {
                 throw new SavingAccountNotFoundException(challenge.getTitle());
             }
         }
+    }
+
+    @Transactional
+    public void transferDeposit(Member member, String challengeAccountNo, Long deposit) {
+        try {
+            accountService.accountTransfer(
+                    new TransferRequest(
+                            member.getId(),
+                            challengeAccountNo,
+                            member.getChallengeAccount().getAccountNo(),
+                            deposit,
+                            TransferType.CHALLENGE
+                    )
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new CannotJoinChallengeException();
+        }
+
     }
 
     private MemberChallenge createMemberChallenge(Member member, Challenge challenge, Long deposit) {
