@@ -32,8 +32,8 @@ public class MemberController {
 
     @GetMapping("/login")
     public ResponseEntity<MemberResponse> login(
-            @RequestBody @Valid MemberLoginRequest memberLoginRequest) {
-        return ResponseEntity.ok(memberService.login(memberLoginRequest));
+            @RequestParam @Valid String email) {
+        return ResponseEntity.ok(memberService.login(email));
     }
 
     @GetMapping("/duplicate/{email}")
@@ -41,7 +41,7 @@ public class MemberController {
         return ResponseEntity.ok(memberService.duplicateEmail(email));
     }
 
-    @PostMapping("/device")
+    @PatchMapping("/device")
     public ResponseEntity<Void> updateDeviceToken(@RequestBody DeviceTokenRequest request) {
         memberService.updateDeviceToken(request);
         return ResponseEntity.noContent().build();
