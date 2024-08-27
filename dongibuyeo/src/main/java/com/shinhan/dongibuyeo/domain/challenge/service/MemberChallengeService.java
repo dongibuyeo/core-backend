@@ -310,7 +310,7 @@ public class MemberChallengeService {
                 .orElseThrow(() -> new MemberChallengeNotFoundException(memberId, challengeType));
     }
 
-    public List<MemberChallenge> findsByChallengeTypeAndStatus(ChallengeType challengeType, ChallengeStatus challengeStatus) {
+    public List<MemberChallenge> findAllByChallengeTypeAndStatus(ChallengeType challengeType, ChallengeStatus challengeStatus) {
         return memberChallengeRepository.findAllByChallengeTypeAndChallengeStatus(challengeType, challengeStatus);
     }
 

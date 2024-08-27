@@ -48,7 +48,7 @@ public class DailyScoreService {
 
     @Transactional
     public void rewardNonConsumptionDuringFeverTime(ChallengeType challengeType, TransferType transferType) {
-        List<MemberChallenge> activeChallenges = memberChallengeService.findsByChallengeTypeAndStatus(challengeType, ChallengeStatus.IN_PROGRESS);
+        List<MemberChallenge> activeChallenges = memberChallengeService.findAllByChallengeTypeAndStatus(challengeType, ChallengeStatus.IN_PROGRESS);
         List<FeverTimeInfo> feverTimes = getFeverTimes(challengeType);
 
         for (FeverTimeInfo feverTime : feverTimes) {
