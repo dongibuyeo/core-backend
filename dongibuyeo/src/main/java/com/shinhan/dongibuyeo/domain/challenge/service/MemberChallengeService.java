@@ -246,9 +246,10 @@ public class MemberChallengeService {
         memberChallenge.softDelete();
 
         // 적금 해지(유저 적금 계좌 -> 유저 적금 납입 계좌로 자동 환급됨)
+        String accountName = challenge.getType().toString() + challenge.getStartDate().format(DateTimeFormatter.ofPattern("yyMMdd"));
         Optional<SavingAccountsDetail> savingChallengeAccount = savingsService.getAllSavingsByMemberId(memberId)
                 .stream()
-                .filter(savings -> savings.getAccountName().equals(challenge.getTitle()))
+                .filter(savings -> savings.getAccountName().equals(accountName))
                 .findFirst();
 
         if (savingChallengeAccount.isPresent()) {

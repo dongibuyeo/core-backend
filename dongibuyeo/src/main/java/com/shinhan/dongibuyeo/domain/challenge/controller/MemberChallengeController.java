@@ -62,7 +62,7 @@ public class MemberChallengeController {
 
     @PostMapping("/withdraw")
     public ResponseEntity<Void> withdrawChallenge(@RequestBody @Valid MemberChallengeRequest request) {
-        memberChallengeService.withdrawChallenge(request.getChallengeId(), request.getChallengeId());
+        memberChallengeService.withdrawChallenge(request.getChallengeId(), request.getMemberId());
         return ResponseEntity.ok().build();
     }
 
