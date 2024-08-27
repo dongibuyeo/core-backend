@@ -1,12 +1,16 @@
 package com.shinhan.dongibuyeo.domain.challenge.service;
 
 import com.shinhan.dongibuyeo.domain.account.dto.request.TransactionHistoryRequest;
+import com.shinhan.dongibuyeo.domain.account.dto.request.TransferRequest;
+import com.shinhan.dongibuyeo.domain.account.entity.Account;
+import com.shinhan.dongibuyeo.domain.account.service.AccountService;
 import com.shinhan.dongibuyeo.domain.challenge.entity.Challenge;
 import com.shinhan.dongibuyeo.domain.challenge.entity.MemberChallenge;
 import com.shinhan.dongibuyeo.domain.challenge.entity.MemberChallengeStatus;
 import com.shinhan.dongibuyeo.domain.consume.dto.request.ConsumtionRequest;
 import com.shinhan.dongibuyeo.domain.consume.dto.response.ConsumtionResponse;
 import com.shinhan.dongibuyeo.domain.consume.service.ConsumeService;
+import com.shinhan.dongibuyeo.domain.member.entity.Member;
 import com.shinhan.dongibuyeo.global.entity.TransferType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,11 +26,13 @@ import java.util.UUID;
 public class ChallengeRewardService {
 
     private final ConsumeService consumeService;
+    private final AccountService accountService;
 
-    public ChallengeRewardService(ConsumeService consumeService) {
+
+    public ChallengeRewardService(ConsumeService consumeService, AccountService accountService) {
         this.consumeService = consumeService;
+        this.accountService = accountService;
     }
-
 
     /**
      * 종료된 소비 챌린지의 환급 처리 메서드
@@ -157,5 +163,22 @@ public class ChallengeRewardService {
                 .mapToLong(MemberChallenge::getBaseReward)
                 .sum();
         return totalDepositPool - totalBaseRewards;
+    }
+
+    /**
+     * 챌린지 계좌 -> 유저 챌린지 계좌 환급 메서드
+     *
+     * @param member 환급 대상 회원
+     * @param challenge 환급 챌린지
+     * @param deposit 환급금
+     */
+    public void transferFromChallengeAccountToMemberAccount(Member member, Challenge challenge, Long deposit) {
+        Account memberChallengeAccount = member.getChallengeAccount();
+        accountService.accountTransfer(new TransferRequest(
+                member.getId(),
+                memberChallengeAccount.getAccountNo(),
+                challenge.getAccount().getAccountNo(),
+                deposit,
+                TransferType.CHALLENGE));
     }
 }
