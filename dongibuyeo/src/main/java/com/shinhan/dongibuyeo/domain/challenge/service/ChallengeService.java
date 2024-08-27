@@ -114,6 +114,7 @@ public class ChallengeService {
         challenge.updateAccount(adminAccount);
 
         processChallengeByType(request.getType(), challenge, adminAccount);
+        challengeRepository.save(challenge);
         return challengeMapper.toChallengeResponse(challenge);
     }
 

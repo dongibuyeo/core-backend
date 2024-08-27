@@ -11,7 +11,7 @@ spring:
     database: mysql
     show-sql: true
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
 
 shinhan:
   key: 7c746d26c4a44632a638a88131f0b779
@@ -28,3 +28,9 @@ shinhan:
   quiz:
     deposit: 10000
     head-count: 10
+  challenge:
+    member-account: "088-1-692b220758d742"
+  deposit:
+    min: 10000
+    max: 300000
+    unit: 10000

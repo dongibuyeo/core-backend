@@ -1,5 +1,6 @@
 package com.shinhan.dongibuyeo.domain.challenge.controller;
 
+import com.shinhan.dongibuyeo.domain.account.dto.request.MakeAccountRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.JoinChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.MemberChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.ChallengeResponse;
@@ -44,6 +45,12 @@ public class MemberChallengeController {
     @PostMapping("/join")
     public ResponseEntity<Void> joinChallenge(@RequestBody @Valid JoinChallengeRequest request) {
         memberChallengeService.joinChallenge(request);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/account")
+    public ResponseEntity<Void> makeMemberChallengeAccount(@RequestBody @Valid MakeAccountRequest request) {
+        memberChallengeService.makeMemberChallengeAccount(request);
         return ResponseEntity.ok().build();
     }
 
