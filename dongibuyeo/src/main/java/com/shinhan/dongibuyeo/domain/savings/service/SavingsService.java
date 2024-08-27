@@ -31,28 +31,26 @@ import java.util.UUID;
 @Service
 public class SavingsService {
 
-    private final SavingsClient savingsClient;
-    private final AccountService accountService;
-    private final ChallengeService challengeService;
-
     @Value("${shinhan.key}")
     private String apiKey;
+
+    private final SavingsClient savingsClient;
 
     private final AccountRepository accountRepository;
 
     private final AccountMapper accountMapper;
-
-    private final MemberService memberService;
     private final SavingsMapper savingsMapper;
 
-    public SavingsService(AccountRepository accountRepository, AccountMapper accountMapper, MemberService memberService, SavingsMapper savingsMapper, SavingsClient savingsClient, AccountService accountService, ChallengeService challengeService, ChallengeService challengeService1) {
+    private final AccountService accountService;
+    private final MemberService memberService;
+
+    public SavingsService(AccountRepository accountRepository, AccountMapper accountMapper, MemberService memberService, SavingsMapper savingsMapper, SavingsClient savingsClient, AccountService accountService) {
         this.accountRepository = accountRepository;
         this.accountMapper = accountMapper;
         this.memberService = memberService;
         this.savingsMapper = savingsMapper;
         this.savingsClient = savingsClient;
         this.accountService = accountService;
-        this.challengeService = challengeService1;
     }
 
     @Transactional
@@ -113,8 +111,7 @@ public class SavingsService {
 
     @Transactional
     public SavingAccountInfo makeSevenSavingAccount(MakeSevenSavingAccountRequest request) {
-        Challenge challenge = challengeService.findChallengeById(request.getChallengeId());
-        String accountName = challenge.getId() + challenge.getTitle();
+        String accountName = request.getChallengeId() + request.getChallengeTitle();
         UUID memberId = request.getMemberId();
         String withdrawalAccountNo = request.getWithdrawalAccountNo();
         Long depositBalance = request.getDepositBalance();
