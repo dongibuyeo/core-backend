@@ -14,6 +14,7 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
@@ -38,38 +39,43 @@ public class ScoreAspect {
     /**
      * 소비내역을 추적해 챌린지 점수 차감
      */
-    @Transactional
-    @AfterReturning("execution(* com.shinhan.dongibuyeo.*.controller.AccountController.accountTransfer(..))")
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @AfterReturning("execution(* com.shinhan.dongibuyeo.domain.account.controller.AccountController.accountTransfer(..))")
     public void afterTransfer(JoinPoint joinPoint) {
-        log.info("[afterTransfer] 소비 내역 추적");
-        Object[] args = joinPoint.getArgs();
-        TransferRequest request = (TransferRequest) args[0];
+        log.info("[afterTransfer] 소비 내역 추적 시작");
+        try {
+            Object[] args = joinPoint.getArgs();
+            TransferRequest request = (TransferRequest) args[0];
 
-        String challengeType = "CONSUMPTION_" + request.getTransferType();
+            String challengeType = "CONSUMPTION_" + request.getTransferType();
+            log.info("Challenge Type: {}", challengeType);
 
-        List<MemberChallenge> memberChallenges = memberChallengeService.findByMemberId(request.getMemberId());
-        Optional<MemberChallenge> correspondChallenge = memberChallenges.stream()
-                .filter(memberChallenge -> memberChallenge.getChallenge().getType().toString().equals(challengeType))
-                .findAny();
+            List<MemberChallenge> memberChallenges = memberChallengeService.findByMemberId(request.getMemberId());
+            log.info("Found {} member challenges", memberChallenges.size());
 
-        if (correspondChallenge.isPresent()) {
-            MemberChallenge memberChallenge = correspondChallenge.get();
-            LocalDate today = LocalDate.now();
+            Optional<MemberChallenge> correspondChallenge = memberChallenges.stream()
+                    .filter(memberChallenge -> memberChallenge.getChallenge().getType().toString().equals(challengeType))
+                    .findAny();
 
-            DailyScore todayScore = dailyScoreService.getOrCreateDailyScore(memberChallenge, today);
+            if (correspondChallenge.isPresent()) {
+                MemberChallenge memberChallenge = correspondChallenge.get();
+                log.info("Corresponding challenge found: {}", memberChallenge.getId());
 
-            int currentScore = todayScore.getTotalScore();
-            ScoreDetail scoreDetail = new ScoreDetail(challengeType, -5, currentScore - 5);
-            todayScore.updateScoreDetails(scoreDetail);
-            dailyScoreRepository.save(todayScore);
+                LocalDate today = LocalDate.now();
+                dailyScoreService.updateDailyScore(memberChallenge, today, challengeType, -5);
+            }
+
+        } catch (Exception e) {
+            log.error("Error in afterTransfer method", e);
         }
+        log.info("[afterTransfer] 소비 내역 추적 종료");
     }
 
     /**
      * 퀴즈 정답내역을 추적해 챌린지 점수 추가
      */
     @Transactional
-    @AfterReturning(pointcut = "execution(* com.shinhan.dongibuyeo.*.controller.QuizController.solveQuiz(..))", returning = "result")
+    @AfterReturning(pointcut = "execution(* com.shinhan.dongibuyeo.domain.quiz.controller.QuizController.solveQuiz(..))", returning = "result")
     public void afterSolveQuiz(JoinPoint joinPoint, Object result) {
         Object[] args = joinPoint.getArgs();
         QuizSolveRequest request = (QuizSolveRequest) args[0];

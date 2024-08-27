@@ -23,12 +23,14 @@ public interface MemberChallengeRepository extends JpaRepository<MemberChallenge
             "WHERE mc.member.id = :memberId ")
     List<Challenge> findChallengesByMemberId(UUID memberId);
 
-    @Query("SELECT c, mc.isSuccess, mc.deposit as memberDeposit, mc.baseReward, mc.additionalReward, mc.totalScore " +
+    @Query("SELECT new com.shinhan.dongibuyeo.domain.challenge.dto.response.MemberChallengeResponse(" +
+            "c.id, c.type, c.status, c.account.accountNo, c.startDate, c.endDate, " +
+            "c.title, c.description, c.totalDeposit, c.participants, " +
+            "mc.isSuccess, mc.deposit, mc.baseReward, mc.additionalReward, mc.totalScore) " +
             "FROM Challenge c " +
-            "JOIN FETCH MemberChallenge mc " +
-            "ON mc.challenge.id = c.id " +
+            "JOIN MemberChallenge mc ON mc.challenge.id = c.id " +
             "WHERE mc.member.id = :memberId " +
-            "AND mc.challenge.id = :challengeId")
+            "AND c.id = :challengeId")
     Optional<MemberChallengeResponse> findChallengeByMemberIdAndChallengeId(UUID memberId, UUID challengeId);
 
     @Query("SELECT mc " +
