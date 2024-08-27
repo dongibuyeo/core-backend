@@ -4,6 +4,8 @@ import com.shinhan.dongibuyeo.domain.account.entity.Account;
 import com.shinhan.dongibuyeo.domain.account.mapper.AccountMapper;
 import com.shinhan.dongibuyeo.domain.account.repository.AccountRepository;
 import com.shinhan.dongibuyeo.domain.account.service.AccountService;
+import com.shinhan.dongibuyeo.domain.challenge.entity.Challenge;
+import com.shinhan.dongibuyeo.domain.challenge.service.ChallengeService;
 import com.shinhan.dongibuyeo.domain.member.entity.Member;
 import com.shinhan.dongibuyeo.domain.member.service.MemberService;
 import com.shinhan.dongibuyeo.domain.savings.client.SavingsClient;
@@ -31,6 +33,8 @@ public class SavingsService {
 
     private final SavingsClient savingsClient;
     private final AccountService accountService;
+    private final ChallengeService challengeService;
+
     @Value("${shinhan.key}")
     private String apiKey;
 
@@ -41,13 +45,14 @@ public class SavingsService {
     private final MemberService memberService;
     private final SavingsMapper savingsMapper;
 
-    public SavingsService(AccountRepository accountRepository, AccountMapper accountMapper, MemberService memberService, SavingsMapper savingsMapper, SavingsClient savingsClient, AccountService accountService) {
+    public SavingsService(AccountRepository accountRepository, AccountMapper accountMapper, MemberService memberService, SavingsMapper savingsMapper, SavingsClient savingsClient, AccountService accountService, ChallengeService challengeService, ChallengeService challengeService1) {
         this.accountRepository = accountRepository;
         this.accountMapper = accountMapper;
         this.memberService = memberService;
         this.savingsMapper = savingsMapper;
         this.savingsClient = savingsClient;
         this.accountService = accountService;
+        this.challengeService = challengeService1;
     }
 
     @Transactional
@@ -108,17 +113,18 @@ public class SavingsService {
 
     @Transactional
     public SavingAccountInfo makeSevenSavingAccount(MakeSevenSavingAccountRequest request) {
-        String challengeTitle = request.getChallengeTitle();
+        Challenge challenge = challengeService.findChallengeById(request.getChallengeId());
+        String accountName = challenge.getId() + challenge.getTitle();
         UUID memberId = request.getMemberId();
         String withdrawalAccountNo = request.getWithdrawalAccountNo();
         Long depositBalance = request.getDepositBalance();
 
-        SavingInfo sevenSavingProduct = findSavingsAccountTypeUniqueNo(challengeTitle);
+        SavingInfo sevenSavingProduct = findSavingInfoByAccountName(accountName);
 
 
-        Optional<SavingAccountsDetail> memberSavingAccount = findMemberSavingAccountByAccountName(memberId, challengeTitle);
+        Optional<SavingAccountsDetail> memberSavingAccount = findMemberSavingAccountByAccountName(memberId, accountName);
         if (memberSavingAccount.isPresent()) {
-            throw new SavingAccountAlreadyExistsException(challengeTitle);
+            throw new SavingAccountAlreadyExistsException(accountName);
         }
 
         // 해당 상품 가입
@@ -140,12 +146,12 @@ public class SavingsService {
                 .findFirst();
     }
 
-    public SavingInfo findSavingsAccountTypeUniqueNo(String challengeTitle) {
-        // 챌린지명과 일치하는 적금 상품 찾기
+    public SavingInfo findSavingInfoByAccountName(String accountName) {
+        // 계좌명이 일치하는 적금 상품 찾기
         return getSavingProducts()
                 .stream()
-                .filter(savingInfo -> savingInfo.getAccountName().equals(challengeTitle))
+                .filter(savingInfo -> savingInfo.getAccountName().equals(accountName))
                 .findFirst()
-                .orElseThrow(() -> new SavingProductNotFoundException(challengeTitle));
+                .orElseThrow(() -> new SavingProductNotFoundException(accountName));
     }
 }
