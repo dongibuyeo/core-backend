@@ -60,5 +60,4 @@ public interface MemberChallengeRepository extends JpaRepository<MemberChallenge
             "WHERE c.type = :challengeType " +
             "AND c.status = :challengeStatus ")
     List<MemberChallenge> findAllByChallengeTypeAndChallengeStatus(ChallengeType challengeType, ChallengeStatus challengeStatus);
-
 }

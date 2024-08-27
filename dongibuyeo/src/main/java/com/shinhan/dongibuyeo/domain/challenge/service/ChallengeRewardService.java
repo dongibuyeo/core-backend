@@ -173,9 +173,9 @@ public class ChallengeRewardService {
     /**
      * 챌린지 계좌 -> 유저 챌린지 계좌 환급 메서드
      *
-     * @param member    환급 대상 회원
+     * @param member 환급 대상 회원
      * @param challenge 환급 챌린지
-     * @param deposit   환급금
+     * @param deposit 환급금
      */
     public void transferFromChallengeAccountToMemberAccount(Member member, Challenge challenge, Long deposit) {
         MemberResponse adminMember = memberService.findAdminMember();

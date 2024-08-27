@@ -45,7 +45,6 @@ public class MemberService {
     }
 
     public Member getMemberById(UUID id) {
-        log.info("[getMemberById] id: {}", id);
         return memberRepository.findMemberById(id)
                 .orElseThrow(() -> new MemberNotFoundException(id));
     }
