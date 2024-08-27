@@ -1,7 +1,5 @@
 package com.shinhan.dongibuyeo.domain.challenge.service;
 
-import com.shinhan.dongibuyeo.domain.account.entity.Account;
-import com.shinhan.dongibuyeo.domain.account.service.AccountService;
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.JoinChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.*;
 import com.shinhan.dongibuyeo.domain.challenge.entity.*;
@@ -11,9 +9,7 @@ import com.shinhan.dongibuyeo.domain.challenge.repository.ChallengeRepository;
 import com.shinhan.dongibuyeo.domain.challenge.repository.MemberChallengeRepository;
 import com.shinhan.dongibuyeo.domain.member.entity.Member;
 import com.shinhan.dongibuyeo.domain.member.service.MemberService;
-import com.shinhan.dongibuyeo.domain.savings.dto.request.MakeSavingAccountRequest;
 import com.shinhan.dongibuyeo.domain.savings.dto.response.SavingAccountsDetail;
-import com.shinhan.dongibuyeo.domain.savings.dto.response.SavingInfo;
 import com.shinhan.dongibuyeo.domain.savings.exception.SavingAccountNotFoundException;
 import com.shinhan.dongibuyeo.domain.savings.service.SavingsService;
 import org.springframework.stereotype.Service;
@@ -104,7 +100,7 @@ public class MemberChallengeService {
         if (challenge.getType() == ChallengeType.SAVINGS_SEVEN) {
             Optional<SavingAccountsDetail> memberSavingAccount = savingsService.findMemberSavingAccountByAccountName(
                     member.getId(),
-                    challenge.getTitle());
+                    challenge.getId() + challenge.getTitle());
 
             if (memberSavingAccount.isEmpty()) {
                 throw new SavingAccountNotFoundException(challenge.getTitle());
