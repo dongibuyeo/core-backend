@@ -49,8 +49,8 @@ public class MemberChallengeController {
     }
 
     @PostMapping("/account")
-    public ResponseEntity<Void> makeMemberChallengeAccount(@RequestBody @Valid MakeAccountRequest request) {
-        memberChallengeService.makeMemberChallengeAccount(request);
+    public ResponseEntity<Void> makeMemberChallengeAccount(@RequestParam @Valid UUID memberId) {
+        memberChallengeService.makeMemberChallengeAccount(memberId);
         return ResponseEntity.ok().build();
     }
 
@@ -66,7 +66,7 @@ public class MemberChallengeController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/score-details")
+    @PostMapping("/score-details")
     public ResponseEntity<ScoreDetailResponse> getChallengeScoreDetail(@RequestBody @Valid MemberChallengeRequest request) {
         return ResponseEntity.ok(memberChallengeService.getChallengeScoreDetail(request.getMemberId(), request.getChallengeId()));
     }

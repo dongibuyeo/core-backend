@@ -5,9 +5,11 @@ import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeType;
 import com.shinhan.dongibuyeo.domain.challenge.entity.DailyScore;
 import com.shinhan.dongibuyeo.domain.challenge.entity.MemberChallenge;
 import com.shinhan.dongibuyeo.domain.challenge.entity.ScoreDetail;
+import com.shinhan.dongibuyeo.domain.challenge.repository.DailyScoreRepository;
 import com.shinhan.dongibuyeo.domain.challenge.service.MemberChallengeService;
 import com.shinhan.dongibuyeo.domain.challenge.service.DailyScoreService;
 import com.shinhan.dongibuyeo.domain.quiz.dto.request.QuizSolveRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
@@ -18,16 +20,19 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Aspect
 @Component
 public class ScoreAspect {
 
     private final MemberChallengeService memberChallengeService;
     private final DailyScoreService dailyScoreService;
+    private final DailyScoreRepository dailyScoreRepository;
 
-    public ScoreAspect(MemberChallengeService memberChallengeService, DailyScoreService dailyScoreService) {
+    public ScoreAspect(MemberChallengeService memberChallengeService, DailyScoreService dailyScoreService, DailyScoreRepository dailyScoreRepository) {
         this.memberChallengeService = memberChallengeService;
         this.dailyScoreService = dailyScoreService;
+        this.dailyScoreRepository = dailyScoreRepository;
     }
 
     /**
@@ -36,6 +41,7 @@ public class ScoreAspect {
     @Transactional
     @AfterReturning("execution(* com.shinhan.dongibuyeo.*.controller.AccountController.accountTransfer(..))")
     public void afterTransfer(JoinPoint joinPoint) {
+        log.info("[afterTransfer] 소비 내역 추적");
         Object[] args = joinPoint.getArgs();
         TransferRequest request = (TransferRequest) args[0];
 
@@ -55,6 +61,7 @@ public class ScoreAspect {
             int currentScore = todayScore.getTotalScore();
             ScoreDetail scoreDetail = new ScoreDetail(challengeType, -5, currentScore - 5);
             todayScore.updateScoreDetails(scoreDetail);
+            dailyScoreRepository.save(todayScore);
         }
     }
 
@@ -78,5 +85,6 @@ public class ScoreAspect {
         int currentScore = todayScore.getTotalScore();
         ScoreDetail scoreDetail = new ScoreDetail("SOLVE_QUIZ", +5, currentScore + 5);
         todayScore.updateScoreDetails(scoreDetail);
+        dailyScoreRepository.save(todayScore);
     }
 }
