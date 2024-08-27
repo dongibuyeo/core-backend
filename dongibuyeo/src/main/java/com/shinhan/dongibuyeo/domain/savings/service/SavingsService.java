@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -111,7 +112,7 @@ public class SavingsService {
 
     @Transactional
     public SavingAccountInfo makeSevenSavingAccount(MakeSevenSavingAccountRequest request) {
-        String accountName = request.getChallengeId() + request.getChallengeTitle();
+        String accountName = request.getChallengeType() + request.getStartDate().format(DateTimeFormatter.ofPattern("yyMMdd"));
         UUID memberId = request.getMemberId();
         String withdrawalAccountNo = request.getWithdrawalAccountNo();
         Long depositBalance = request.getDepositBalance();
