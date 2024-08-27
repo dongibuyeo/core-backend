@@ -8,7 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Getter
@@ -26,14 +26,13 @@ public class DailyScore {
     private LocalDate date;
     private int totalScore;
 
-    @Column(columnDefinition = "JSON")
-    private String scoreDetails;  // JSON 형식으로 점수 세부 정보 저장
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "score_entries", joinColumns = @JoinColumn(name = "daily_score_id"))
+    private List<ScoreDetail> scoreDetails = new ArrayList<>();
 
     @Builder
-    public DailyScore(LocalDate date, String scoreDetails, int totalScore) {
+    public DailyScore(LocalDate date) {
         this.date = date;
-        this.scoreDetails = scoreDetails;
-        this.totalScore = totalScore;
     }
 
     public void updateMemberChallenge(MemberChallenge memberChallenge) {
@@ -43,7 +42,27 @@ public class DailyScore {
         }
     }
 
-    public void updateDailyTotalScore(int score) {
-        this.totalScore += score;
+    public void addScoreDetail(ScoreDetail scoreDetail) {
+        this.scoreDetails.add(scoreDetail);
+        int scoreDifference = scoreDetail.getScore();
+        this.totalScore += scoreDifference;
+        this.memberChallenge.addTotalScore(scoreDifference);
+    }
+
+    public List<ScoreDetail> getScoreDetails() {
+        return Collections.unmodifiableList(scoreDetails);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DailyScore that = (DailyScore) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

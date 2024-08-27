@@ -43,7 +43,10 @@ public class MemberChallenge extends BaseEntity {
 
     private Long additionalReward;
 
-    private Integer totalPoints;
+    private Integer totalScore;
+
+    @Enumerated(EnumType.STRING)
+    private MemberChallengeStatus status;
 
     @Builder
     public MemberChallenge(Member member, Challenge challenge, Long deposit) {
@@ -53,13 +56,18 @@ public class MemberChallenge extends BaseEntity {
         this.deposit = deposit;
         this.baseReward = 0L;
         this.additionalReward = 0L;
-        this.totalPoints = 0;
+        this.totalScore = 0;
+        this.status = MemberChallengeStatus.BEFORE_CALCULATION;
     }
 
-    public void addDailyScore(DailyScore dailyScore, int totalScore) {
-        this.dailyScores.add(dailyScore);
-        dailyScore.updateMemberChallenge(this);
-        this.totalPoints += totalScore;
+    public void addDailyScore(DailyScore dailyScore) {
+        if (!this.dailyScores.contains(dailyScore)) {
+            this.dailyScores.add(dailyScore);
+        }
+    }
+
+    public void addTotalScore(int scoreDifference) {
+        this.totalScore += scoreDifference;
     }
 
     public void updateSuccessStatus(boolean isSuccess) {
@@ -74,4 +82,11 @@ public class MemberChallenge extends BaseEntity {
         this.additionalReward = additionalReward;
     }
 
+    public void completeRefund() {
+        this.status = MemberChallengeStatus.REWARDED;
+    }
+
+    public void updateStatus(MemberChallengeStatus status) {
+        this.status = status;
+    }
 }
