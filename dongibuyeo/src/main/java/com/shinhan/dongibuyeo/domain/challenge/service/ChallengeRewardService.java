@@ -139,7 +139,7 @@ public class ChallengeRewardService {
                 .sorted(Comparator.comparingInt(MemberChallenge::getTotalScore).reversed())
                 .toList();
 
-        int topPerformersCount = (int) Math.ceil(sortedChallenges.size() * 0.1);
+        int topPerformersCount = sortedChallenges.size() / 10;
         distributeRewardsToGroup(sortedChallenges, 0, topPerformersCount, additionalReward.getTop10PercentRewardPerUnit());
         distributeRewardsToGroup(sortedChallenges, topPerformersCount, sortedChallenges.size(), additionalReward.getLower90PercentRewardPerUnit());
     }

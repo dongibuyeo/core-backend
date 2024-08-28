@@ -13,6 +13,7 @@ import com.shinhan.dongibuyeo.domain.challenge.entity.Challenge;
 import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeStatus;
 import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeType;
 import com.shinhan.dongibuyeo.domain.challenge.entity.MemberChallenge;
+import com.shinhan.dongibuyeo.domain.challenge.exception.ChallengeNotCompletedException;
 import com.shinhan.dongibuyeo.domain.challenge.exception.ChallengeNotFoundException;
 import com.shinhan.dongibuyeo.domain.challenge.exception.MemberChallengeNotFoundException;
 import com.shinhan.dongibuyeo.domain.challenge.mapper.ChallengeMapper;
@@ -285,6 +286,10 @@ public class ChallengeService {
         // 챌린지 기본 정보
         Challenge challenge = findChallengeById(challengeId);
 
+        if (challenge.getStatus() != ChallengeStatus.COMPLETED) {
+            throw new ChallengeNotCompletedException(challengeId);
+        }
+
         // 환급 조회를 위한 정보
         long totalDeposit = challenge.getTotalDeposit();
         long remainingFromFailure = memberChallengeRepository.getSumOfFailedBaseRewards(challengeId);
@@ -324,6 +329,10 @@ public class ChallengeService {
     public MemberChallengeResultResponse getMemberChallengeResult(UUID challengeId, UUID memberId) {
         // 챌린지 기본 정보
         Challenge challenge = findChallengeById(challengeId);
+
+        if (challenge.getStatus() != ChallengeStatus.COMPLETED) {
+            throw new ChallengeNotCompletedException(challengeId);
+        }
 
         // 환급 조회를 위한 정보
         long totalDeposit = challenge.getTotalDeposit();
