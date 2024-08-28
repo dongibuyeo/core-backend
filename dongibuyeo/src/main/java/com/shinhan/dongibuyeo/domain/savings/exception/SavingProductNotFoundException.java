@@ -1,11 +1,10 @@
 package com.shinhan.dongibuyeo.domain.savings.exception;
 
-import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeType;
-import com.shinhan.dongibuyeo.global.exception.BaseException;
+import com.shinhan.dongibuyeo.global.exception.NotFoundException;
 
 import java.util.Map;
 
-public class SavingProductNotFoundException extends BaseException {
+public class SavingProductNotFoundException extends NotFoundException {
 
     public SavingProductNotFoundException(String accountName) {
         super(
