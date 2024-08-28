@@ -1,0 +1,15 @@
+services:
+  db:
+    image: mysql:latest
+    container_name: db
+    ports:
+      - 3306:3306
+    env_file: .env
+    environment:
+      TZ: Asia/Seoul
+    restart: always
+    networks:
+      - backend
+
+networks:
+  backend:
