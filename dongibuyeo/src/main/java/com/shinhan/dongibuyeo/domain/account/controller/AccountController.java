@@ -37,6 +37,11 @@ public class AccountController {
         return ResponseEntity.ok(accountService.getAllAccountsByMemberId(memberId));
     }
 
+    @GetMapping("/challenge/{memberId}")
+    public ResponseEntity<AccountDetailInfo> getChallengeAccountByMemberId(@PathVariable("memberId") UUID memberId) {
+        return ResponseEntity.ok(accountService.getChallengeAccountByMemberId(memberId));
+    }
+
     @GetMapping("/member/{memberId}/{accountNo}")
     public ResponseEntity<AccountDetailInfo> getAccountByAccountId(@PathVariable("memberId") UUID memberId, @PathVariable("accountNo") String accountNo) {
         return ResponseEntity.ok(accountService.getAccountByAccountNo(memberId,accountNo));
