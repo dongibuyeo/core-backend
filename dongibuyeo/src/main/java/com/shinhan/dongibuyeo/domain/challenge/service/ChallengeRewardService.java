@@ -1,6 +1,5 @@
 package com.shinhan.dongibuyeo.domain.challenge.service;
 
-import com.shinhan.dongibuyeo.domain.account.dto.request.TransactionHistoryRequest;
 import com.shinhan.dongibuyeo.domain.account.dto.request.TransferRequest;
 import com.shinhan.dongibuyeo.domain.account.entity.Account;
 import com.shinhan.dongibuyeo.domain.account.service.AccountService;
@@ -9,8 +8,6 @@ import com.shinhan.dongibuyeo.domain.challenge.entity.Challenge;
 import com.shinhan.dongibuyeo.domain.challenge.entity.MemberChallenge;
 import com.shinhan.dongibuyeo.domain.challenge.entity.MemberChallengeStatus;
 import com.shinhan.dongibuyeo.domain.challenge.score.util.ScoreUtils;
-import com.shinhan.dongibuyeo.domain.consume.dto.request.ConsumtionRequest;
-import com.shinhan.dongibuyeo.domain.consume.dto.response.ConsumtionResponse;
 import com.shinhan.dongibuyeo.domain.consume.service.ConsumeService;
 import com.shinhan.dongibuyeo.domain.member.dto.response.MemberResponse;
 import com.shinhan.dongibuyeo.domain.member.entity.Member;
@@ -22,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
@@ -117,13 +113,18 @@ public class ChallengeRewardService {
 
     /**
      * 추가 환급금 계산 메서드
-     * - 상위 10%의 유저들과 상위 90% 유저들이 상금의 50%씩을 배분받는다.
+     * - 성공 유저 중 상위 10%의 유저들과 상위 90% 유저들이 상금의 50%씩을 배분받는다.
      * - ChallengeService의 calculateEstimatedReward 메서드를 활용하여 만원 단위의 추가 환급금을 구한 뒤 계산
      */
     private void getConsumptionAdditionalRewards(List<MemberChallenge> memberChallenges, long totalDeposit) {
-        Challenge challenge = memberChallenges.get(0).getChallenge();
-        int top10PercentMemberNum = challenge.getParticipants() / 10;
-        int lower90PercentMemberNum = challenge.getParticipants() - top10PercentMemberNum;
+        List<MemberChallenge> successMembersOrderByScore = memberChallenges.stream()
+                .filter(MemberChallenge::getIsSuccess)
+                .sorted(Comparator.comparingInt(MemberChallenge::getTotalScore).reversed())
+                .toList();
+
+        int totalCountOfSuccessMember = successMembersOrderByScore.size();
+        int top10PercentMemberNum = totalCountOfSuccessMember / 10;
+        int lower90PercentMemberNum = totalCountOfSuccessMember - top10PercentMemberNum;
 
         long leftDeposit = calculateRemainingPool(memberChallenges, totalDeposit);
 
@@ -135,13 +136,8 @@ public class ChallengeRewardService {
                 lower90PercentMemberNum
         );
 
-        List<MemberChallenge> sortedChallenges = memberChallenges.stream()
-                .sorted(Comparator.comparingInt(MemberChallenge::getTotalScore).reversed())
-                .toList();
-
-        int topPerformersCount = sortedChallenges.size() / 10;
-        distributeRewardsToGroup(sortedChallenges, 0, topPerformersCount, additionalReward.getTop10PercentRewardPerUnit());
-        distributeRewardsToGroup(sortedChallenges, topPerformersCount, sortedChallenges.size(), additionalReward.getLower90PercentRewardPerUnit());
+        distributeRewardsToGroup(successMembersOrderByScore, 0, top10PercentMemberNum, additionalReward.getTop10PercentRewardPerUnit());
+        distributeRewardsToGroup(successMembersOrderByScore, top10PercentMemberNum, totalCountOfSuccessMember, additionalReward.getLower90PercentRewardPerUnit());
     }
 
     private void distributeRewardsToGroup(List<MemberChallenge> memberChallenges, int startIndex, int endIndex, long rewardPerUnit) {

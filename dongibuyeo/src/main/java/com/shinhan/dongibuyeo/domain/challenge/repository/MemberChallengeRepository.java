@@ -7,7 +7,7 @@ import com.shinhan.dongibuyeo.domain.challenge.entity.Challenge;
 import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeStatus;
 import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeType;
 import com.shinhan.dongibuyeo.domain.challenge.entity.MemberChallenge;
-import org.springframework.data.domain.Pageable;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -70,7 +70,9 @@ public interface MemberChallengeRepository extends JpaRepository<MemberChallenge
             "JOIN mc.member m " +
             "WHERE mc.challenge.id = :challengeId " +
             "ORDER BY mc.totalScore DESC")
-    List<TopRankerInfo> findTop5ByChallengeId(@Param("challengeId") UUID challengeId);;
+    List<TopRankerInfo> findTop5ByChallengeId(@Param("challengeId") UUID challengeId);
+
+    ;
 
     @Query("SELECT mc.totalScore FROM MemberChallenge mc WHERE mc.challenge.id = :challengeId ORDER BY mc.totalScore DESC")
     List<Integer> findAllScoresByChallengeId(@Param("challengeId") UUID challengeId);
@@ -79,6 +81,11 @@ public interface MemberChallengeRepository extends JpaRepository<MemberChallenge
             "FROM MemberChallenge mc " +
             "WHERE mc.challenge.id = :challengeId AND mc.isSuccess = false")
     Long getSumOfFailedBaseRewards(@Param("challengeId") UUID challengeId);
+
+    @Query("SELECT COUNT(mc.id) " +
+            "FROM MemberChallenge mc " +
+            "WHERE mc.challenge.id = :challengeId AND mc.isSuccess = true")
+    Integer getTotalCountOfSuccessMember(@Param("challengeId") UUID challengeId);
 
     @Query("SELECT NEW com.shinhan.dongibuyeo.domain.challenge.dto.response.ChallengeRewardStatistics(" +
             "SUM(CASE WHEN mc.totalScore >= :cutoffScore THEN 1 ELSE 0 END), " +
