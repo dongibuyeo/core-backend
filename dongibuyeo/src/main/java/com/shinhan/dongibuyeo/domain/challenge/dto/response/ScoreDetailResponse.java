@@ -11,5 +11,5 @@ import java.util.List;
 @AllArgsConstructor
 public class ScoreDetailResponse {
     private Integer totalPoints;
-    private List<DailyScoreDetail> dailyScores;
+    private List<DailyScoreDetailResponse> dailyScores;
 }

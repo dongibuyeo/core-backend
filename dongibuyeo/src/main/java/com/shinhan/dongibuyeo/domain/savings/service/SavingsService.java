@@ -4,8 +4,6 @@ import com.shinhan.dongibuyeo.domain.account.entity.Account;
 import com.shinhan.dongibuyeo.domain.account.mapper.AccountMapper;
 import com.shinhan.dongibuyeo.domain.account.repository.AccountRepository;
 import com.shinhan.dongibuyeo.domain.account.service.AccountService;
-import com.shinhan.dongibuyeo.domain.challenge.entity.Challenge;
-import com.shinhan.dongibuyeo.domain.challenge.service.ChallengeService;
 import com.shinhan.dongibuyeo.domain.member.entity.Member;
 import com.shinhan.dongibuyeo.domain.member.service.MemberService;
 import com.shinhan.dongibuyeo.domain.savings.client.SavingsClient;
@@ -24,7 +22,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -112,7 +109,7 @@ public class SavingsService {
 
     @Transactional
     public SavingAccountInfo makeSevenSavingAccount(MakeSevenSavingAccountRequest request) {
-        String accountName = request.getChallengeType() + request.getStartDate().format(DateTimeFormatter.ofPattern("yyMMdd"));
+        String accountName = request.getChallengeType() + request.getStartDate();
         UUID memberId = request.getMemberId();
         String withdrawalAccountNo = request.getWithdrawalAccountNo();
         Long depositBalance = request.getDepositBalance();

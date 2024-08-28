@@ -286,16 +286,16 @@ public class MemberChallengeService {
         MemberChallenge memberChallenge = memberChallengeRepository.findMemberChallengeByChallengeIdAndMemberId(challengeId, memberId)
                 .orElseThrow(() -> new MemberChallengeNotFoundException(challengeId, memberId));
 
-        List<DailyScoreDetail> dailyScores = memberChallenge.getDailyScores().stream()
+        List<DailyScoreDetailResponse> dailyScores = memberChallenge.getDailyScores().stream()
                 .map(this::convertToDailyScoreDetail)
-                .sorted(Comparator.comparing(DailyScoreDetail::getDate).reversed())
+                .sorted(Comparator.comparing(DailyScoreDetailResponse::getDate).reversed())
                 .collect(Collectors.toList());
 
         return new ScoreDetailResponse(memberChallenge.getTotalScore(), dailyScores);
     }
 
-    private DailyScoreDetail convertToDailyScoreDetail(DailyScore dailyScore) {
-        return DailyScoreDetail.builder()
+    private DailyScoreDetailResponse convertToDailyScoreDetail(DailyScore dailyScore) {
+        return DailyScoreDetailResponse.builder()
                 .date(dailyScore.getDate().toString())
                 .entries(dailyScore.getScoreDetails())
                 .build();

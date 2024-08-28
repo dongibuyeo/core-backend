@@ -10,7 +10,7 @@ import java.util.List;
 @Getter
 @Builder
 @AllArgsConstructor
-public class DailyScoreDetail {
+public class DailyScoreDetailResponse {
     private String date;
     private List<ScoreDetail> entries;
 }

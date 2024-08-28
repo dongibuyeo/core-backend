@@ -40,7 +40,7 @@ public class MemberChallengeResponse {
                                    Integer participants, Boolean isSuccess, Long memberDeposit,
                                    Long baseReward, Long additionalReward, Integer totalScore) {
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
 
         this.challengeId = challengeId;
         this.type = type;

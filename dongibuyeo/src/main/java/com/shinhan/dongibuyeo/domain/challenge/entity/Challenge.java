@@ -11,11 +11,10 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Entity
 @Getter
@@ -106,6 +105,14 @@ public class Challenge extends BaseEntity {
     public void updateDate(LocalDate startDate, LocalDate endDate) {
         this.startDate = startDate;
         this.endDate = endDate;
+        updateStatus();
+    }
+
+    public void updateDate(String startDate, String endDate) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+
+        this.startDate = LocalDate.parse(startDate, formatter);;
+        this.endDate = LocalDate.parse(endDate, formatter);;
         updateStatus();
     }
 
