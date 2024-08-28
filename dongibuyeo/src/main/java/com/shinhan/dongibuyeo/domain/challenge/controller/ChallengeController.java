@@ -1,10 +1,7 @@
 package com.shinhan.dongibuyeo.domain.challenge.controller;
 
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.ChallengeRequest;
-import com.shinhan.dongibuyeo.domain.challenge.dto.response.ChallengeRankResponse;
-import com.shinhan.dongibuyeo.domain.challenge.dto.response.ChallengeResponse;
-import com.shinhan.dongibuyeo.domain.challenge.dto.response.AdditionalRewardResponse;
-import com.shinhan.dongibuyeo.domain.challenge.dto.response.MemberChallengeRankResponse;
+import com.shinhan.dongibuyeo.domain.challenge.dto.response.*;
 import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeStatus;
 import com.shinhan.dongibuyeo.domain.challenge.service.ChallengeService;
 import jakarta.validation.Valid;
@@ -73,4 +70,14 @@ public class ChallengeController {
         return ResponseEntity.ok(challengeService.calculateEstimatedReward(challengeId));
     }
 
+    @GetMapping("/result/{challengeId}")
+    public ResponseEntity<ChallengeResultResponse> getChallengeResult(@PathVariable UUID challengeId) {
+        return ResponseEntity.ok(challengeService.getChallengeResult(challengeId));
+    }
+
+    @GetMapping("/result/my-challenge")
+    public ResponseEntity<MemberChallengeResultResponse> getMyChallengeResult(@RequestParam UUID challengeId,
+                                                                       @RequestParam UUID memberId) {
+        return ResponseEntity.ok(challengeService.getMemberChallengeResult(challengeId, memberId));
+    }
 }

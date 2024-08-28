@@ -96,19 +96,6 @@ public class ChallengeRewardService {
         }
     }
 
-    private long getTotalConsumption(UUID memberId, LocalDate startDate, LocalDate endDate, TransferType transferType) {
-        ConsumtionRequest request = new ConsumtionRequest(
-                transferType,
-                TransactionHistoryRequest.builder()
-                        .memberId(memberId)
-                        .startDate(startDate.format(DateTimeFormatter.ofPattern("yyyyMMdd")))
-                        .endDate(endDate.format(DateTimeFormatter.ofPattern("yyyyMMdd")))
-                        .build()
-        );
-        ConsumtionResponse response = consumeService.getTotalConsumtion(request);
-        return response.getTotalConsumtion();
-    }
-
     private long calculateBaseReward(boolean isSuccess, MemberChallenge memberChallenge, long previousMonthConsumption, long currentMonthConsumption) {
         if (isSuccess) {
             return memberChallenge.getDeposit();
@@ -135,7 +122,7 @@ public class ChallengeRewardService {
      */
     private void getConsumptionAdditionalRewards(List<MemberChallenge> memberChallenges, long totalDeposit) {
         Challenge challenge = memberChallenges.get(0).getChallenge();
-        int top10PercentMemberNum = (int) Math.ceil(challenge.getParticipants() * 0.1);
+        int top10PercentMemberNum = challenge.getParticipants() / 10;
         int lower90PercentMemberNum = challenge.getParticipants() - top10PercentMemberNum;
 
         long leftDeposit = calculateRemainingPool(memberChallenges, totalDeposit);

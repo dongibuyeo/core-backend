@@ -1,5 +1,6 @@
 package com.shinhan.dongibuyeo.domain.challenge.repository;
 
+import com.shinhan.dongibuyeo.domain.challenge.dto.response.ChallengeRewardStatistics;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.MemberChallengeResponse;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.TopRankerInfo;
 import com.shinhan.dongibuyeo.domain.challenge.entity.Challenge;
@@ -73,4 +74,21 @@ public interface MemberChallengeRepository extends JpaRepository<MemberChallenge
 
     @Query("SELECT mc.totalScore FROM MemberChallenge mc WHERE mc.challenge.id = :challengeId ORDER BY mc.totalScore DESC")
     List<Integer> findAllScoresByChallengeId(@Param("challengeId") UUID challengeId);
+
+    @Query("SELECT SUM(mc.baseReward) " +
+            "FROM MemberChallenge mc " +
+            "WHERE mc.challenge.id = :challengeId AND mc.isSuccess = false")
+    Long getSumOfFailedBaseRewards(@Param("challengeId") UUID challengeId);
+
+    @Query("SELECT NEW com.shinhan.dongibuyeo.domain.challenge.dto.response.ChallengeRewardStatistics(" +
+            "SUM(CASE WHEN mc.totalScore >= :cutoffScore THEN 1 ELSE 0 END), " +
+            "SUM(CASE WHEN mc.totalScore >= :cutoffScore THEN mc.additionalReward ELSE 0 END), " +
+            "SUM(CASE WHEN mc.totalScore < :cutoffScore THEN 1 ELSE 0 END), " +
+            "SUM(CASE WHEN mc.totalScore < :cutoffScore THEN mc.additionalReward ELSE 0 END)) " +
+            "FROM MemberChallenge mc " +
+            "WHERE mc.challenge.id = :challengeId AND mc.isSuccess = true")
+    ChallengeRewardStatistics getChallengeRewardStatistics(
+            @Param("challengeId") UUID challengeId,
+            @Param("cutoffScore") Integer cutoffScore
+    );
 }

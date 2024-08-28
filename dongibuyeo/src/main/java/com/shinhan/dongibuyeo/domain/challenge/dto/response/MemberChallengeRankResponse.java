@@ -16,6 +16,6 @@ public class MemberChallengeRankResponse {
 
     private Integer totalScore;
     private Double percentileRank;
-    private Integer top10PercentCutoff;;
+    private Integer top10PercentCutoff;
 
 }

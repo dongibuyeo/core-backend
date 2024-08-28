@@ -2,17 +2,22 @@ package com.shinhan.dongibuyeo.domain.consume.service;
 
 import com.shinhan.dongibuyeo.domain.account.client.AccountClient;
 import com.shinhan.dongibuyeo.domain.account.dto.client.ShinhanTransactionHistoryResponse;
+import com.shinhan.dongibuyeo.domain.account.dto.request.TransactionHistoryRequest;
 import com.shinhan.dongibuyeo.domain.account.dto.response.TransactionHistory;
 import com.shinhan.dongibuyeo.domain.account.mapper.AccountMapper;
 import com.shinhan.dongibuyeo.domain.consume.dto.request.ConsumtionRequest;
 import com.shinhan.dongibuyeo.domain.consume.dto.response.ConsumtionResponse;
 import com.shinhan.dongibuyeo.domain.member.entity.Member;
 import com.shinhan.dongibuyeo.domain.member.service.MemberService;
+import com.shinhan.dongibuyeo.global.entity.TransferType;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Service
@@ -58,4 +63,17 @@ public class ConsumeService {
         return response.getRec().getTransactions().stream().filter(x -> x.getTransactionSummary().startsWith(request.getTransferType().toString())).toList();
     }
 
+    @Transactional
+    public long getTotalConsumption(UUID memberId, LocalDate startDate, LocalDate endDate, TransferType transferType) {
+        ConsumtionRequest request = new ConsumtionRequest(
+                transferType,
+                TransactionHistoryRequest.builder()
+                        .memberId(memberId)
+                        .startDate(startDate.format(DateTimeFormatter.ofPattern("yyyyMMdd")))
+                        .endDate(endDate.format(DateTimeFormatter.ofPattern("yyyyMMdd")))
+                        .build()
+        );
+        ConsumtionResponse response = getTotalConsumtion(request);
+        return response.getTotalConsumtion();
+    }
 }
