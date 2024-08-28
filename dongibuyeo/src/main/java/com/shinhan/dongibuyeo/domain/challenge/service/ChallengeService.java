@@ -266,7 +266,6 @@ public class ChallengeService {
         int top10PercentMembersNum = (int) (totalParticipants * successRate * 0.1);
         int lower90PercentMembersNum = totalParticipants - top10PercentMembersNum;
 
-        // 상금 계산
         long leftDeposit = (long) Math.floor(totalDeposit * (1-successRate) * bounceBackRate);
         return ScoreUtils.calculateEstimatedAdditionalRewardPerUnit(
                 challengeInterestRate,

@@ -24,7 +24,8 @@ public class ScoreUtils {
             int lower90PercentMemberNum) {
 
         // 총 상금: 잔여 금액 + (총상금 * 연이자/12)
-        long totalReward = leftDeposit + (long) (totalDeposit * (interestRate / 12));
+        long interestEarned = (long) (totalDeposit * (interestRate / 12));
+        long totalReward = leftDeposit + interestEarned;
 
         // 상위 퍼센트 단위 상금 계산: (상금 * 0.5) / 해당 그룹 회원수
         long top10RewardPerUnit = (totalReward / 2) / top10PercentMemberNum;
@@ -33,8 +34,12 @@ public class ScoreUtils {
         // RewardResponseDTO 객체 생성 및 반환
         return AdditionalRewardResponse.builder()
                 .totalReward(totalReward)
+                .interestEarned(interestEarned)
+                .remainingFromFailures(leftDeposit)
                 .top10PercentRewardPerUnit(top10RewardPerUnit)
                 .lower90PercentRewardPerUnit(lower90RewardPerUnit)
+                .top10PercentMemberNum(top10PercentMemberNum)
+                .lower90PercentMemberNum(lower90PercentMemberNum)
                 .build();
     }
 }
