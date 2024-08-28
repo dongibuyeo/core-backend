@@ -27,7 +27,9 @@ public class ChatRoomMapper {
         return new MessageResponse(
                 message.getMember().getId(),
                 message.getMember().getName(),
-                message.getMessage()
+                message.getMessage(),
+                message.getMember().getProfileImage(),
+                message.getCreatedAt()
         );
     }
 }
