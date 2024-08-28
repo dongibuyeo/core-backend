@@ -85,8 +85,8 @@ public class ChallengeRewardService {
         for (MemberChallenge memberChallenge : memberChallenges) {
             UUID memberId = memberChallenge.getMember().getId();
 
-            long currentPeriodConsumption = getTotalConsumption(memberId, challengeStartDate, challengeEndDate, transferType);
-            long previousPeriodConsumption = getTotalConsumption(memberId, previousPeriodStartDate, previousPeriodEndDate, transferType);
+            long currentPeriodConsumption = consumeService.getTotalConsumption(memberId, challengeStartDate, challengeEndDate, transferType);
+            long previousPeriodConsumption = consumeService.getTotalConsumption(memberId, previousPeriodStartDate, previousPeriodEndDate, transferType);
 
             boolean isSuccess = currentPeriodConsumption < previousPeriodConsumption;
             long baseReward = calculateBaseReward(isSuccess, memberChallenge, previousPeriodConsumption, currentPeriodConsumption);
