@@ -126,4 +126,12 @@ public class AccountService {
 
         account.softDelete();
     }
+
+    @Transactional
+    public AccountDetailInfo getChallengeAccountByMemberId(UUID memberId) {
+        Member member = memberService.getMemberById(memberId);
+        String challengeAccountNo = member.getChallengeAccount().getAccountNo();
+
+        return getAccountByAccountNo(memberId, challengeAccountNo);
+    }
 }
