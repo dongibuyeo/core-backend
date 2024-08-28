@@ -12,7 +12,7 @@ import java.io.IOException;
 @Configuration
 public class FirebaseConfig {
 
-    private static final String FIREBASE_KEY_PATH = "src/main/resources/dongibuyeo-39d99-firebase-adminsdk-n2ef2-274029e929.json";
+    private static final String FIREBASE_KEY_PATH = "resources/dongibuyeo-39d99-firebase-adminsdk-n2ef2-274029e929.json";
 
     @PostConstruct
     public void init() {

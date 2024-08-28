@@ -1,5 +1,6 @@
 package com.shinhan.dongibuyeo.domain.challenge.score.scheduler;
 
+import com.shinhan.dongibuyeo.domain.alarm.service.NotificationService;
 import com.shinhan.dongibuyeo.domain.challenge.entity.Challenge;
 import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeStatus;
 import com.shinhan.dongibuyeo.domain.challenge.repository.ChallengeRepository;
@@ -19,14 +20,16 @@ import java.util.List;
 @Slf4j
 public class ChallengeScheduler {
 
+    private final NotificationService notificationService;
     private final ChallengeRepository challengeRepository;
     private final ChallengeRewardService challengeRewardService;
     private final DailyScoreService dailyScoreService;
 
-    public ChallengeScheduler(ChallengeRepository challengeRepository, ChallengeRewardService challengeRewardService, DailyScoreService dailyScoreService) {
+    public ChallengeScheduler(ChallengeRepository challengeRepository, ChallengeRewardService challengeRewardService, DailyScoreService dailyScoreService, NotificationService notificationService) {
         this.challengeRepository = challengeRepository;
         this.challengeRewardService = challengeRewardService;
         this.dailyScoreService = dailyScoreService;
+        this.notificationService = notificationService;
     }
 
     /**
@@ -39,8 +42,17 @@ public class ChallengeScheduler {
         log.info("Starting daily challenge update and score creation for date: {}", today);
 
         challengeRepository.findAll().forEach(challenge -> {
-            // 챌린지 상태 변경
-            challenge.updateStatus();
+            LocalDate now = LocalDate.now();
+            LocalDate startDate = challenge.getStartDate();
+            LocalDate endDate = challenge.getEndDate();
+
+            if (startDate == null || endDate == null || now.isBefore(startDate)) {
+                challenge.updateStatus(ChallengeStatus.SCHEDULED);
+
+            } else if (challenge.getStatus() == ChallengeStatus.SCHEDULED){
+                notificationService.sendNotificationMemberChallenges(challenge.getChallengeMembers(),"챌린지 시작","사전 신청하신 챌린지가 시작되었습니다!");
+                challenge.updateStatus(ChallengeStatus.IN_PROGRESS);
+            }
 
             // 진행 중인 챌린지 일일 점수 생성
             if (challenge.getStatus() == ChallengeStatus.IN_PROGRESS) {
@@ -70,7 +82,8 @@ public class ChallengeScheduler {
             try {
                 log.info("Processing ended challenge: {}", challenge.getId());
                 challengeRewardService.processConsumptionChallengeRewards(challenge);
-                challenge.updateStatus();
+                challenge.updateStatus(ChallengeStatus.COMPLETED);
+                notificationService.sendNotificationMemberChallenges(challenge.getChallengeMembers(),"챌린지 종료","참여하신 챌린지가 종료되었습니다! 결과를 확인해주세요!");
                 log.info("Challenge {} completed and rewards processed", challenge.getId());
             } catch (Exception e) {
                 log.error("Error processing challenge {}: {}", challenge.getId(), e.getMessage(), e);
