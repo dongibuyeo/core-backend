@@ -1,11 +1,11 @@
 package com.shinhan.dongibuyeo.domain.challenge.exception;
 
-import com.shinhan.dongibuyeo.global.exception.BaseException;
+import com.shinhan.dongibuyeo.global.exception.NotFoundException;
 
 import java.util.Map;
 import java.util.UUID;
 
-public class ChallengeAccountNotFoundException extends BaseException {
+public class ChallengeAccountNotFoundException extends NotFoundException {
 
     public ChallengeAccountNotFoundException(UUID memberId) {
         super(

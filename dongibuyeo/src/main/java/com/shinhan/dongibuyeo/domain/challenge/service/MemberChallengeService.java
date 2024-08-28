@@ -86,7 +86,7 @@ public class MemberChallengeService {
     public MakeAccountResponse makeMemberChallengeAccount(UUID memberId) {
         Member member = memberService.getMemberById(memberId);
         if(member.hasChallengeAccount()) {
-            throw new MemberChallengeAccoutAlreadyExistsException(memberId);
+            throw new MemberChallengeAccountAlreadyExistsException(memberId);
         }
 
         return accountService.makeChallengeAccount(

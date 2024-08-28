@@ -66,7 +66,7 @@ public class CommonExceptionHandler {
     public ResponseEntity<ErrorResponse> handleGlobalException(Exception e) {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .code("INTERNAL_SERVER_ERROR")
-                .message("An unexpected error occurred.")
+                .message(e.getMessage())
                 .build();
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
