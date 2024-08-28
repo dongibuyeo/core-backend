@@ -11,6 +11,7 @@ import com.shinhan.dongibuyeo.domain.account.entity.Account;
 import com.shinhan.dongibuyeo.domain.account.exception.AccountNotFoundException;
 import com.shinhan.dongibuyeo.domain.account.mapper.AccountMapper;
 import com.shinhan.dongibuyeo.domain.account.repository.AccountRepository;
+import com.shinhan.dongibuyeo.domain.alarm.service.NotificationService;
 import com.shinhan.dongibuyeo.domain.member.entity.Member;
 import com.shinhan.dongibuyeo.domain.member.service.MemberService;
 import jakarta.transaction.Transactional;
@@ -34,11 +35,14 @@ public class AccountService {
 
     private final MemberService memberService;
 
-    public AccountService(AccountRepository accountRepository, AccountClient accountClient, AccountMapper accountMapper, MemberService memberService) {
+    private final NotificationService notificationService;
+
+    public AccountService(AccountRepository accountRepository, AccountClient accountClient, AccountMapper accountMapper, MemberService memberService, NotificationService notificationService) {
         this.accountRepository = accountRepository;
         this.accountClient = accountClient;
         this.accountMapper = accountMapper;
         this.memberService = memberService;
+        this.notificationService = notificationService;
     }
 
     @Transactional
@@ -90,6 +94,8 @@ public class AccountService {
         ShinhanTransferResponse transfer = accountClient.accountTransfer(
             accountMapper.toShinhanTransferRequest(transferRequest,apiKey,member)
         );
+
+
 
         return transfer.getRec();
     }
