@@ -18,6 +18,7 @@ import com.shinhan.dongibuyeo.domain.challenge.exception.MemberChallengeNotFound
 import com.shinhan.dongibuyeo.domain.challenge.mapper.ChallengeMapper;
 import com.shinhan.dongibuyeo.domain.challenge.repository.ChallengeRepository;
 import com.shinhan.dongibuyeo.domain.challenge.repository.MemberChallengeRepository;
+import com.shinhan.dongibuyeo.domain.challenge.score.util.ScoreUtils;
 import com.shinhan.dongibuyeo.domain.member.dto.response.MemberResponse;
 import com.shinhan.dongibuyeo.domain.member.service.MemberService;
 import com.shinhan.dongibuyeo.domain.product.entity.Product;
@@ -60,7 +61,7 @@ public class ChallengeService {
     private Long maxBalance;
 
     @Value("${shinhan.savings.seven.interest-rate}")
-    private double interestRate;
+    private double savingInterestRate;
 
     @Value("${shinhan.quiz.deposit}")
     private Long deposit;
@@ -68,6 +69,14 @@ public class ChallengeService {
     @Value("${shinhan.quiz.head-count}")
     private Long headCount;
 
+    @Value("${shinhan.challenge.estimate.success-rate}")
+    private double successRate;
+
+    @Value("${shinhan.challenge.estimate.bounce-back-rate}")
+    private double bounceBackRate;
+
+    @Value("${shinhan.challenge.interest-rate}")
+    private double challengeInterestRate;
 
     public ChallengeService(MemberService memberService, ChallengeRepository challengeRepository, ChallengeMapper challengeMapper, AccountService accountService, ProductService productService, AccountRepository accountRepository, SavingsService savingsService, MemberChallengeRepository memberChallengeRepository) {
         this.memberService = memberService;
@@ -160,8 +169,8 @@ public class ChallengeService {
                         .subscriptionPeriod(subscriptionPeriod)
                         .minSubscriptionBalance(minBalance)
                         .maxSubscriptionBalance(maxBalance)
-                        .interestRate(interestRate)
-                        .rateDescription(interestRate + "%")
+                        .interestRate(savingInterestRate)
+                        .rateDescription(savingInterestRate + "%")
                         .build()
         );
     }
@@ -247,32 +256,24 @@ public class ChallengeService {
         return scores.get(top10PercentIndex);
     }
 
-    public ChallengeResultResponse calculateEstimatedReward(UUID challengeId) {
+    public AdditionalRewardResponse calculateEstimatedReward(UUID challengeId) {
         Challenge challenge = findChallengeById(challengeId);
 
         Long totalDeposit = challenge.getTotalDeposit();
         int totalParticipants = challenge.getParticipants();
 
         // 총 상금 계산
-        double successRate = 0.18;
-        double interestRate = 0.2;
-
-        int top10PercentMembersNum = (int) (totalParticipants * 0.82 * 0.1);
+        int top10PercentMembersNum = (int) (totalParticipants * successRate * 0.1);
         int lower90PercentMembersNum = totalParticipants - top10PercentMembersNum;
 
         // 상금 계산
-        double reward = (totalDeposit * successRate * rewardDivisionRatio) + (totalDeposit * (interestRate / 12));
-
-        // 상위 퍼센트 단위상금 계산
-        double topPercentRewardPerUnit = (reward * 0.5) / top10PercentMembersNum;
-
-        // 하위 퍼센트 단위상금 계산
-        double lowerPercentRewardPerUnit = (reward * 0.5) / lower90PercentMembersNum;
-
-        return ChallengeResultResponse.builder()
-                .totalReward(reward)
-                .top10PercentRewardPerUnit(top10PercentRewardPerUnit)
-                .lower90PercentRewardPerUnit(lower90PercentRewardPerUnit)
-                .build();
+        long leftDeposit = (long) Math.floor(totalDeposit * (1-successRate) * bounceBackRate);
+        return ScoreUtils.calculateEstimatedAdditionalRewardPerUnit(
+                challengeInterestRate,
+                totalDeposit,
+                leftDeposit,
+                top10PercentMembersNum,
+                lower90PercentMembersNum
+        );
     }
 }

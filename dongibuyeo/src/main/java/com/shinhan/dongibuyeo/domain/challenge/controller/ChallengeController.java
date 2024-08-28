@@ -3,7 +3,7 @@ package com.shinhan.dongibuyeo.domain.challenge.controller;
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.ChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.ChallengeRankResponse;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.ChallengeResponse;
-import com.shinhan.dongibuyeo.domain.challenge.dto.response.ChallengeResultResponse;
+import com.shinhan.dongibuyeo.domain.challenge.dto.response.AdditionalRewardResponse;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.MemberChallengeRankResponse;
 import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeStatus;
 import com.shinhan.dongibuyeo.domain.challenge.service.ChallengeService;
@@ -69,7 +69,7 @@ public class ChallengeController {
     }
 
     @GetMapping("/estimate-reward")
-    public ResponseEntity<ChallengeResultResponse> calculateEstimatedReward(@RequestParam UUID challengeId) {
+    public ResponseEntity<AdditionalRewardResponse> calculateEstimatedReward(@RequestParam UUID challengeId) {
         return ResponseEntity.ok(challengeService.calculateEstimatedReward(challengeId));
     }
 
