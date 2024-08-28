@@ -6,8 +6,8 @@ import com.shinhan.dongibuyeo.domain.challenge.entity.DailyScore;
 import com.shinhan.dongibuyeo.domain.challenge.entity.MemberChallenge;
 import com.shinhan.dongibuyeo.domain.challenge.entity.ScoreDetail;
 import com.shinhan.dongibuyeo.domain.challenge.repository.DailyScoreRepository;
-import com.shinhan.dongibuyeo.domain.challenge.service.MemberChallengeService;
 import com.shinhan.dongibuyeo.domain.challenge.service.DailyScoreService;
+import com.shinhan.dongibuyeo.domain.challenge.service.MemberChallengeService;
 import com.shinhan.dongibuyeo.domain.quiz.dto.request.QuizSolveRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
@@ -91,6 +91,6 @@ public class ScoreAspect {
         int currentScore = todayScore.getTotalScore();
         ScoreDetail scoreDetail = new ScoreDetail("SOLVE_QUIZ", +5, currentScore + 5);
         todayScore.addScoreDetail(scoreDetail);
-        dailyScoreRepository.save(todayScore);
+        memberChallenge.addDailyScore(todayScore);
     }
 }

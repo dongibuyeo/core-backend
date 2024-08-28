@@ -10,8 +10,11 @@ import com.shinhan.dongibuyeo.domain.challenge.entity.MemberChallengeStatus;
 import com.shinhan.dongibuyeo.domain.consume.dto.request.ConsumtionRequest;
 import com.shinhan.dongibuyeo.domain.consume.dto.response.ConsumtionResponse;
 import com.shinhan.dongibuyeo.domain.consume.service.ConsumeService;
+import com.shinhan.dongibuyeo.domain.member.dto.response.MemberResponse;
 import com.shinhan.dongibuyeo.domain.member.entity.Member;
+import com.shinhan.dongibuyeo.domain.member.service.MemberService;
 import com.shinhan.dongibuyeo.global.entity.TransferType;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,16 +25,18 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class ChallengeRewardService {
 
     private final ConsumeService consumeService;
     private final AccountService accountService;
+    private final MemberService memberService;
 
-
-    public ChallengeRewardService(ConsumeService consumeService, AccountService accountService) {
+    public ChallengeRewardService(ConsumeService consumeService, AccountService accountService, MemberService memberService) {
         this.consumeService = consumeService;
         this.accountService = accountService;
+        this.memberService = memberService;
     }
 
     /**
@@ -173,9 +178,11 @@ public class ChallengeRewardService {
      * @param deposit 환급금
      */
     public void transferFromChallengeAccountToMemberAccount(Member member, Challenge challenge, Long deposit) {
+        MemberResponse adminMember = memberService.findAdminMember();
         Account memberChallengeAccount = member.getChallengeAccount();
+        log.info("[환급 메서드] memberAccount: {}, challengeAccount: {}", memberChallengeAccount.getAccountNo(), challenge.getAccount().getAccountNo());
         accountService.accountTransfer(new TransferRequest(
-                member.getId(),
+                adminMember.getMemberId(),
                 memberChallengeAccount.getAccountNo(),
                 challenge.getAccount().getAccountNo(),
                 deposit,

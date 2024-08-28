@@ -246,9 +246,10 @@ public class MemberChallengeService {
         memberChallenge.softDelete();
 
         // 적금 해지(유저 적금 계좌 -> 유저 적금 납입 계좌로 자동 환급됨)
+        String accountName = challenge.getType().toString() + challenge.getStartDate().format(DateTimeFormatter.ofPattern("yyMMdd"));
         Optional<SavingAccountsDetail> savingChallengeAccount = savingsService.getAllSavingsByMemberId(memberId)
                 .stream()
-                .filter(savings -> savings.getAccountName().equals(challenge.getTitle()))
+                .filter(savings -> savings.getAccountName().equals(accountName))
                 .findFirst();
 
         if (savingChallengeAccount.isPresent()) {
@@ -309,7 +310,7 @@ public class MemberChallengeService {
                 .orElseThrow(() -> new MemberChallengeNotFoundException(memberId, challengeType));
     }
 
-    public List<MemberChallenge> findsByChallengeTypeAndStatus(ChallengeType challengeType, ChallengeStatus challengeStatus) {
+    public List<MemberChallenge> findAllByChallengeTypeAndStatus(ChallengeType challengeType, ChallengeStatus challengeStatus) {
         return memberChallengeRepository.findAllByChallengeTypeAndChallengeStatus(challengeType, challengeStatus);
     }
 
@@ -331,5 +332,23 @@ public class MemberChallengeService {
 
         memberChallenge.updateStatus(MemberChallengeStatus.REWARDED);
         return new RewardResponse(baseReward, additionalReward);
+    }
+
+    public ChallengeStatusCountResponse getChallengeStatusCount(UUID memberId) {
+        List<ChallengeResponse> challenges = findAllChallengesByMemberId(memberId);
+
+        int scheduledCount = 0;
+        int inProgressCount = 0;
+        int completedCount = 0;
+
+        for (ChallengeResponse challenge : challenges) {
+            switch (challenge.getStatus()) {
+                case SCHEDULED -> scheduledCount++;
+                case IN_PROGRESS -> inProgressCount++;
+                case COMPLETED -> completedCount++;
+            }
+        }
+
+        return ChallengeStatusCountResponse.of(scheduledCount, inProgressCount, completedCount);
     }
 }

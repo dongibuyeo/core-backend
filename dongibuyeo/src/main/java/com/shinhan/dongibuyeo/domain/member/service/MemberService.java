@@ -87,8 +87,8 @@ public class MemberService {
         return true;
     }
 
-    public MemberResponse login(MemberLoginRequest request) {
-        Member member = getMemberByEmail(request.getEmail());
+    public MemberResponse login(String email) {
+        Member member = getMemberByEmail(email);
         return memberMapper.toMemberResponse(member);
     }
 
