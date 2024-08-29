@@ -85,7 +85,7 @@ public class MemberChallengeService {
     @Transactional
     public MakeAccountResponse makeMemberChallengeAccount(UUID memberId) {
         Member member = memberService.getMemberById(memberId);
-        if(member.hasChallengeAccount()) {
+        if (member.hasChallengeAccount()) {
             throw new MemberChallengeAccountAlreadyExistsException(memberId);
         }
 
@@ -230,7 +230,7 @@ public class MemberChallengeService {
         member.removeChallenge(memberChallenge);
         memberChallenge.softDelete();
     }
-    
+
     @Transactional
     public void withdrawChallenge(UUID challengeId, UUID memberId) {
         Challenge challenge = findChallengeById(challengeId);
@@ -306,7 +306,7 @@ public class MemberChallengeService {
     }
 
     public MemberChallenge findByMemberIdAndChallengeType(UUID memberId, ChallengeType challengeType) {
-        return  memberChallengeRepository.findByMemberIdAndChallengeType(memberId, challengeType)
+        return memberChallengeRepository.findByMemberIdAndChallengeType(memberId, challengeType)
                 .orElseThrow(() -> new MemberChallengeNotFoundException(memberId, challengeType));
     }
 

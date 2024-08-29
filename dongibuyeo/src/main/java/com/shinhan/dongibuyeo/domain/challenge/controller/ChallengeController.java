@@ -1,7 +1,7 @@
 package com.shinhan.dongibuyeo.domain.challenge.controller;
 
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.ChallengeRequest;
-import com.shinhan.dongibuyeo.domain.challenge.dto.response.ChallengeResponse;
+import com.shinhan.dongibuyeo.domain.challenge.dto.response.*;
 import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeStatus;
 import com.shinhan.dongibuyeo.domain.challenge.service.ChallengeService;
 import jakarta.validation.Valid;
@@ -54,4 +54,30 @@ public class ChallengeController {
         return ResponseEntity.ok(challengeService.updateChallengeByChallengeId(challengeId, request));
     }
 
+    @GetMapping("/rank/{challengeId}")
+    public ResponseEntity<ChallengeRankResponse> getChallengeRank(@PathVariable UUID challengeId) {
+        return ResponseEntity.ok(challengeService.getChallengeRank(challengeId));
+    }
+
+    @GetMapping("/rank/my-challenge")
+    public ResponseEntity<MemberChallengeRankResponse> getMyChallenges(@RequestParam UUID challengeId,
+                                                                       @RequestParam UUID memberId) {
+        return ResponseEntity.ok(challengeService.getMemberChallengeRank(challengeId, memberId));
+    }
+
+    @GetMapping("/estimate-reward")
+    public ResponseEntity<AdditionalRewardResponse> calculateEstimatedReward(@RequestParam UUID challengeId) {
+        return ResponseEntity.ok(challengeService.calculateEstimatedReward(challengeId));
+    }
+
+    @GetMapping("/result/{challengeId}")
+    public ResponseEntity<ChallengeResultResponse> getChallengeResult(@PathVariable UUID challengeId) {
+        return ResponseEntity.ok(challengeService.getChallengeResult(challengeId));
+    }
+
+    @GetMapping("/result/my-challenge")
+    public ResponseEntity<MemberChallengeResultResponse> getMyChallengeResult(@RequestParam UUID challengeId,
+                                                                       @RequestParam UUID memberId) {
+        return ResponseEntity.ok(challengeService.getMemberChallengeResult(challengeId, memberId));
+    }
 }

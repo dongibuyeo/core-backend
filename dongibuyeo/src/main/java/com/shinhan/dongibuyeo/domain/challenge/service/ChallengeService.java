@@ -8,25 +8,33 @@ import com.shinhan.dongibuyeo.domain.account.exception.AccountNotFoundException;
 import com.shinhan.dongibuyeo.domain.account.repository.AccountRepository;
 import com.shinhan.dongibuyeo.domain.account.service.AccountService;
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.ChallengeRequest;
-import com.shinhan.dongibuyeo.domain.challenge.dto.response.ChallengeResponse;
+import com.shinhan.dongibuyeo.domain.challenge.dto.response.*;
 import com.shinhan.dongibuyeo.domain.challenge.entity.Challenge;
 import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeStatus;
 import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeType;
+import com.shinhan.dongibuyeo.domain.challenge.entity.MemberChallenge;
+import com.shinhan.dongibuyeo.domain.challenge.exception.ChallengeNotCompletedException;
 import com.shinhan.dongibuyeo.domain.challenge.exception.ChallengeNotFoundException;
+import com.shinhan.dongibuyeo.domain.challenge.exception.MemberChallengeNotFoundException;
 import com.shinhan.dongibuyeo.domain.challenge.mapper.ChallengeMapper;
 import com.shinhan.dongibuyeo.domain.challenge.repository.ChallengeRepository;
+import com.shinhan.dongibuyeo.domain.challenge.repository.MemberChallengeRepository;
+import com.shinhan.dongibuyeo.domain.challenge.score.util.ScoreUtils;
+import com.shinhan.dongibuyeo.domain.consume.service.ConsumeService;
 import com.shinhan.dongibuyeo.domain.member.dto.response.MemberResponse;
 import com.shinhan.dongibuyeo.domain.member.service.MemberService;
 import com.shinhan.dongibuyeo.domain.product.entity.Product;
 import com.shinhan.dongibuyeo.domain.product.service.ProductService;
 import com.shinhan.dongibuyeo.domain.savings.dto.request.SavingProductRequest;
 import com.shinhan.dongibuyeo.domain.savings.service.SavingsService;
+import com.shinhan.dongibuyeo.global.entity.TransferType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 
@@ -39,9 +47,11 @@ public class ChallengeService {
 
     private final ChallengeMapper challengeMapper;
     private final AccountService accountService;
+    private final ConsumeService consumeService;
     private final ProductService productService;
     private final AccountRepository accountRepository;
     private final SavingsService savingsService;
+    private final MemberChallengeRepository memberChallengeRepository;
 
     @Value("${shinhan.savings.seven.bank-code}")
     private String bankCode;
@@ -56,7 +66,7 @@ public class ChallengeService {
     private Long maxBalance;
 
     @Value("${shinhan.savings.seven.interest-rate}")
-    private double interestRate;
+    private double savingInterestRate;
 
     @Value("${shinhan.quiz.deposit}")
     private Long deposit;
@@ -64,15 +74,25 @@ public class ChallengeService {
     @Value("${shinhan.quiz.head-count}")
     private Long headCount;
 
+    @Value("${shinhan.challenge.estimate.success-rate}")
+    private double successRate;
 
-    public ChallengeService(MemberService memberService, ChallengeRepository challengeRepository, ChallengeMapper challengeMapper, AccountService accountService, ProductService productService, AccountRepository accountRepository, SavingsService savingsService) {
+    @Value("${shinhan.challenge.estimate.bounce-back-rate}")
+    private double bounceBackRate;
+
+    @Value("${shinhan.challenge.interest-rate}")
+    private double challengeInterestRate;
+
+    public ChallengeService(MemberService memberService, ChallengeRepository challengeRepository, ChallengeMapper challengeMapper, AccountService accountService, ConsumeService consumeService, ProductService productService, AccountRepository accountRepository, SavingsService savingsService, MemberChallengeRepository memberChallengeRepository) {
         this.memberService = memberService;
         this.challengeRepository = challengeRepository;
         this.challengeMapper = challengeMapper;
         this.accountService = accountService;
+        this.consumeService = consumeService;
         this.productService = productService;
         this.accountRepository = accountRepository;
         this.savingsService = savingsService;
+        this.memberChallengeRepository = memberChallengeRepository;
     }
 
     public Challenge findChallengeById(UUID challengeId) {
@@ -155,8 +175,8 @@ public class ChallengeService {
                         .subscriptionPeriod(subscriptionPeriod)
                         .minSubscriptionBalance(minBalance)
                         .maxSubscriptionBalance(maxBalance)
-                        .interestRate(interestRate)
-                        .rateDescription(interestRate + "%")
+                        .interestRate(savingInterestRate)
+                        .rateDescription(savingInterestRate + "%")
                         .build()
         );
     }
@@ -199,5 +219,174 @@ public class ChallengeService {
 
     public List<Challenge> findAllChallengesByStatusAndDate(ChallengeType type, LocalDate curDay) {
         return challengeRepository.findAllChallengesByStatusAndDate(type, curDay);
+    }
+
+    public ChallengeRankResponse getChallengeRank(UUID challengeId) {
+        List<Integer> allScores = memberChallengeRepository.findAllScoresByChallengeId(challengeId);
+        int totalParticipants = allScores.size();
+        int top10PercentCutoff = calculateTop10PercentCutoff(allScores, totalParticipants);
+        List<TopRankerInfo> top5RankerInfos = memberChallengeRepository.findTop5ByChallengeId(challengeId);
+
+        return ChallengeRankResponse.builder()
+                .challengeId(challengeId)
+                .top10PercentCutoff(top10PercentCutoff)
+                .top5Members(top5RankerInfos)
+                .build();
+    }
+
+    public MemberChallengeRankResponse getMemberChallengeRank(UUID challengeId, UUID memberId) {
+        List<Integer> allScores = memberChallengeRepository.findAllScoresByChallengeId(challengeId);
+        int totalParticipants = allScores.size();
+        int top10PercentCutoff = calculateTop10PercentCutoff(allScores, totalParticipants);
+
+        MemberChallenge myChallenge = memberChallengeRepository.findMemberChallengeByChallengeIdAndMemberId(challengeId, memberId)
+                .orElseThrow(() -> new MemberChallengeNotFoundException(challengeId, memberId));
+        int myTotalScore = myChallenge.getTotalScore();
+
+        int currentRank = allScores.indexOf(myTotalScore) + 1;
+        double percentileRank = (double) currentRank / totalParticipants * 100;
+
+        return MemberChallengeRankResponse.builder()
+                .memberId(memberId)
+                .challengeId(challengeId)
+                .percentileRank(percentileRank)
+                .totalScore(myTotalScore)
+                .top10PercentCutoff(top10PercentCutoff)
+                .build();
+    }
+
+    public static int calculateTop10PercentCutoff(List<Integer> scores, int totalParticipants) {
+        if (scores.isEmpty()) return 0;
+
+        int top10PercentIndex = Math.max((int) Math.ceil(totalParticipants * 0.1) - 1, 0);
+        return scores.get(top10PercentIndex);
+    }
+
+    public AdditionalRewardResponse calculateEstimatedReward(UUID challengeId) {
+        Challenge challenge = findChallengeById(challengeId);
+
+        Long totalDeposit = challenge.getTotalDeposit();
+        int totalParticipants = challenge.getParticipants();
+
+        // 총 상금 계산
+        int top10PercentMembersNum = (int) (totalParticipants * successRate * 0.1);
+        int lower90PercentMembersNum = totalParticipants - top10PercentMembersNum;
+
+        long leftDeposit = (long) Math.floor(totalDeposit * (1-successRate) * bounceBackRate);
+        return ScoreUtils.calculateEstimatedAdditionalRewardPerUnit(
+                challengeInterestRate,
+                totalDeposit,
+                leftDeposit,
+                top10PercentMembersNum,
+                lower90PercentMembersNum
+        );
+    }
+
+    public ChallengeResultResponse getChallengeResult(UUID challengeId) {
+        // 챌린지 기본 정보
+        Challenge challenge = findChallengeById(challengeId);
+
+        if (challenge.getStatus() != ChallengeStatus.COMPLETED) {
+            throw new ChallengeNotCompletedException(challengeId);
+        }
+
+        // 환급 조회를 위한 정보
+        long totalDeposit = challenge.getTotalDeposit();
+        long remainingFromFailure = memberChallengeRepository.getSumOfFailedBaseRewards(challengeId);
+
+        int totalCountOfSuccessMember = memberChallengeRepository.getTotalCountOfSuccessMember(challengeId);
+        int top10PercentMemberNum = totalCountOfSuccessMember / 10;
+        int lower90PercentMemberNum = totalCountOfSuccessMember - top10PercentMemberNum;
+
+        AdditionalRewardResponse additionalReward = ScoreUtils.calculateEstimatedAdditionalRewardPerUnit(
+                challengeInterestRate,
+                totalDeposit,
+                remainingFromFailure,
+                top10PercentMemberNum,
+                lower90PercentMemberNum
+        );
+
+        return ChallengeResultResponse.builder()
+                .challengeId(challengeId)
+                .type(challenge.getType())
+                .status(challenge.getStatus())
+                .startDate(challenge.getStartDate())
+                .endDate(challenge.getEndDate())
+                .title(challenge.getTitle())
+                .description(challenge.getDescription())
+                .totalDeposit(totalDeposit)
+                .participants(challenge.getParticipants()) // 챌린지 기본 정보
+                .totalReward(additionalReward.getTotalReward())
+                .interestEarned(additionalReward.getInterestEarned())
+                .remainingFromFailures(additionalReward.getRemainingFromFailures())
+                .top10PercentRewardPerUnit(additionalReward.getTop10PercentRewardPerUnit())
+                .lower90PercentRewardPerUnit(additionalReward.getLower90PercentRewardPerUnit())
+                .top10PercentMemberNum(top10PercentMemberNum)
+                .lower90PercentMemberNum(lower90PercentMemberNum) // 환급 정산 정보
+                .build();
+    }
+
+    public MemberChallengeResultResponse getMemberChallengeResult(UUID challengeId, UUID memberId) {
+        // 챌린지 기본 정보
+        Challenge challenge = findChallengeById(challengeId);
+
+        if (challenge.getStatus() != ChallengeStatus.COMPLETED) {
+            throw new ChallengeNotCompletedException(challengeId);
+        }
+
+        // 환급 조회를 위한 정보
+        long totalDeposit = challenge.getTotalDeposit();
+        long remainingFromFailure = memberChallengeRepository.getSumOfFailedBaseRewards(challengeId);
+
+        int totalCountOfSuccessMember = memberChallengeRepository.getTotalCountOfSuccessMember(challengeId);
+        int top10PercentMemberNum = totalCountOfSuccessMember / 10;
+        int lower90PercentMemberNum = totalCountOfSuccessMember - top10PercentMemberNum;
+
+        AdditionalRewardResponse additionalReward = ScoreUtils.calculateEstimatedAdditionalRewardPerUnit(
+                challengeInterestRate,
+                totalDeposit,
+                remainingFromFailure,
+                top10PercentMemberNum,
+                lower90PercentMemberNum
+        );
+
+        MemberChallenge memberChallenge = memberChallengeRepository.findMemberChallengeByChallengeIdAndMemberId(challengeId, memberId)
+                .orElseThrow(() -> new MemberChallengeNotFoundException(challengeId, memberId));
+
+
+        // 회원 소비 정보
+        LocalDate challengeStartDate = challenge.getStartDate();
+        LocalDate challengeEndDate = challenge.getEndDate();
+
+        // 챌린지 기간과 동일한 길이의 직전 기간 계산
+        long challengeDuration = ChronoUnit.DAYS.between(challengeStartDate, challengeEndDate);
+        LocalDate previousPeriodStartDate = challengeStartDate.minusDays(challengeDuration);
+        LocalDate previousPeriodEndDate = challengeStartDate.minusDays(1);
+
+        TransferType transferType = challenge.getType().getTransferType();
+
+        long currentPeriodConsumption = consumeService.getTotalConsumption(memberId, challengeStartDate, challengeEndDate, transferType);
+        long previousPeriodConsumption = consumeService.getTotalConsumption(memberId, previousPeriodStartDate, previousPeriodEndDate, transferType);
+
+        return MemberChallengeResultResponse.builder()
+                .memberId(memberId)
+                .challengeId(challengeId)
+                .type(challenge.getType())
+                .status(challenge.getStatus())
+                .startDate(challenge.getStartDate())
+                .endDate(challenge.getEndDate())
+                .title(challenge.getTitle())
+                .description(challenge.getDescription())        // 챌린지 정보
+                .myStatus(memberChallenge.getStatus())
+                .isSuccess(memberChallenge.getIsSuccess())
+                .baseReward(memberChallenge.getBaseReward())
+                .additionalReward(memberChallenge.getAdditionalReward())    // 멤버챌린지 정보
+                .currentConsume(currentPeriodConsumption)
+                .beforeConsume(previousPeriodConsumption)       // 소비 정보
+                .top10PercentRewardPerUnit(additionalReward.getTop10PercentRewardPerUnit())
+                .lower90PercentRewardPerUnit(additionalReward.getLower90PercentRewardPerUnit())
+                .top10PercentMemberNum(additionalReward.getTop10PercentMemberNum())
+                .lower90PercentMemberNum(additionalReward.getLower90PercentMemberNum()) // 정산 정보
+                .build();
     }
 }

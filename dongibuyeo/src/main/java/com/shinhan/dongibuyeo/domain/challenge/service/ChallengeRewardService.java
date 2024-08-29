@@ -1,25 +1,24 @@
 package com.shinhan.dongibuyeo.domain.challenge.service;
 
-import com.shinhan.dongibuyeo.domain.account.dto.request.TransactionHistoryRequest;
 import com.shinhan.dongibuyeo.domain.account.dto.request.TransferRequest;
 import com.shinhan.dongibuyeo.domain.account.entity.Account;
 import com.shinhan.dongibuyeo.domain.account.service.AccountService;
+import com.shinhan.dongibuyeo.domain.challenge.dto.response.AdditionalRewardResponse;
 import com.shinhan.dongibuyeo.domain.challenge.entity.Challenge;
 import com.shinhan.dongibuyeo.domain.challenge.entity.MemberChallenge;
 import com.shinhan.dongibuyeo.domain.challenge.entity.MemberChallengeStatus;
-import com.shinhan.dongibuyeo.domain.consume.dto.request.ConsumtionRequest;
-import com.shinhan.dongibuyeo.domain.consume.dto.response.ConsumtionResponse;
+import com.shinhan.dongibuyeo.domain.challenge.score.util.ScoreUtils;
 import com.shinhan.dongibuyeo.domain.consume.service.ConsumeService;
 import com.shinhan.dongibuyeo.domain.member.dto.response.MemberResponse;
 import com.shinhan.dongibuyeo.domain.member.entity.Member;
 import com.shinhan.dongibuyeo.domain.member.service.MemberService;
 import com.shinhan.dongibuyeo.global.entity.TransferType;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
@@ -28,6 +27,12 @@ import java.util.UUID;
 @Slf4j
 @Service
 public class ChallengeRewardService {
+
+    @Value("${shinhan.challenge.interest-rate}")
+    private double challengeInterestRate;
+
+    @Value("${shinhan.challenge.money-unit}")
+    private double moneyUnit;
 
     private final ConsumeService consumeService;
     private final AccountService accountService;
@@ -52,9 +57,8 @@ public class ChallengeRewardService {
                 .toList();
 
         if (!memberChallenges.isEmpty()) {
-            long totalDepositPool = calculateTotalDepositPool(memberChallenges);
             getConsumptionBaseRewards(memberChallenges, challenge);
-            getConsumptionAdditionalRewards(memberChallenges, totalDepositPool);
+            getConsumptionAdditionalRewards(memberChallenges, challenge.getTotalDeposit());
         }
     }
 
@@ -77,8 +81,8 @@ public class ChallengeRewardService {
         for (MemberChallenge memberChallenge : memberChallenges) {
             UUID memberId = memberChallenge.getMember().getId();
 
-            long currentPeriodConsumption = getTotalConsumption(memberId, challengeStartDate, challengeEndDate, transferType);
-            long previousPeriodConsumption = getTotalConsumption(memberId, previousPeriodStartDate, previousPeriodEndDate, transferType);
+            long currentPeriodConsumption = consumeService.getTotalConsumption(memberId, challengeStartDate, challengeEndDate, transferType);
+            long previousPeriodConsumption = consumeService.getTotalConsumption(memberId, previousPeriodStartDate, previousPeriodEndDate, transferType);
 
             boolean isSuccess = currentPeriodConsumption < previousPeriodConsumption;
             long baseReward = calculateBaseReward(isSuccess, memberChallenge, previousPeriodConsumption, currentPeriodConsumption);
@@ -86,19 +90,6 @@ public class ChallengeRewardService {
             memberChallenge.updateSuccessStatus(isSuccess);
             memberChallenge.updateBaseReward(baseReward);
         }
-    }
-
-    private long getTotalConsumption(UUID memberId, LocalDate startDate, LocalDate endDate, TransferType transferType) {
-        ConsumtionRequest request = new ConsumtionRequest(
-                transferType,
-                TransactionHistoryRequest.builder()
-                        .memberId(memberId)
-                        .startDate(startDate.format(DateTimeFormatter.ofPattern("yyyyMMdd")))
-                        .endDate(endDate.format(DateTimeFormatter.ofPattern("yyyyMMdd")))
-                        .build()
-        );
-        ConsumtionResponse response = consumeService.getTotalConsumtion(request);
-        return response.getTotalConsumtion();
     }
 
     private long calculateBaseReward(boolean isSuccess, MemberChallenge memberChallenge, long previousMonthConsumption, long currentMonthConsumption) {
@@ -120,47 +111,42 @@ public class ChallengeRewardService {
         return Math.max(0.0, Math.min(increaseRate, 1.0));
     }
 
-    private long calculateTotalDepositPool(List<MemberChallenge> memberChallenges) {
-        return memberChallenges.stream()
-                .mapToLong(MemberChallenge::getDeposit)
-                .sum();
-    }
-
     /**
      * 추가 환급금 계산 메서드
-     * - 상위 10%의 유저들과 상위 90% 유저들이 상금의 50%씩을 배분받는다.
-     * 단, 환급금 분배의 경우 각 그룹 내 해당 유저의 예치금 비율에 따라 산정된다.
+     * - 성공 유저 중 상위 10%의 유저들과 상위 90% 유저들이 상금의 50%씩을 배분받는다.
+     * - ChallengeService의 calculateEstimatedReward 메서드를 활용하여 만원 단위의 추가 환급금을 구한 뒤 계산
      */
-    private void getConsumptionAdditionalRewards(List<MemberChallenge> memberChallenges, long totalDepositPool) {
-        long remainingPool = calculateRemainingPool(memberChallenges, totalDepositPool);
-        long topPerformersPool = remainingPool / 2;
-        long othersPool = remainingPool - topPerformersPool;
-
-        List<MemberChallenge> sortedChallenges = memberChallenges.stream()
+    private void getConsumptionAdditionalRewards(List<MemberChallenge> memberChallenges, long totalDeposit) {
+        List<MemberChallenge> successMembersOrderByScore = memberChallenges.stream()
+                .filter(MemberChallenge::getIsSuccess)
                 .sorted(Comparator.comparingInt(MemberChallenge::getTotalScore).reversed())
                 .toList();
 
-        int topPerformersCount = (int) Math.ceil(sortedChallenges.size() * 0.1);
-        distributeRewardsToGroup(sortedChallenges, 0, topPerformersCount, topPerformersPool);
-        distributeRewardsToGroup(sortedChallenges, topPerformersCount, sortedChallenges.size(), othersPool);
+        int totalCountOfSuccessMember = successMembersOrderByScore.size();
+        int top10PercentMemberNum = totalCountOfSuccessMember / 10;
+        int lower90PercentMemberNum = totalCountOfSuccessMember - top10PercentMemberNum;
+
+        long leftDeposit = calculateRemainingPool(memberChallenges, totalDeposit);
+
+        AdditionalRewardResponse additionalReward = ScoreUtils.calculateEstimatedAdditionalRewardPerUnit(
+                challengeInterestRate,
+                totalDeposit,
+                leftDeposit,
+                top10PercentMemberNum,
+                lower90PercentMemberNum
+        );
+
+        distributeRewardsToGroup(successMembersOrderByScore, 0, top10PercentMemberNum, additionalReward.getTop10PercentRewardPerUnit());
+        distributeRewardsToGroup(successMembersOrderByScore, top10PercentMemberNum, totalCountOfSuccessMember, additionalReward.getLower90PercentRewardPerUnit());
     }
 
-
-    private void distributeRewardsToGroup(List<MemberChallenge> sortedChallenges, int startIndex, int endIndex, long rewardPool) {
-        long groupDepositTotal = calculateGroupDepositTotal(sortedChallenges, startIndex, endIndex);
-
+    private void distributeRewardsToGroup(List<MemberChallenge> memberChallenges, int startIndex, int endIndex, long rewardPerUnit) {
         for (int i = startIndex; i < endIndex; i++) {
-            MemberChallenge memberChallenge = sortedChallenges.get(i);
-            long additionalReward = (rewardPool * memberChallenge.getDeposit()) / groupDepositTotal;
+            MemberChallenge memberChallenge = memberChallenges.get(i);
+            long additionalReward = (long) Math.floor(rewardPerUnit * memberChallenge.getDeposit() / moneyUnit);
             memberChallenge.updateAdditionalReward(additionalReward);
             memberChallenge.updateStatus(MemberChallengeStatus.CALCULATED);
         }
-    }
-
-    private long calculateGroupDepositTotal(List<MemberChallenge> sortedChallenges, int startIndex, int endIndex) {
-        return sortedChallenges.subList(startIndex, endIndex).stream()
-                .mapToLong(MemberChallenge::getDeposit)
-                .sum();
     }
 
     private long calculateRemainingPool(List<MemberChallenge> memberChallenges, long totalDepositPool) {
@@ -173,9 +159,9 @@ public class ChallengeRewardService {
     /**
      * 챌린지 계좌 -> 유저 챌린지 계좌 환급 메서드
      *
-     * @param member 환급 대상 회원
+     * @param member    환급 대상 회원
      * @param challenge 환급 챌린지
-     * @param deposit 환급금
+     * @param deposit   환급금
      */
     public void transferFromChallengeAccountToMemberAccount(Member member, Challenge challenge, Long deposit) {
         MemberResponse adminMember = memberService.findAdminMember();
