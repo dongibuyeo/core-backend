@@ -41,19 +41,17 @@ public class WebSocketHandler extends TextWebSocketHandler implements Initializi
         String curMessage = message.getPayload();
         MessageRequest messageRequest = objectMapper.readValue(curMessage, MessageRequest.class);
 
-        if(!users.containsKey(session)) {
+        if(messageRequest.getMessage().equals("ENTER_ROOM")) {
             users.put(session, messageRequest.getRoomName());
             rooms.get(messageRequest.getRoomName()).add(session);
         }
 
-        for(WebSocketSession other : rooms.get(users.get(session))) {
-            if(other.equals(session))
-                continue;
-
-            other.sendMessage(message);
+        else {
+            for (WebSocketSession other : rooms.get(users.get(session))) {
+                other.sendMessage(message);
+            }
+            chatService.sendMessage(messageRequest);
         }
-
-        chatService.sendMessage(messageRequest);
     }
 
     @Override
