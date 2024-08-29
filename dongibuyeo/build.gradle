@@ -55,6 +55,9 @@ dependencies {
 
     // firebase
     implementation 'com.google.firebase:firebase-admin:6.8.1'
+
+    // slack
+    implementation group: 'com.slack.api', name: 'slack-api-client', version: '1.30.0'
 }
 
 tasks.named('test') {
