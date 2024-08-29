@@ -16,13 +16,6 @@ public interface ChallengeRepository extends JpaRepository<Challenge, UUID> {
 
     Optional<Challenge> findChallengeById(UUID challengeId);
 
-    @Query("SELECT c " +
-            "FROM Challenge c " +
-            "JOIN FETCH c.challengeMembers mc " +
-            "WHERE mc.member.id = :memberId AND c.status = :status")
-    List<Challenge> findChallengesByMemberIdAndStatus(UUID memberId, ChallengeStatus status);
-
-
     List<Challenge> findChallengesByEndDate(LocalDate endDate);
 
     @Query("SELECT c " +
