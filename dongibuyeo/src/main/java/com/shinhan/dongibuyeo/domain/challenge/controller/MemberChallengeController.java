@@ -10,7 +10,6 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -24,12 +23,12 @@ public class MemberChallengeController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ChallengeResponse>> getMemberChallenges(@RequestParam UUID memberId) {
-        return ResponseEntity.ok(memberChallengeService.findAllChallengesByMemberId(memberId));
+    public ResponseEntity<MemberChallengesResponse> getMemberChallenges(@RequestParam UUID memberId) {
+        return ResponseEntity.ok(memberChallengeService.findAllMemberChallengesByMemberId(memberId));
     }
 
     @GetMapping("/status")
-    public ResponseEntity<List<ChallengeResponse>> getMemberChallengesByStatus(@RequestParam UUID memberId, @RequestParam ChallengeStatus status) {
+    public ResponseEntity<MemberChallengesResponse> getMemberChallengesByStatus(@RequestParam UUID memberId, @RequestParam ChallengeStatus status) {
         return ResponseEntity.ok(memberChallengeService.findAllChallengesByMemberIdAndStatus(memberId, status));
     }
 
@@ -39,8 +38,8 @@ public class MemberChallengeController {
     }
 
     @GetMapping("/{challengeId}")
-    public ResponseEntity<MemberChallengeResponse> getMemberChallengeByChallengeId(@PathVariable UUID challengeId,
-                                                                                   @RequestParam UUID memberId) {
+    public ResponseEntity<MemberChallengeDetail> getMemberChallengeByChallengeId(@PathVariable UUID challengeId,
+                                                                                 @RequestParam UUID memberId) {
         return ResponseEntity.ok(memberChallengeService.findChallengeByChallengeIdAndMemberId(challengeId, memberId));
     }
 

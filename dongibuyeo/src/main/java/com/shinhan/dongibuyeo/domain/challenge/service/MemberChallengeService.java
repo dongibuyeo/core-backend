@@ -71,11 +71,23 @@ public class MemberChallengeService {
                 .orElseThrow(() -> new ChallengeNotFoundException(challengeId));
     }
 
-    public List<ChallengeResponse> findAllChallengesByMemberId(UUID memberId) {
-        return memberChallengeRepository.findChallengesByMemberId(memberId)
+    private List<Challenge> findAllChallengesByMemberId(UUID memberId) {
+        return memberChallengeRepository.findChallengesByMemberId(memberId);
+    }
+
+    public MemberChallengesResponse findAllMemberChallengesByMemberId(UUID memberId) {
+
+        int totalCalculatedNum = memberChallengeRepository.countAllByMemberIdAndStatus(memberId, MemberChallengeStatus.CALCULATED);
+
+        List<MemberChallengeDetail> memberChallengeDetails = findByMemberId(memberId)
                 .stream()
-                .map(challengeMapper::toChallengeResponse)
+                .map(challengeMapper::toMemberChallengeResponse)
                 .toList();
+
+        return new MemberChallengesResponse(
+                totalCalculatedNum,
+                memberChallengeDetails
+        );
     }
 
     /**
@@ -269,16 +281,24 @@ public class MemberChallengeService {
                 .orElseThrow(() -> new MemberChallengeNotFoundException(challengeId, memberId));
     }
 
-    public MemberChallengeResponse findChallengeByChallengeIdAndMemberId(UUID challengeId, UUID memberId) {
+    public MemberChallengeDetail findChallengeByChallengeIdAndMemberId(UUID challengeId, UUID memberId) {
         return memberChallengeRepository.findChallengeByMemberIdAndChallengeId(memberId, challengeId)
                 .orElseThrow(() -> new MemberChallengeNotFoundException(challengeId, memberId));
     }
 
-    public List<ChallengeResponse> findAllChallengesByMemberIdAndStatus(UUID memberId, ChallengeStatus status) {
-        return challengeRepository.findChallengesByMemberIdAndStatus(memberId, status)
+    public MemberChallengesResponse findAllChallengesByMemberIdAndStatus(UUID memberId, ChallengeStatus status) {
+
+        int totalCalculatedNum = memberChallengeRepository.countAllByMemberIdAndStatus(memberId, MemberChallengeStatus.CALCULATED);
+
+        List<MemberChallengeDetail> memberChallengeDetails = memberChallengeRepository.findAllByMemberIdAndChallengeStatus(memberId, status)
                 .stream()
-                .map(challengeMapper::toChallengeResponse)
+                .map(challengeMapper::toMemberChallengeResponse)
                 .toList();
+
+        return new MemberChallengesResponse(
+                totalCalculatedNum,
+                memberChallengeDetails
+        );
     }
 
     @Transactional(readOnly = true)
@@ -289,7 +309,7 @@ public class MemberChallengeService {
         List<DailyScoreDetailResponse> dailyScores = memberChallenge.getDailyScores().stream()
                 .map(this::convertToDailyScoreDetail)
                 .sorted(Comparator.comparing(DailyScoreDetailResponse::getDate).reversed())
-                .collect(Collectors.toList());
+                .toList();
 
         return new ScoreDetailResponse(memberChallenge.getTotalScore(), dailyScores);
     }
@@ -335,13 +355,13 @@ public class MemberChallengeService {
     }
 
     public ChallengeStatusCountResponse getChallengeStatusCount(UUID memberId) {
-        List<ChallengeResponse> challenges = findAllChallengesByMemberId(memberId);
 
         int scheduledCount = 0;
         int inProgressCount = 0;
         int completedCount = 0;
 
-        for (ChallengeResponse challenge : challenges) {
+        List<Challenge> challenges = findAllChallengesByMemberId(memberId);
+        for (Challenge challenge : challenges) {
             switch (challenge.getStatus()) {
                 case SCHEDULED -> scheduledCount++;
                 case IN_PROGRESS -> inProgressCount++;

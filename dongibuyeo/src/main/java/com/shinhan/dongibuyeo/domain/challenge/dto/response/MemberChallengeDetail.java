@@ -2,6 +2,7 @@ package com.shinhan.dongibuyeo.domain.challenge.dto.response;
 
 import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeStatus;
 import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeType;
+import com.shinhan.dongibuyeo.domain.challenge.entity.MemberChallengeStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,7 +14,7 @@ import java.util.UUID;
 @Getter
 @Builder
 @AllArgsConstructor
-public class MemberChallengeResponse {
+public class MemberChallengeDetail {
 
     private UUID challengeId;
     private ChallengeType type;
@@ -29,17 +30,19 @@ public class MemberChallengeResponse {
     private Long totalDeposit;
     private Integer participants;
 
+    private MemberChallengeStatus memberStatus;
     private Boolean isSuccess;
     private Long memberDeposit;
     private Long baseReward;
     private Long additionalReward;
     private Integer totalScore;
 
-    public MemberChallengeResponse(UUID challengeId, ChallengeType type, ChallengeStatus status,
-                                   String accountNo, LocalDate startDate, LocalDate endDate,
-                                   String title, String description, String image, Long totalDeposit,
-                                   Integer participants, Boolean isSuccess, Long memberDeposit,
-                                   Long baseReward, Long additionalReward, Integer totalScore) {
+    public MemberChallengeDetail(UUID challengeId, ChallengeType type, ChallengeStatus status,
+                                 String accountNo, LocalDate startDate, LocalDate endDate,
+                                 String title, String description, String image, Long totalDeposit,
+                                 Integer participants, Boolean isSuccess, Long memberDeposit,
+                                 Long baseReward, Long additionalReward, Integer totalScore,
+                                 MemberChallengeStatus memberStatus) {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
 
@@ -59,5 +62,6 @@ public class MemberChallengeResponse {
         this.baseReward = baseReward;
         this.additionalReward = additionalReward;
         this.totalScore = totalScore;
+        this.memberStatus = memberStatus;
     }
 }

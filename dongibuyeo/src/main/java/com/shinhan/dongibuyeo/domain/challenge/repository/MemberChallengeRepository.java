@@ -1,12 +1,9 @@
 package com.shinhan.dongibuyeo.domain.challenge.repository;
 
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.ChallengeRewardStatistics;
-import com.shinhan.dongibuyeo.domain.challenge.dto.response.MemberChallengeResponse;
+import com.shinhan.dongibuyeo.domain.challenge.dto.response.MemberChallengeDetail;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.TopRankerInfo;
-import com.shinhan.dongibuyeo.domain.challenge.entity.Challenge;
-import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeStatus;
-import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeType;
-import com.shinhan.dongibuyeo.domain.challenge.entity.MemberChallenge;
+import com.shinhan.dongibuyeo.domain.challenge.entity.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -26,24 +23,26 @@ public interface MemberChallengeRepository extends JpaRepository<MemberChallenge
             "WHERE mc.member.id = :memberId ")
     List<Challenge> findChallengesByMemberId(UUID memberId);
 
-    @Query("SELECT new com.shinhan.dongibuyeo.domain.challenge.dto.response.MemberChallengeResponse(" +
+    @Query("SELECT new com.shinhan.dongibuyeo.domain.challenge.dto.response.MemberChallengeDetail(" +
             "c.id, c.type, c.status, c.account.accountNo, c.startDate, c.endDate, " +
             "c.title, c.description, c.image, c.totalDeposit, c.participants, " +
-            "mc.isSuccess, mc.deposit, mc.baseReward, mc.additionalReward, mc.totalScore) " +
+            "mc.isSuccess, mc.deposit, mc.baseReward, mc.additionalReward, mc.totalScore, mc.status) " +
             "FROM Challenge c " +
             "JOIN MemberChallenge mc ON mc.challenge.id = c.id " +
             "WHERE mc.member.id = :memberId " +
             "AND c.id = :challengeId")
-    Optional<MemberChallengeResponse> findChallengeByMemberIdAndChallengeId(UUID memberId, UUID challengeId);
+    Optional<MemberChallengeDetail> findChallengeByMemberIdAndChallengeId(UUID memberId, UUID challengeId);
 
     @Query("SELECT mc " +
             "FROM MemberChallenge mc " +
-            "JOIN FETCH Challenge c " +
-            "ON mc.challenge.id = c.id " +
-            "WHERE c.status = :status ")
-    List<MemberChallenge> findAllByChallengeStatus(ChallengeStatus status);
+            "JOIN FETCH mc.challenge c " +
+            "WHERE mc.member.id = :memberId " +
+            "AND c.status = :status")
+    List<MemberChallenge> findAllByMemberIdAndChallengeStatus(UUID memberId, ChallengeStatus status);
 
-    List<MemberChallenge> findAllByChallengeId(UUID challengeId);
+    int countAllByMemberIdAndStatus(UUID memberId, MemberChallengeStatus status);
+
+    List<MemberChallenge> findAllByMemberIdAndStatus(UUID memberId, MemberChallengeStatus status);
 
     List<MemberChallenge> findByMemberId(UUID memberId);
 
