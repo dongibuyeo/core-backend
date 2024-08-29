@@ -28,7 +28,7 @@ public interface MemberChallengeRepository extends JpaRepository<MemberChallenge
 
     @Query("SELECT new com.shinhan.dongibuyeo.domain.challenge.dto.response.MemberChallengeResponse(" +
             "c.id, c.type, c.status, c.account.accountNo, c.startDate, c.endDate, " +
-            "c.title, c.description, c.totalDeposit, c.participants, " +
+            "c.title, c.description, c.image, c.totalDeposit, c.participants, " +
             "mc.isSuccess, mc.deposit, mc.baseReward, mc.additionalReward, mc.totalScore) " +
             "FROM Challenge c " +
             "JOIN MemberChallenge mc ON mc.challenge.id = c.id " +

@@ -22,6 +22,7 @@ public class ChallengeResponse {
 
     private String title;
     private String description;
+    private String image;
 
     private Long totalDeposit;
     private Integer participants;

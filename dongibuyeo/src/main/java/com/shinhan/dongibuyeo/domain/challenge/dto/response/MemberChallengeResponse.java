@@ -24,6 +24,7 @@ public class MemberChallengeResponse {
 
     private String title;
     private String description;
+    private String image;
 
     private Long totalDeposit;
     private Integer participants;
@@ -36,7 +37,7 @@ public class MemberChallengeResponse {
 
     public MemberChallengeResponse(UUID challengeId, ChallengeType type, ChallengeStatus status,
                                    String accountNo, LocalDate startDate, LocalDate endDate,
-                                   String title, String description, Long totalDeposit,
+                                   String title, String description, String image, Long totalDeposit,
                                    Integer participants, Boolean isSuccess, Long memberDeposit,
                                    Long baseReward, Long additionalReward, Integer totalScore) {
 
@@ -50,6 +51,7 @@ public class MemberChallengeResponse {
         this.endDate = (endDate != null) ? endDate.format(formatter) : null;
         this.title = title;
         this.description = description;
+        this.image = image;
         this.totalDeposit = totalDeposit;
         this.participants = participants;
         this.isSuccess = isSuccess;

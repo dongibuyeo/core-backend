@@ -23,6 +23,7 @@ public class ChallengeResultResponse {
 
     private String title;
     private String description;
+    private String image;
 
     private Long totalDeposit;
     private Integer participants;
@@ -38,7 +39,8 @@ public class ChallengeResultResponse {
 
     @Builder
     public ChallengeResultResponse(UUID challengeId, ChallengeType type, ChallengeStatus status,
-                                   LocalDate startDate, LocalDate endDate, String title, String description, Long totalDeposit, Integer participants,
+                                   LocalDate startDate, LocalDate endDate, String title, String description, String image,
+                                   Long totalDeposit, Integer participants,
                                    long totalReward, long interestEarned, long remainingFromFailures, long top10PercentRewardPerUnit, long lower90PercentRewardPerUnit,
                                    int top10PercentMemberNum, int lower90PercentMemberNum) {
 
@@ -51,6 +53,7 @@ public class ChallengeResultResponse {
         this.endDate = (endDate != null) ? endDate.format(formatter) : null;
         this.title = title;
         this.description = description;
+        this.image = image;
         this.totalDeposit = totalDeposit;
         this.participants = participants;
         this.totalReward = totalReward;
