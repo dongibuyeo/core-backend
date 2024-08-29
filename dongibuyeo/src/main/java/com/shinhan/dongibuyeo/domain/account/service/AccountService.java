@@ -95,7 +95,9 @@ public class AccountService {
             accountMapper.toShinhanTransferRequest(transferRequest,apiKey,member)
         );
 
-        notificationService.sendNotification(member,"계좌 이체","계좌 이체");
+        if(member.getDeviceToken() != null) {
+            notificationService.sendNotification(member, "계좌 이체", "계좌 이체");
+        }
 
         return transfer.getRec();
     }
