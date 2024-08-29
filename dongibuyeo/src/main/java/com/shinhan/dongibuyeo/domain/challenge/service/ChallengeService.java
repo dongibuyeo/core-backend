@@ -165,7 +165,7 @@ public class ChallengeService {
     }
 
     private void createSavingsProduct(Challenge challenge) {
-        String accountName = challenge.getType().toString() + challenge.getStartDate().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        String accountName = challenge.getType().toString() + challenge.getStartDate().format(DateTimeFormatter.ofPattern("yyMMdd"));
         System.out.println("!!!!!!!!!!! acountName: " + accountName + "!!!!!!!!!!!!!!!!!");
         savingsService.makeSavingProduct(
                 SavingProductRequest.builder()
@@ -264,15 +264,22 @@ public class ChallengeService {
 
     public AdditionalRewardResponse calculateEstimatedReward(UUID challengeId) {
         Challenge challenge = findChallengeById(challengeId);
-
         Long totalDeposit = challenge.getTotalDeposit();
-        int totalParticipants = challenge.getParticipants();
 
         // 총 상금 계산
-        int top10PercentMembersNum = (int) (totalParticipants * successRate * 0.1);
-        int lower90PercentMembersNum = totalParticipants - top10PercentMembersNum;
+        int top10PercentMembersNum;
+        int lower90PercentMembersNum;
+        if (challenge.getStatus() != ChallengeStatus.COMPLETED) {   // 정산 전인 경우 성공률 기반으로 계산
+            int totalParticipants = challenge.getParticipants();
+            top10PercentMembersNum = Math.max(1, (int) Math.ceil(totalParticipants * successRate * 0.1));
+            lower90PercentMembersNum = totalParticipants - top10PercentMembersNum;
+        } else {
+            int successParticipants = memberChallengeRepository.getTotalCountOfSuccessMember(challengeId);
+            top10PercentMembersNum = successParticipants / 10;
+            lower90PercentMembersNum = successParticipants - top10PercentMembersNum;
+        }
 
-        long leftDeposit = (long) Math.floor(totalDeposit * (1-successRate) * bounceBackRate);
+        long leftDeposit = (long) Math.floor(totalDeposit * (1 - successRate) * bounceBackRate);
         return ScoreUtils.calculateEstimatedAdditionalRewardPerUnit(
                 challengeInterestRate,
                 totalDeposit,
@@ -292,7 +299,8 @@ public class ChallengeService {
 
         // 환급 조회를 위한 정보
         long totalDeposit = challenge.getTotalDeposit();
-        long remainingFromFailure = memberChallengeRepository.getSumOfFailedBaseRewards(challengeId);
+        long remainDeposit = memberChallengeRepository.getSumOfFailedBaseRewards(challengeId)
+                + memberChallengeRepository.getSumOfSuccessBaseRewards(challengeId);
 
         int totalCountOfSuccessMember = memberChallengeRepository.getTotalCountOfSuccessMember(challengeId);
         int top10PercentMemberNum = totalCountOfSuccessMember / 10;
@@ -301,7 +309,7 @@ public class ChallengeService {
         AdditionalRewardResponse additionalReward = ScoreUtils.calculateEstimatedAdditionalRewardPerUnit(
                 challengeInterestRate,
                 totalDeposit,
-                remainingFromFailure,
+                remainDeposit,
                 top10PercentMemberNum,
                 lower90PercentMemberNum
         );
@@ -318,7 +326,7 @@ public class ChallengeService {
                 .participants(challenge.getParticipants()) // 챌린지 기본 정보
                 .totalReward(additionalReward.getTotalReward())
                 .interestEarned(additionalReward.getInterestEarned())
-                .remainingFromFailures(additionalReward.getRemainingFromFailures())
+                .remainDeposit(additionalReward.getRemainDeposit())
                 .top10PercentRewardPerUnit(additionalReward.getTop10PercentRewardPerUnit())
                 .lower90PercentRewardPerUnit(additionalReward.getLower90PercentRewardPerUnit())
                 .top10PercentMemberNum(top10PercentMemberNum)
@@ -336,7 +344,8 @@ public class ChallengeService {
 
         // 환급 조회를 위한 정보
         long totalDeposit = challenge.getTotalDeposit();
-        long remainingFromFailure = memberChallengeRepository.getSumOfFailedBaseRewards(challengeId);
+        long remainDeposit = memberChallengeRepository.getSumOfFailedBaseRewards(challengeId)
+                + memberChallengeRepository.getSumOfSuccessBaseRewards(challengeId);
 
         int totalCountOfSuccessMember = memberChallengeRepository.getTotalCountOfSuccessMember(challengeId);
         int top10PercentMemberNum = totalCountOfSuccessMember / 10;
@@ -345,7 +354,7 @@ public class ChallengeService {
         AdditionalRewardResponse additionalReward = ScoreUtils.calculateEstimatedAdditionalRewardPerUnit(
                 challengeInterestRate,
                 totalDeposit,
-                remainingFromFailure,
+                remainDeposit,
                 top10PercentMemberNum,
                 lower90PercentMemberNum
         );

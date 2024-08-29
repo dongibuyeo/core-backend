@@ -24,6 +24,7 @@ public class MemberChallengeResultResponse {
     private String endDate;
     private String title;
     private String description;
+    private String image;
 
     private MemberChallengeStatus myStatus;
     private boolean isSuccess;
@@ -41,7 +42,8 @@ public class MemberChallengeResultResponse {
 
     @Builder
     public MemberChallengeResultResponse(UUID memberId, UUID challengeId, ChallengeType type, ChallengeStatus status,
-                                         LocalDate startDate, LocalDate endDate, String title, String description, MemberChallengeStatus myStatus,
+                                         LocalDate startDate, LocalDate endDate, String title, String description,
+                                         String image, MemberChallengeStatus myStatus,
                                          boolean isSuccess, long baseReward, long additionalReward, long beforeConsume, long currentConsume,
                                          long top10PercentRewardPerUnit, long lower90PercentRewardPerUnit, int top10PercentMemberNum, int lower90PercentMemberNum) {
 
@@ -55,6 +57,7 @@ public class MemberChallengeResultResponse {
         this.endDate = (endDate != null) ? endDate.format(formatter) : null;
         this.title = title;
         this.description = description;
+        this.image = image;
         this.myStatus = myStatus;
         this.isSuccess = isSuccess;
         this.baseReward = baseReward;

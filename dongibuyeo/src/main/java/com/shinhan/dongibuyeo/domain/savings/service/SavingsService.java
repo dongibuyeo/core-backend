@@ -109,7 +109,7 @@ public class SavingsService {
 
     @Transactional
     public SavingAccountInfo makeSevenSavingAccount(MakeSevenSavingAccountRequest request) {
-        String accountName = request.getChallengeType() + request.getStartDate();
+        String accountName = request.getChallengeType() + request.getStartDate().substring(2);
         UUID memberId = request.getMemberId();
         String withdrawalAccountNo = request.getWithdrawalAccountNo();
         Long depositBalance = request.getDepositBalance();
