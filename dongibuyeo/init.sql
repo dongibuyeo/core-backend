@@ -181,3 +181,18 @@ CREATE TABLE DONG.`score_entries` (
 
 INSERT INTO DONG.member (id, email, name, nickname, profile_image, user_key, device_token, created_at, updated_at)
 VALUES (UNHEX(REPLACE(UUID(), '-', '')), 'example@example.com', 'John', 'johnny', 'profile.png', NULL, 'exampleDeviceToken', NOW(), NOW());
+
+INSERT INTO DONG.room (created_at, deleted_at, updated_at, id, name)
+VALUES (NOW(),null,NOW(),UNHEX(REPLACE(UUID(), '-', '')),'COFFEE');
+
+INSERT INTO DONG.room (created_at, deleted_at, updated_at, id, name)
+VALUES (NOW(),null,NOW(),UNHEX(REPLACE(UUID(), '-', '')),'DELIVERY');
+
+INSERT INTO DONG.room (created_at, deleted_at, updated_at, id, name)
+VALUES (NOW(),null,NOW(),UNHEX(REPLACE(UUID(), '-', '')),'DRINK');
+
+INSERT INTO DONG.room (created_at, deleted_at, updated_at, id, name)
+VALUES (NOW(),null,NOW(),UNHEX(REPLACE(UUID(), '-', '')),'SEVEN');
+
+INSERT INTO DONG.room (created_at, deleted_at, updated_at, id, name)
+VALUES (NOW(),null,NOW(),UNHEX(REPLACE(UUID(), '-', '')),'QUIZ');
