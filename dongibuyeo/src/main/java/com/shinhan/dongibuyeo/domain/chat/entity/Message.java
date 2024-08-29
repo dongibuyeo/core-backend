@@ -1,5 +1,6 @@
 package com.shinhan.dongibuyeo.domain.chat.entity;
 
+import com.github.f4b6a3.ulid.UlidCreator;
 import com.shinhan.dongibuyeo.domain.member.entity.Member;
 import com.shinhan.dongibuyeo.global.entity.BaseEntity;
 import jakarta.persistence.*;
@@ -17,7 +18,7 @@ import java.util.UUID;
 public class Message extends BaseEntity {
     @Id
     @Column(columnDefinition = "BINARY(16)")
-    private UUID id;
+    private UUID id = UlidCreator.getMonotonicUlid().toUuid();
     private String message;
 
     @ManyToOne

@@ -41,4 +41,13 @@ public class ChatService {
         room.getMessages().add(message);
         return mapper.toMessageResponse(message);
     }
+
+    @Transactional
+    public void makeRoom() {
+        chatRoomRepository.save(new Room("COFFEE"));
+        chatRoomRepository.save(new Room("DELIVERY"));
+        chatRoomRepository.save(new Room("DRINK"));
+        chatRoomRepository.save(new Room("SEVEN"));
+        chatRoomRepository.save(new Room("QUIZ"));
+    }
 }

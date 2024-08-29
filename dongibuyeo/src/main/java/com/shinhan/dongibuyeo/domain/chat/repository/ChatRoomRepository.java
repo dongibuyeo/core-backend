@@ -11,6 +11,6 @@ public interface ChatRoomRepository extends JpaRepository<Room, UUID> {
 
     Optional<Room> findByName(String name);
 
-    @Query("SELECT r FROM Room r JOIN FETCH r.messages WHERE r.name = :name")
+    @Query("SELECT r FROM Room r LEFT JOIN FETCH r.messages rm WHERE r.name = :name")
     Optional<Room> findByNameAndChats(String name);
 }

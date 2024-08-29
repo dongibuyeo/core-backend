@@ -1,6 +1,9 @@
 server:
   port: 8080
 
+slack:
+  url: https://hooks.slack.com/services/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
+
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -12,6 +15,7 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: create
+
 
 shinhan:
   key: 7c746d26c4a44632a638a88131f0b779

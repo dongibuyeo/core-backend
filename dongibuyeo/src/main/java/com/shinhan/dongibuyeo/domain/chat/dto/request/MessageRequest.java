@@ -13,4 +13,5 @@ public class MessageRequest {
     private UUID memberId;
     private String roomName;
     private String message;
+    private String image;
 }
