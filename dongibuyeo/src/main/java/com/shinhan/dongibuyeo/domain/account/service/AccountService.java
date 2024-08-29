@@ -15,12 +15,14 @@ import com.shinhan.dongibuyeo.domain.alarm.service.NotificationService;
 import com.shinhan.dongibuyeo.domain.member.entity.Member;
 import com.shinhan.dongibuyeo.domain.member.service.MemberService;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class AccountService {
 
@@ -95,7 +97,8 @@ public class AccountService {
             accountMapper.toShinhanTransferRequest(transferRequest,apiKey,member)
         );
 
-        if(member.getDeviceToken() != null) {
+        if(member.getDeviceToken() != null && !member.getDeviceToken().isBlank()) {
+            log.info("[sendNotification] deviceToken: {}", member.getDeviceToken());
             notificationService.sendNotification(member, "계좌 이체", "계좌 이체");
         }
 

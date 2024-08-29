@@ -74,12 +74,12 @@ public interface MemberChallengeRepository extends JpaRepository<MemberChallenge
     @Query("SELECT mc.totalScore FROM MemberChallenge mc WHERE mc.challenge.id = :challengeId ORDER BY mc.totalScore DESC")
     List<Integer> findAllScoresByChallengeId(@Param("challengeId") UUID challengeId);
 
-    @Query("SELECT SUM(mc.baseReward) " +
+    @Query("SELECT COALESCE(SUM(mc.baseReward), 0) " +
             "FROM MemberChallenge mc " +
             "WHERE mc.challenge.id = :challengeId AND mc.isSuccess = false")
     Long getSumOfFailedBaseRewards(@Param("challengeId") UUID challengeId);
 
-    @Query("SELECT SUM(mc.baseReward) " +
+    @Query("SELECT COALESCE(SUM(mc.baseReward), 0) " +
             "FROM MemberChallenge mc " +
             "WHERE mc.challenge.id = :challengeId AND mc.isSuccess = true")
     Long getSumOfSuccessBaseRewards(@Param("challengeId") UUID challengeId);
