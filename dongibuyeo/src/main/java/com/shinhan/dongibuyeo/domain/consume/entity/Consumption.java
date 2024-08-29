@@ -35,11 +35,11 @@ public class Consumption extends BaseEntity {
     private String transactionSummary;
     private String transactionMemo;
 
-    public Consumption(Member member, String transactionUniqueNo, String transactionTime, String transactionDate, String transactionType, String transactionTypeName, String transactionAccountNo, Long transactionBalance, Long transactionAfterBalance, String transactionSummary, String transactionMemo) {
+    public Consumption(Member member, String transactionUniqueNo, String transactionDate, String transactionTime, String transactionType, String transactionTypeName, String transactionAccountNo, Long transactionBalance, Long transactionAfterBalance, String transactionSummary, String transactionMemo) {
         this.member = member;
         this.transactionUniqueNo = transactionUniqueNo;
-        this.transactionTime = transactionTime;
         this.transactionDate = transactionDate;
+        this.transactionTime = transactionTime;
         this.transactionType = transactionType;
         this.transactionTypeName = transactionTypeName;
         this.transactionAccountNo = transactionAccountNo;
