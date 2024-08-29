@@ -40,6 +40,10 @@ public interface MemberChallengeRepository extends JpaRepository<MemberChallenge
             "AND c.status = :status")
     List<MemberChallenge> findAllByMemberIdAndChallengeStatus(UUID memberId, ChallengeStatus status);
 
+    @Query("SELECT COUNT(mc.id) " +
+            "FROM MemberChallenge mc " +
+            "WHERE mc.member.id =:memberId " +
+            "AND mc.status = :status ")
     int countAllByMemberIdAndStatus(UUID memberId, MemberChallengeStatus status);
 
     List<MemberChallenge> findAllByMemberIdAndStatus(UUID memberId, MemberChallengeStatus status);
