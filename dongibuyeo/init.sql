@@ -1,22 +1,22 @@
 DROP DATABASE IF EXISTS `DONG`;
 
-CREATE DATABASE `DONG`;
+CREATE DATABASE `DONG` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;;
 
 USE `DONG`;
 
 CREATE TABLE DONG.`member` (
                                `created_at` datetime(6) DEFAULT NULL,
                                `deleted_at` datetime(6) DEFAULT NULL,
-                               `name` varchar(8) NOT NULL,
+                               `name` varchar(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL ,
                                `updated_at` datetime(6) DEFAULT NULL,
-                               `nickname` varchar(10) NOT NULL,
+                               `nickname` varchar(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
                                `id` binary(16) NOT NULL,
-                               `device_token` varchar(255) DEFAULT NULL,
-                               `email` varchar(255) NOT NULL,
+                               `device_token` varchar(512) DEFAULT NULL,
+                               `email` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
                                `profile_image` varchar(255) DEFAULT NULL,
                                `user_key` varchar(255) DEFAULT NULL,
                                PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 CREATE TABLE DONG.`account` (
@@ -43,9 +43,9 @@ CREATE TABLE DONG.`challenge` (
                              `updated_at` datetime(6) DEFAULT NULL,
                              `account_id` binary(16) DEFAULT NULL,
                              `id` binary(16) NOT NULL,
-                             `description` varchar(255) DEFAULT NULL,
+                             `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                              `image` varchar(255) DEFAULT NULL,
-                             `title` varchar(255) DEFAULT NULL,
+                             `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                              `type` enum('CONSUMPTION_COFFEE','CONSUMPTION_DELIVERY','CONSUMPTION_DRINK','QUIZ_SOLBEING','SAVINGS_SEVEN') DEFAULT NULL,
                              PRIMARY KEY (`id`),
                              UNIQUE KEY `UK4saeeac119vkfictd49yb5g67` (`account_id`),
@@ -182,28 +182,44 @@ CREATE TABLE DONG.`score_entries` (
 INSERT INTO DONG.member (id, email, name, nickname, profile_image, user_key, device_token, created_at, updated_at)
 VALUES (UNHEX(REPLACE(UUID(), '-', '')), 'example@example.com', 'John', 'johnny', 'profile.png', NULL, 'exampleDeviceToken', NOW(), NOW());
 
+INSERT INTO DONG.room (created_at, deleted_at, updated_at, id, name)
+VALUES (NOW(),null,NOW(),UNHEX(REPLACE(UUID(), '-', '')),'COFFEE');
+
+INSERT INTO DONG.room (created_at, deleted_at, updated_at, id, name)
+VALUES (NOW(),null,NOW(),UNHEX(REPLACE(UUID(), '-', '')),'DELIVERY');
+
+INSERT INTO DONG.room (created_at, deleted_at, updated_at, id, name)
+VALUES (NOW(),null,NOW(),UNHEX(REPLACE(UUID(), '-', '')),'DRINK');
+
+INSERT INTO DONG.room (created_at, deleted_at, updated_at, id, name)
+VALUES (NOW(),null,NOW(),UNHEX(REPLACE(UUID(), '-', '')),'SEVEN');
+
+INSERT INTO DONG.room (created_at, deleted_at, updated_at, id, name)
+VALUES (NOW(),null,NOW(),UNHEX(REPLACE(UUID(), '-', '')),'QUIZ');
+
+
 INSERT INTO DONG.member (created_at, deleted_at, name, updated_at, nickname, id, device_token, email, profile_image, user_key) VALUES
-                                                                                                                                   ('2024-08-29 12:51:42.872571', NULL, 'admin', '2024-08-29 12:51:42.872571', 'admin', 0x01919C42B3CEB4F1A612238F5CE70C00, NULL, 'admin@dongibuyeo-test.com', NULL, '113c59ec-b974-4f04-984f-6642566d4856'),
-                                                                                                                                   ('2024-08-29 12:54:45.584610', NULL, '박수진', '2024-08-29 12:54:45.584610', '박박박', 0x01919C457DCC847749819F669AB5DD46, 'fy7GpBsMSXPunH7TataJCV:APA91bGmgdWyd6XB2TQQpL1ZIG5Q3SjKoCMsiDPCCJGkYYQqqybFXcYbW6tX0ymVMWaIX0YWDI_1VMS6RmstbkyqjvWPxOoF4B2D5Dr3NnzQlknd7UuwgVX_YWM_ZpUJHFTw2eqA0b3J', 'sujin1@naver.com', NULL, '7e72acce-c2a3-4a67-be11-aa9702156257'),
-                                                                                                                                   ('2024-08-29 13:06:37.563551', NULL, '신한', '2024-08-29 14:27:48.463141', '해커톤시렁', 0x01919C505AF68AE77DFFEA6E329C5A6D, 'cgmVNNdbk3HHdLLsAQeOoB:APA91bGoFtnB5wjECxMxvE_pWBQuFqMcqYbFkWfsxqWZQHhCNiMRYOhfypWe9onbjbHbHKtUIsZyxdGPcQHHoDHS4oEBqXOOiiNe1EyfD5TSoj23Qr615EspQY0ER9w3WK6q8V0uePf0', 'asd@asd.com', 'Lay', '534effa4-1573-4fb0-a857-aea69ca6568d'),
-                                                                                                                                   ('2024-08-29 13:23:25.130119', NULL, '김신한', '2024-08-29 13:23:25.130119', 'shinhanKim', 0x01919C5FBAC69C61BAD76CE5F992440E, '', 'shinhanKim@dongibuyeo-test.com', '', '5971b18f-bfd6-49a4-b1c8-883d70ebb803'),
-                                                                                                                                   ('2024-08-29 14:53:56.503077', NULL, '곽곽', '2024-08-29 14:53:56.503077', '곽곽이', 0x01919CB29B1033C9DCF879E53C3B31F2, 'fwuNBYZ31v1_X5MNq2GTGO:APA91bGKkdfdn_OWl2CmEStORXOnMG-KMwb34yCy3I1uM8oGDKE6s7pcjKcq9kD72PyWVJGLp_N18GJLyKsq1cp2jTqiXe3_JyqJQFCq_hZ1DgR6jeglKwOSJlRYU_U2w3LyBgkYi-BG', 'test123@test.co', NULL, 'cbe35d3c-caed-42ca-8caf-eaa25081ee94');
+('2024-08-29 12:51:42', NULL, 'admin', '2024-08-29 12:51:42', 'admin', 0x01919C42B3CEB4F1A612238F5CE70C00, NULL, 'admin@dongibuyeo-test.com', NULL, '113c59ec-b974-4f04-984f-6642566d4856');
+INSERT INTO DONG.member (created_at, deleted_at, name, updated_at, nickname, id, device_token, email, profile_image, user_key) VALUES ('2024-08-29 12:54:45', NULL, '박수진', '2024-08-29 12:54:45', '박박박', 0x01919C457DCC847749819F669AB5DD46, 'fy7GpBsMSXPunH7TataJCV:APA91bGmgdWyd6XB2TQQpL1ZIG5Q3SjKoCMsiDPCCJGkYYQqqybFXcYbW6tX0ymVMWaIX0YWDI_1VMS6RmstbkyqjvWPxOoF4B2D5Dr3NnzQlknd7UuwgVX_YWM_ZpUJHFTw2eqA0b3J', 'sujin1@naver.com', NULL, '7e72acce-c2a3-4a67-be11-aa9702156257');
+INSERT INTO DONG.member (created_at, deleted_at, name, updated_at, nickname, id, device_token, email, profile_image, user_key) VALUES ('2024-08-29 13:06:37', NULL, '신한', '2024-08-29 14:27:48', '해커톤시렁', 0x01919C505AF68AE77DFFEA6E329C5A6D, 'cgmVNNdbk3HHdLLsAQeOoB:APA91bGoFtnB5wjECxMxvE_pWBQuFqMcqYbFkWfsxqWZQHhCNiMRYOhfypWe9onbjbHbHKtUIsZyxdGPcQHHoDHS4oEBqXOOiiNe1EyfD5TSoj23Qr615EspQY0ER9w3WK6q8V0uePf0', 'asd@asd.com', 'Lay', '534effa4-1573-4fb0-a857-aea69ca6568d');
+INSERT INTO DONG.member (created_at, deleted_at, name, updated_at, nickname, id, device_token, email, profile_image, user_key) VALUES ('2024-08-29 13:23:25', NULL, '김신한', '2024-08-29 13:23:25', 'shinhanKim', 0x01919C5FBAC69C61BAD76CE5F992440E, '', 'shinhanKim@dongibuyeo-test.com', '', '5971b18f-bfd6-49a4-b1c8-883d70ebb803');
+INSERT INTO DONG.member (created_at, deleted_at, name, updated_at, nickname, id, device_token, email, profile_image, user_key) VALUES ('2024-08-29 14:53:56', NULL, '곽곽', '2024-08-29 14:53:56', '곽곽이', 0x01919CB29B1033C9DCF879E53C3B31F2, 'fwuNBYZ31v1_X5MNq2GTGO:APA91bGKkdfdn_OWl2CmEStORXOnMG-KMwb34yCy3I1uM8oGDKE6s7pcjKcq9kD72PyWVJGLp_N18GJLyKsq1cp2jTqiXe3_JyqJQFCq_hZ1DgR6jeglKwOSJlRYU_U2w3LyBgkYi-BG', 'test123@test.co', NULL, 'cbe35d3c-caed-42ca-8caf-eaa25081ee94');
 
 INSERT INTO DONG.account (created_at, deleted_at, updated_at, id, member_id, account_no, account_type)
 VALUES
-    ('2024-08-29 13:24:02.957626', NULL, '2024-08-29 13:24:02.964314', 0x01919C604E86334E71442B0E6AA8B8AE, 0x01919C5FBAC69C61BAD76CE5F992440E, '0042401830256381', 'PRIVATE'),
-    ('2024-08-29 13:24:35.802457', NULL, '2024-08-29 13:24:35.810119', 0x01919C60CED7C389FB1E29F132E6A5FA, 0x01919C5FBAC69C61BAD76CE5F992440E, '0111427268290839', 'PRIVATE'),
-    ('2024-08-29 13:25:02.673546', NULL, '2024-08-29 13:25:02.677679', 0x01919C6137CFF4AAE65FADA7BF87524C, 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', 'PRIVATE'),
-    ('2024-08-29 13:26:21.061329', NULL, '2024-08-29 13:26:21.064392', 0x01919C626A023FB66374ACE2C02365A6, 0x01919C5FBAC69C61BAD76CE5F992440E, '0881763003647857', 'PRIVATE'),
-    ('2024-08-29 13:31:18.083626', NULL, '2024-08-29 13:31:18.086350', 0x01919C66F23F4D7949CF037FA9AACCD9, 0x01919C5FBAC69C61BAD76CE5F992440E, '0887556547087119', 'CHALLENGE'),
-    ('2024-08-29 13:38:40.849130', NULL, '2024-08-29 13:38:40.866248', 0x01919C6DB3CEB83D89143E25FE34ECA3, 0x01919C42B3CEB4F1A612238F5CE70C00, '0889713108612288', 'CHALLENGE'),
-    ('2024-08-29 13:39:55.835344', NULL, '2024-08-29 13:39:55.918940', 0x01919C6ED8B9840B50D66E4E37A82A9A, 0x01919C42B3CEB4F1A612238F5CE70C00, '0887447183036205', 'CHALLENGE'),
-    ('2024-08-29 13:41:56.571632', NULL, '2024-08-29 13:41:56.579747', 0x01919C70B0576B79B6F6ECA0E5CAAE8D, 0x01919C42B3CEB4F1A612238F5CE70C00, '0888396451871590', 'CHALLENGE'),
-    ('2024-08-29 13:43:13.761490', NULL, '2024-08-29 13:43:13.768534', 0x01919C71DDDFF0C092939C6776774211, 0x01919C42B3CEB4F1A612238F5CE70C00, '0885898830115588', 'CHALLENGE'),
-    ('2024-08-29 13:44:05.046333', NULL, '2024-08-29 13:44:05.056436', 0x01919C72A6348824743639E75691CB4C, 0x01919C42B3CEB4F1A612238F5CE70C00, '0886860797262912', 'CHALLENGE'),
-    ('2024-08-29 13:45:05.764680', NULL, '2024-08-29 13:45:05.886824', 0x01919C739360D4E0E2F99D1F6C6B42E6, 0x01919C42B3CEB4F1A612238F5CE70C00, '0886377511023806', 'CHALLENGE'),
-    ('2024-08-29 13:52:09.532218', NULL, '2024-08-29 13:52:09.536775', 0x01919C7A0AB82D56D98ED81CDC14EA3F, 0x01919C5FBAC69C61BAD76CE5F992440E, '0883038929', 'PRIVATE'),
-    ('2024-08-29 13:53:43.536691', NULL, '2024-08-29 13:53:43.542246', 0x01919C7B79ED9437CA6870707E44C8F1, 0x01919C5FBAC69C61BAD76CE5F992440E, '0012954192', 'PRIVATE');
+    ('2024-08-29 13:24:02', NULL, '2024-08-29 13:24:02.964314', 0x01919C604E86334E71442B0E6AA8B8AE, 0x01919C5FBAC69C61BAD76CE5F992440E, '0042401830256381', 'PRIVATE'),
+    ('2024-08-29 13:24:35', NULL, '2024-08-29 13:24:35.810119', 0x01919C60CED7C389FB1E29F132E6A5FA, 0x01919C5FBAC69C61BAD76CE5F992440E, '0111427268290839', 'PRIVATE'),
+    ('2024-08-29 13:25:02', NULL, '2024-08-29 13:25:02.677679', 0x01919C6137CFF4AAE65FADA7BF87524C, 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', 'PRIVATE'),
+    ('2024-08-29 13:26:21', NULL, '2024-08-29 13:26:21.064392', 0x01919C626A023FB66374ACE2C02365A6, 0x01919C5FBAC69C61BAD76CE5F992440E, '0881763003647857', 'PRIVATE'),
+    ('2024-08-29 13:31:18', NULL, '2024-08-29 13:31:18.086350', 0x01919C66F23F4D7949CF037FA9AACCD9, 0x01919C5FBAC69C61BAD76CE5F992440E, '0887556547087119', 'CHALLENGE'),
+    ('2024-08-29 13:38:40', NULL, '2024-08-29 13:38:40.866248', 0x01919C6DB3CEB83D89143E25FE34ECA3, 0x01919C42B3CEB4F1A612238F5CE70C00, '0889713108612288', 'CHALLENGE'),
+    ('2024-08-29 13:39:55', NULL, '2024-08-29 13:39:55.918940', 0x01919C6ED8B9840B50D66E4E37A82A9A, 0x01919C42B3CEB4F1A612238F5CE70C00, '0887447183036205', 'CHALLENGE'),
+    ('2024-08-29 13:41:56', NULL, '2024-08-29 13:41:56.579747', 0x01919C70B0576B79B6F6ECA0E5CAAE8D, 0x01919C42B3CEB4F1A612238F5CE70C00, '0888396451871590', 'CHALLENGE'),
+    ('2024-08-29 13:43:13', NULL, '2024-08-29 13:43:13.768534', 0x01919C71DDDFF0C092939C6776774211, 0x01919C42B3CEB4F1A612238F5CE70C00, '0885898830115588', 'CHALLENGE'),
+    ('2024-08-29 13:44:05', NULL, '2024-08-29 13:44:05.056436', 0x01919C72A6348824743639E75691CB4C, 0x01919C42B3CEB4F1A612238F5CE70C00, '0886860797262912', 'CHALLENGE'),
+    ('2024-08-29 13:45:05', NULL, '2024-08-29 13:45:05.886824', 0x01919C739360D4E0E2F99D1F6C6B42E6, 0x01919C42B3CEB4F1A612238F5CE70C00, '0886377511023806', 'CHALLENGE'),
+    ('2024-08-29 13:52:09', NULL, '2024-08-29 13:52:09.536775', 0x01919C7A0AB82D56D98ED81CDC14EA3F, 0x01919C5FBAC69C61BAD76CE5F992440E, '0883038929', 'PRIVATE'),
+    ('2024-08-29 13:53:43', NULL, '2024-08-29 13:53:43.542246', 0x01919C7B79ED9437CA6870707E44C8F1, 0x01919C5FBAC69C61BAD76CE5F992440E, '0012954192', 'PRIVATE');
 
 
 INSERT INTO DONG.challenge (end_date, participants, start_date, status, created_at, deleted_at, total_deposit, updated_at, account_id, id, description, image, title, type) VALUES
@@ -223,19 +239,5 @@ INSERT INTO DONG.product (created_at, deleted_at, updated_at, id, account_descri
                                                                                                                                                                                                            ('2024-08-29 13:16:35.079926', NULL, '2024-08-29 13:16:35.079926', 0x01919C5979058BAEDF325FD3DB648EE0, '신한은행 대표 입출금 통장으로, 다양한 금융 서비스와 편리한 온라인 뱅킹 서비스를 제공합니다.', '신한 주거래 통장', 'DOMESTIC', '1', '입출금통장', '088-1-3209341ffa0b42', '088', '신한은행'),
                                                                                                                                                                                                            ('2024-08-29 13:17:08.879085', NULL, '2024-08-29 13:17:08.879085', 0x01919C59FD0CFFA37E397694E720BF31, '카카오뱅크 대표 계좌로, 모바일 전용 은행, 간편 이체와 저렴한 수수료가 특징인 입출금통장입니다.', '카카오뱅크 입출금통장', 'DOMESTIC', '1', '입출금통장', '090-1-fbf53e02926f4f', '090', '카카오뱅크');
 
-INSERT INTO DONG.room (created_at, deleted_at, updated_at, id, name)
-VALUES (NOW(),null,NOW(),UNHEX(REPLACE(UUID(), '-', '')),'COFFEE');
-
-INSERT INTO DONG.room (created_at, deleted_at, updated_at, id, name)
-VALUES (NOW(),null,NOW(),UNHEX(REPLACE(UUID(), '-', '')),'DELIVERY');
-
-INSERT INTO DONG.room (created_at, deleted_at, updated_at, id, name)
-VALUES (NOW(),null,NOW(),UNHEX(REPLACE(UUID(), '-', '')),'DRINK');
-
-INSERT INTO DONG.room (created_at, deleted_at, updated_at, id, name)
-VALUES (NOW(),null,NOW(),UNHEX(REPLACE(UUID(), '-', '')),'SEVEN');
-
-INSERT INTO DONG.room (created_at, deleted_at, updated_at, id, name)
-VALUES (NOW(),null,NOW(),UNHEX(REPLACE(UUID(), '-', '')),'QUIZ');
 
 
