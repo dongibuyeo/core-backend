@@ -37,12 +37,16 @@ public class ChallengeResultResponse {
     private int top10PercentMemberNum;
     private int lower90PercentMemberNum;
 
+    private int successNum;
+    private double successRate;
+
     @Builder
     public ChallengeResultResponse(UUID challengeId, ChallengeType type, ChallengeStatus status,
                                    LocalDate startDate, LocalDate endDate, String title, String description, String image,
                                    Long totalDeposit, Integer participants,
                                    long totalReward, long interestEarned, long remainDeposit, long top10PercentRewardPerUnit, long lower90PercentRewardPerUnit,
-                                   int top10PercentMemberNum, int lower90PercentMemberNum) {
+                                   int top10PercentMemberNum, int lower90PercentMemberNum,
+                                   int successNum, double successRate) {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
 
@@ -63,6 +67,8 @@ public class ChallengeResultResponse {
         this.lower90PercentRewardPerUnit = lower90PercentRewardPerUnit;
         this.top10PercentMemberNum = top10PercentMemberNum;
         this.lower90PercentMemberNum = lower90PercentMemberNum;
+        this.successNum = successNum;
+        this.successRate = successRate;
     }
 
 }
