@@ -79,6 +79,11 @@ public interface MemberChallengeRepository extends JpaRepository<MemberChallenge
             "WHERE mc.challenge.id = :challengeId AND mc.isSuccess = false")
     Long getSumOfFailedBaseRewards(@Param("challengeId") UUID challengeId);
 
+    @Query("SELECT SUM(mc.baseReward) " +
+            "FROM MemberChallenge mc " +
+            "WHERE mc.challenge.id = :challengeId AND mc.isSuccess = true")
+    Long getSumOfSuccessBaseRewards(@Param("challengeId") UUID challengeId);
+
     @Query("SELECT COUNT(mc.id) " +
             "FROM MemberChallenge mc " +
             "WHERE mc.challenge.id = :challengeId AND mc.isSuccess = true")
