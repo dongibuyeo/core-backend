@@ -6,6 +6,7 @@ import com.shinhan.dongibuyeo.domain.chat.service.ChatService;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,5 +22,11 @@ public class ChatController {
     @GetMapping("/{roomName}")
     public ResponseEntity<RoomDetailResponse> getRoomDetail(String roomName) {
         return ResponseEntity.ok(chatService.getRoomDetail(roomName));
+    }
+
+    @PostMapping("/makeRoom")
+    public ResponseEntity<Void> makeRoom() {
+        chatService.makeRoom();
+        return ResponseEntity.ok().build();
     }
 }
