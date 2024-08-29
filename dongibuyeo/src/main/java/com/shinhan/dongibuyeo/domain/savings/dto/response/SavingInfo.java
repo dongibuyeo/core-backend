@@ -16,8 +16,8 @@ public class SavingInfo {
     private String accountName;
     private String accountDescription;
     private String subscriptionPeriod;
-    private Long minSubscriptionPeriod;
-    private Long maxSubscriptionPeriod;
+    private Long minSubscriptionBalance;
+    private Long maxSubscriptionBalance;
     private double interestRate;
     private String rateDescription;
 }
