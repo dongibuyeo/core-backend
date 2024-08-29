@@ -165,7 +165,7 @@ public class ChallengeService {
     }
 
     private void createSavingsProduct(Challenge challenge) {
-        String accountName = challenge.getType().toString() + challenge.getStartDate().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        String accountName = challenge.getType().toString() + challenge.getStartDate().format(DateTimeFormatter.ofPattern("yyMMdd"));
         System.out.println("!!!!!!!!!!! acountName: " + accountName + "!!!!!!!!!!!!!!!!!");
         savingsService.makeSavingProduct(
                 SavingProductRequest.builder()
