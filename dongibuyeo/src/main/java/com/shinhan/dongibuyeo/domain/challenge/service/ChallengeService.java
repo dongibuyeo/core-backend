@@ -314,6 +314,14 @@ public class ChallengeService {
                 lower90PercentMemberNum
         );
 
+        double successRate = 0;
+        int totalParticipants = challenge.getParticipants();
+        if (totalParticipants != 0) {
+            successRate = (double) totalCountOfSuccessMember / totalParticipants * 100;
+        }
+
+        successRate = Math.round(successRate * 100.0) / 100.0;
+
         return ChallengeResultResponse.builder()
                 .challengeId(challengeId)
                 .type(challenge.getType())
@@ -331,6 +339,8 @@ public class ChallengeService {
                 .lower90PercentRewardPerUnit(additionalReward.getLower90PercentRewardPerUnit())
                 .top10PercentMemberNum(top10PercentMemberNum)
                 .lower90PercentMemberNum(lower90PercentMemberNum) // 환급 정산 정보
+                .successNum(totalCountOfSuccessMember)
+                .successRate(successRate)
                 .build();
     }
 
