@@ -5,7 +5,7 @@ import com.shinhan.dongibuyeo.domain.account.dto.response.TransactionHistory;
 import com.shinhan.dongibuyeo.domain.challenge.entity.*;
 import com.shinhan.dongibuyeo.domain.challenge.repository.DailyScoreRepository;
 import com.shinhan.dongibuyeo.domain.challenge.score.scheduler.FeverTimeInfo;
-import com.shinhan.dongibuyeo.domain.consume.dto.request.ConsumtionRequest;
+import com.shinhan.dongibuyeo.domain.consume.dto.request.ConsumptionRequest;
 import com.shinhan.dongibuyeo.domain.consume.service.ConsumeService;
 import com.shinhan.dongibuyeo.domain.member.entity.Member;
 import com.shinhan.dongibuyeo.global.entity.TransferType;
@@ -104,7 +104,7 @@ public class DailyScoreService {
 
     private boolean hasConsumptionDuring(MemberChallenge challenge, LocalDateTime start, LocalDateTime end, TransferType transferType) {
         Member member = challenge.getMember();
-        ConsumtionRequest request = new ConsumtionRequest(
+        ConsumptionRequest request = new ConsumptionRequest(
                 transferType,
                 TransactionHistoryRequest.builder()
                         .memberId(member.getId())

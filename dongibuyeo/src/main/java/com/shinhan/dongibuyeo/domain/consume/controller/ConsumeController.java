@@ -1,8 +1,9 @@
 package com.shinhan.dongibuyeo.domain.consume.controller;
 
 import com.shinhan.dongibuyeo.domain.account.dto.response.TransactionHistory;
-import com.shinhan.dongibuyeo.domain.consume.dto.request.ConsumtionRequest;
-import com.shinhan.dongibuyeo.domain.consume.dto.response.ConsumtionResponse;
+import com.shinhan.dongibuyeo.domain.consume.dto.request.ConsumptionRequest;
+import com.shinhan.dongibuyeo.domain.consume.dto.request.MakeConsumptionRequest;
+import com.shinhan.dongibuyeo.domain.consume.dto.response.ConsumptionResponse;
 import com.shinhan.dongibuyeo.domain.consume.service.ConsumeService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,12 +24,18 @@ public class ConsumeController {
     }
 
     @PostMapping("/total")
-    public ResponseEntity<ConsumtionResponse> getTotalBalance(@RequestBody ConsumtionRequest request) {
+    public ResponseEntity<ConsumptionResponse> getTotalBalance(@RequestBody ConsumptionRequest request) {
         return ResponseEntity.ok(consumeService.getTotalConsumtion(request));
     }
 
     @PostMapping
-    public ResponseEntity<List<TransactionHistory>> getMonthTypeHistory(@RequestBody ConsumtionRequest request) {
+    public ResponseEntity<List<TransactionHistory>> getMonthTypeHistory(@RequestBody ConsumptionRequest request) {
         return ResponseEntity.ok(consumeService.getTypeHistory(request));
+    }
+
+    @PostMapping("/make")
+    public ResponseEntity<Void> makeConsumption(@RequestBody MakeConsumptionRequest request) {
+        consumeService.addConsumption(request);
+        return ResponseEntity.noContent().build();
     }
 }
