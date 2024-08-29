@@ -80,7 +80,7 @@ public class AccountClient {
 
     public ShinhanTransactionHistoryResponse getTransactionHistory(ShinhanTransactionHistoryRequest request) {
         return webClient.post()
-                .uri("/edu/demandDeposit/inquireTransactionHistory")
+                .uri("/edu/demandDeposit/inquireTransactionHistoryList")
                 .accept(MediaType.APPLICATION_JSON)
                 .acceptCharset(StandardCharsets.UTF_8)
                 .bodyValue(request)

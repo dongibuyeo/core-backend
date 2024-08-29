@@ -6,6 +6,7 @@ import com.shinhan.dongibuyeo.domain.account.entity.AccountType;
 import com.shinhan.dongibuyeo.domain.account.exception.AccountNotFoundException;
 import com.shinhan.dongibuyeo.domain.challenge.entity.MemberChallenge;
 import com.shinhan.dongibuyeo.domain.challenge.exception.ChallengeAccountNotFoundException;
+import com.shinhan.dongibuyeo.domain.consume.entity.Consumption;
 import com.shinhan.dongibuyeo.domain.quiz.entity.QuizMember;
 import com.shinhan.dongibuyeo.global.entity.BaseEntity;
 import io.netty.util.internal.ConcurrentSet;
@@ -54,6 +55,11 @@ public class Member extends BaseEntity {
             mappedBy = "member",
             cascade = {CascadeType.PERSIST, CascadeType.MERGE}
     )private List<QuizMember> quizMembers = new ArrayList<>();
+
+    @OneToMany(
+            mappedBy = "member",
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE}
+    )private List<Consumption> consumptions = new ArrayList<>();
 
     @Builder
     public Member(String email, String name, String nickname, String profileImage, String deviceToken) {
