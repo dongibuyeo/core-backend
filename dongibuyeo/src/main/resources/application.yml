@@ -29,7 +29,7 @@ shinhan:
     deposit: 10000
     head-count: 10
   challenge:
-    member-account: "088-1-692b220758d742"
+    member-account: "088-1-e69efd30894448"
     interest-rate: 0.04
     estimate:
       success-rate: 0.82
