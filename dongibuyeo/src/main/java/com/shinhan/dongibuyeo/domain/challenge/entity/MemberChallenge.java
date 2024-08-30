@@ -39,9 +39,9 @@ public class MemberChallenge extends BaseEntity {
 
     private Long deposit;
 
-    private Long baseReward;
+    private Long baseReward = 0L;
 
-    private Long additionalReward;
+    private Long additionalReward = 0L;
 
     private Integer totalScore;
 
