@@ -29,6 +29,7 @@ import com.shinhan.dongibuyeo.domain.product.service.ProductService;
 import com.shinhan.dongibuyeo.domain.savings.dto.request.SavingProductRequest;
 import com.shinhan.dongibuyeo.domain.savings.service.SavingsService;
 import com.shinhan.dongibuyeo.global.entity.TransferType;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -41,6 +42,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class ChallengeService {
 
@@ -362,7 +364,9 @@ public class ChallengeService {
             throw new ChallengeNotCompletedException(challengeId);
         }
 
+        log.info("[getMemberChallengeResult] challenge: " + challenge.getTitle());
         // 환급 조회를 위한 정보
+
         long totalDeposit = challenge.getTotalDeposit();
         long remainDeposit = memberChallengeRepository.getSumOfFailedBaseRewards(challengeId)
                 + memberChallengeRepository.getSumOfSuccessBaseRewards(challengeId);
@@ -378,10 +382,12 @@ public class ChallengeService {
                 top10PercentMemberNum,
                 lower90PercentMemberNum
         );
+        log.info("[getMemberChallengeResult] addtionalReward: {}", additionalReward.getTotalReward());
 
         MemberChallenge memberChallenge = memberChallengeRepository.findMemberChallengeByChallengeIdAndMemberId(challengeId, memberId)
                 .orElseThrow(() -> new MemberChallengeNotFoundException(challengeId, memberId));
 
+        log.info("[getMemberChallengeResult] memberChallenge: {}", memberChallenge.getId());
 
         // 회원 소비 정보
         LocalDate challengeStartDate = challenge.getStartDate();
@@ -394,9 +400,10 @@ public class ChallengeService {
 
         TransferType transferType = challenge.getType().getTransferType();
 
+        log.info("[getMemberChallengeResult] transferType: {}", transferType);
         long currentPeriodConsumption = consumeService.getTotalConsumption(memberId, challengeStartDate, challengeEndDate, transferType);
         long previousPeriodConsumption = consumeService.getTotalConsumption(memberId, previousPeriodStartDate, previousPeriodEndDate, transferType);
-
+        log.info("[getMemberChallengeReult] consumption: {}", currentPeriodConsumption);
         return MemberChallengeResultResponse.builder()
                 .memberId(memberId)
                 .challengeId(challengeId)
