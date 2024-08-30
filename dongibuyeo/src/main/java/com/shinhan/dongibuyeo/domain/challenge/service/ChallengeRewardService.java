@@ -12,6 +12,7 @@ import com.shinhan.dongibuyeo.domain.consume.service.ConsumeService;
 import com.shinhan.dongibuyeo.domain.member.dto.response.MemberResponse;
 import com.shinhan.dongibuyeo.domain.member.entity.Member;
 import com.shinhan.dongibuyeo.domain.member.service.MemberService;
+import com.shinhan.dongibuyeo.domain.quiz.service.QuizService;
 import com.shinhan.dongibuyeo.global.entity.TransferType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,9 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -34,14 +33,24 @@ public class ChallengeRewardService {
     @Value("${shinhan.challenge.money-unit}")
     private double moneyUnit;
 
+    @Value("shinhan.quiz.prize")
+    private long quizPrize;
+
+    @Value("shinhan.savings.seven.winner-num")
+    private long savingsWinnerNum;
+
+    private final MemberChallengeService memberChallengeService;
+    private final QuizService quizService;
     private final ConsumeService consumeService;
     private final AccountService accountService;
     private final MemberService memberService;
 
-    public ChallengeRewardService(ConsumeService consumeService, AccountService accountService, MemberService memberService) {
+    public ChallengeRewardService(QuizService quizService, ConsumeService consumeService, AccountService accountService, MemberService memberService, MemberChallengeService memberChallengeService) {
+        this.quizService = quizService;
         this.consumeService = consumeService;
         this.accountService = accountService;
         this.memberService = memberService;
+        this.memberChallengeService = memberChallengeService;
     }
 
     /**
@@ -52,14 +61,69 @@ public class ChallengeRewardService {
      */
     @Transactional
     public void processConsumptionChallengeRewards(Challenge challenge) {
-        List<MemberChallenge> memberChallenges = challenge.getChallengeMembers().stream()
-                .filter(memberChallenge -> memberChallenge.getStatus().equals(MemberChallengeStatus.BEFORE_CALCULATION))
-                .toList();
+        switch (challenge.getType()) {
+            case QUIZ_SOLBEING -> {
+                settlementQuiz(challenge);
+            }
 
-        if (!memberChallenges.isEmpty()) {
-            getConsumptionBaseRewards(memberChallenges, challenge);
-            getConsumptionAdditionalRewards(memberChallenges, challenge.getTotalDeposit());
+            case SAVINGS_SEVEN -> {
+                settlementSavings(challenge);
+            }
+
+            default -> { // CONSUMPTION Challenge
+                List<MemberChallenge> memberChallenges = challenge.getChallengeMembers().stream()
+                        .filter(memberChallenge -> memberChallenge.getStatus().equals(MemberChallengeStatus.BEFORE_CALCULATION))
+                        .toList();
+
+                if (!memberChallenges.isEmpty()) {
+                    getConsumptionBaseRewards(memberChallenges, challenge);
+                    getConsumptionAdditionalRewards(memberChallenges, challenge.getTotalDeposit());
+                }
+            }
         }
+    }
+
+    @Transactional
+    public void settlementSavings(Challenge challenge) {
+        // 모든 회원 정산 처리
+        challenge.getChallengeMembers()
+                .forEach(
+                        challengeMember -> {
+                            challengeMember.updateStatus(MemberChallengeStatus.CALCULATED);
+                        }
+                );
+
+        // 총상금 조회
+        Long totalDeposit = challenge.getTotalDeposit();
+        Long reward = totalDeposit / savingsWinnerNum;
+
+        List<MemberChallenge> successMembers = challenge.getChallengeMembers();
+        Collections.shuffle(successMembers);
+
+        int cnt = 0;
+        for (MemberChallenge successMember : successMembers) {
+            successMember.updateBaseReward(reward);
+            cnt++;
+            if (cnt >= 7)
+                break;
+        }
+    }
+
+    @Transactional
+    public void settlementQuiz(Challenge challenge) {
+        LocalDate startDate = challenge.getStartDate();
+        int year = startDate.getYear();
+        int month = startDate.getMonthValue();
+
+        quizService.getWinnerOfMonth(year, month)
+                .forEach(
+                        memberResponse -> {
+                            UUID memberId = memberResponse.getMemberId();
+                            MemberChallenge memberChallenge = memberChallengeService.findByMemberIdAndChallengeId(challenge.getId(), memberId);
+                            memberChallenge.updateStatus(MemberChallengeStatus.CALCULATED);
+                            memberChallenge.updateBaseReward(quizPrize);
+                        }
+                );
     }
 
     /**
