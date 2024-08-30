@@ -29,9 +29,12 @@ public class Message extends BaseEntity {
     @JoinColumn(name = "room_id")
     private Room room;
 
-    public Message(String message, Member member, Room room) {
+    private String sendAt;
+
+    public Message(String message, Member member, Room room, String sendAt) {
         this.message = message;
         this.member = member;
         this.room = room;
+        this.sendAt = sendAt;
     }
 }

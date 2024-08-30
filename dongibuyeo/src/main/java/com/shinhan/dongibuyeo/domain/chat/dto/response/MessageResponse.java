@@ -15,5 +15,5 @@ public class MessageResponse {
     private String memberNickName;
     private String message;
     private String image;
-    private LocalDateTime createdAt;
+    private String sendAt;
 }
