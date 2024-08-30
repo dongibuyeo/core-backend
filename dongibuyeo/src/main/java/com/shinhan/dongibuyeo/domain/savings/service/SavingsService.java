@@ -145,7 +145,7 @@ public class SavingsService {
         // 계좌명이 일치하는 적금 상품 찾기
         return getSavingProducts()
                 .stream()
-                .filter(savingInfo -> savingInfo.getAccountName().equals(accountName))
+                .filter(savingInfo -> savingInfo.getAccountName().equals(accountName) && savingInfo.getMinSubscriptionBalance() <= 7000)
                 .findFirst()
                 .orElseThrow(() -> new SavingProductNotFoundException(accountName));
     }

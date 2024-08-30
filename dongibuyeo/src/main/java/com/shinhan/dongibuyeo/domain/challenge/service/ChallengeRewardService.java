@@ -45,6 +45,9 @@ public class ChallengeRewardService {
     @Value("${shinhan.savings.seven.winner-num}")
     private long savingsWinnerNum;
 
+    @Value("${shinhan.savings.seven.deposit}")
+    private long savingsSevenDeposit;
+
     private final QuizService quizService;
     private final ConsumeService consumeService;
     private final AccountService accountService;
@@ -95,6 +98,7 @@ public class ChallengeRewardService {
                 .forEach(
                         challengeMember -> {
                             challengeMember.updateStatus(MemberChallengeStatus.CALCULATED);
+                            challengeMember.updateBaseReward(savingsSevenDeposit);
                         }
                 );
 
@@ -107,7 +111,7 @@ public class ChallengeRewardService {
 
         int cnt = 0;
         for (MemberChallenge successMember : successMembers) {
-            successMember.updateBaseReward(reward);
+            successMember.updateAdditionalReward(reward);
             cnt++;
             if (cnt >= 7)
                 break;

@@ -32,8 +32,9 @@ shinhan:
     seven:
       bank-code: 088
       subscription-period: 49
-      min-balance: 10000
+      min-balance: 1
       max-balance: 1000000
+      deposit: 70000
       interest-rate: 7.7
       winner-num: 7
   quiz:
