@@ -1,5 +1,6 @@
 package com.shinhan.dongibuyeo.domain.challenge.controller;
 
+import com.shinhan.dongibuyeo.domain.account.dto.request.MemberIdRequest;
 import com.shinhan.dongibuyeo.domain.account.dto.response.MakeAccountResponse;
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.JoinChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.MemberChallengeRequest;
@@ -52,9 +53,9 @@ public class MemberChallengeController {
     }
 
     @PostMapping("/account")
-    public ResponseEntity<MakeAccountResponse> makeMemberChallengeAccount(@RequestBody @Valid UUID memberId) {
-        log.info("[makeMemberChallengeAccount] memberId: {}", memberId);
-        return ResponseEntity.ok(memberChallengeService.makeMemberChallengeAccount(memberId));
+    public ResponseEntity<MakeAccountResponse> makeMemberChallengeAccount(@RequestBody @Valid MemberIdRequest memberIdRequest) {
+        log.info("[makeMemberChallengeAccount] memberId: {}", memberIdRequest.getMemberId());
+        return ResponseEntity.ok(memberChallengeService.makeMemberChallengeAccount(memberIdRequest.getMemberId()));
     }
 
     @PostMapping("/cancel")
