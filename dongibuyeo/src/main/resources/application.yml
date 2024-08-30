@@ -5,6 +5,12 @@ slack:
   url: https://hooks.slack.com/services/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
 
 spring:
+  batch:
+    jdbc:
+      initialize-schema: always
+    job:
+      name: SETTLEMENT_JOB
+      enabled: false
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://dongibuyeo-db.c7gumiik0xja.ap-northeast-2.rds.amazonaws.com:3306/DONG?serverTimezone=Asia/Seoul

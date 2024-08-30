@@ -80,4 +80,10 @@ public class ChallengeController {
                                                                        @RequestParam UUID memberId) {
         return ResponseEntity.ok(challengeService.getMemberChallengeResult(challengeId, memberId));
     }
+
+    @GetMapping("/settlement/{challengeId}")
+    public ResponseEntity<Void> goSettlement(@PathVariable("challengeId") UUID challengeId) {
+        challengeService.goSettlement(challengeId);
+        return ResponseEntity.noContent().build();
+    }
 }
