@@ -7,11 +7,13 @@ import com.shinhan.dongibuyeo.domain.challenge.dto.response.*;
 import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeStatus;
 import com.shinhan.dongibuyeo.domain.challenge.service.MemberChallengeService;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequestMapping("/challenges/member")
 public class MemberChallengeController {
@@ -51,6 +53,7 @@ public class MemberChallengeController {
 
     @PostMapping("/account")
     public ResponseEntity<MakeAccountResponse> makeMemberChallengeAccount(@RequestParam UUID memberId) {
+        log.info("[makeMemberChallengeAccount] memberId: {}", memberId);
         return ResponseEntity.ok(memberChallengeService.makeMemberChallengeAccount(memberId));
     }
 
