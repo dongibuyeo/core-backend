@@ -28,7 +28,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -125,13 +124,17 @@ public class MemberChallengeService {
         validateChallengeJoin(challenge, member);
         validateDeposit(deposit);
 
-        // 예치금 입금 (유저 챌린지 계좌 -> 챌린지 전용 계좌)
-        transferDeposit(member, challenge.getAccount().getAccountNo(), deposit);
-
-        MemberChallenge memberChallenge = createMemberChallenge(member, challenge, deposit);
-        challenge.addMember(memberChallenge);
-        member.addChallenge(memberChallenge);
-        memberChallengeRepository.save(memberChallenge);
+        try {
+            // 예치금 입금 (유저 챌린지 계좌 -> 챌린지 전용 계좌)
+            transferDeposit(member, challenge.getAccount().getAccountNo(), deposit);
+            MemberChallenge memberChallenge = createMemberChallenge(member, challenge, deposit);
+            challenge.addMember(memberChallenge);
+            member.addChallenge(memberChallenge);
+            memberChallengeRepository.save(memberChallenge);
+        } catch (Exception e) {
+            log.info("[joinChallenge] error: {}", e.getMessage());
+            throw new CannotJoinChallengeException();
+        }
     }
 
     private void validateDeposit(Long deposit) {
@@ -188,21 +191,15 @@ public class MemberChallengeService {
 
     @Transactional
     public void transferDeposit(Member member, String challengeAccountNo, Long deposit) {
-        try {
-            accountService.accountTransfer(
-                    new TransferRequest(
-                            member.getId(),
-                            challengeAccountNo,
-                            member.getChallengeAccount().getAccountNo(),
-                            deposit,
-                            TransferType.CHALLENGE
-                    )
-            );
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new CannotJoinChallengeException();
-        }
-
+        accountService.accountTransfer(
+                new TransferRequest(
+                        member.getId(),
+                        challengeAccountNo,
+                        member.getChallengeAccount().getAccountNo(),
+                        deposit,
+                        TransferType.CHALLENGE
+                )
+        );
     }
 
     private MemberChallenge createMemberChallenge(Member member, Challenge challenge, Long deposit) {
