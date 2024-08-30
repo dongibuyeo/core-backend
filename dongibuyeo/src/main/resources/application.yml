@@ -39,7 +39,7 @@ shinhan:
       winner-num: 7
   quiz:
     deposit: 10000
-    head-count: 10
+    head-count: 42
     prize: 10000
   challenge:
     member-account: "088-1-e69efd30894448"

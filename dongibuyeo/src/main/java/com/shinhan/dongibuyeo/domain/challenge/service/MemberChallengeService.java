@@ -122,12 +122,20 @@ public class MemberChallengeService {
     public void joinChallenge(JoinChallengeRequest request) {
         Member member = memberService.getMemberById(request.getMemberId());
         Challenge challenge = findChallengeById(request.getChallengeId());
-        Long deposit = request.getDeposit();
-        if (challenge.getType() == ChallengeType.SAVINGS_SEVEN) {
-            deposit = savingsSevenDeposit;
-        }
         validateChallengeJoin(challenge, member);
-        validateDeposit(deposit);
+
+        Long deposit = request.getDeposit();
+        switch (challenge.getType()) {
+            case SAVINGS_SEVEN: {
+                deposit = savingsSevenDeposit;
+            }
+
+            case QUIZ_SOLBEING: {
+                deposit = 0L;
+            }
+
+            default: validateDeposit(deposit);
+        }
 
         transferDeposit(member, challenge.getAccount().getAccountNo(), deposit);
 
