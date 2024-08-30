@@ -7,6 +7,8 @@ import com.shinhan.dongibuyeo.domain.challenge.dto.response.AdditionalRewardResp
 import com.shinhan.dongibuyeo.domain.challenge.entity.Challenge;
 import com.shinhan.dongibuyeo.domain.challenge.entity.MemberChallenge;
 import com.shinhan.dongibuyeo.domain.challenge.entity.MemberChallengeStatus;
+import com.shinhan.dongibuyeo.domain.challenge.exception.MemberChallengeNotFoundException;
+import com.shinhan.dongibuyeo.domain.challenge.repository.MemberChallengeRepository;
 import com.shinhan.dongibuyeo.domain.challenge.score.util.ScoreUtils;
 import com.shinhan.dongibuyeo.domain.consume.service.ConsumeService;
 import com.shinhan.dongibuyeo.domain.member.dto.response.MemberResponse;
@@ -21,36 +23,39 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Service
 public class ChallengeRewardService {
 
+    private final MemberChallengeRepository memberChallengeRepository;
     @Value("${shinhan.challenge.interest-rate}")
     private double challengeInterestRate;
 
     @Value("${shinhan.challenge.money-unit}")
     private double moneyUnit;
 
-    @Value("shinhan.quiz.prize")
+    @Value("${shinhan.quiz.prize}")
     private long quizPrize;
 
-    @Value("shinhan.savings.seven.winner-num")
+    @Value("${shinhan.savings.seven.winner-num}")
     private long savingsWinnerNum;
 
-    private final MemberChallengeService memberChallengeService;
     private final QuizService quizService;
     private final ConsumeService consumeService;
     private final AccountService accountService;
     private final MemberService memberService;
 
-    public ChallengeRewardService(QuizService quizService, ConsumeService consumeService, AccountService accountService, MemberService memberService, MemberChallengeService memberChallengeService) {
+    public ChallengeRewardService(QuizService quizService, ConsumeService consumeService, AccountService accountService, MemberService memberService, MemberChallengeRepository memberChallengeRepository) {
         this.quizService = quizService;
         this.consumeService = consumeService;
         this.accountService = accountService;
         this.memberService = memberService;
-        this.memberChallengeService = memberChallengeService;
+        this.memberChallengeRepository = memberChallengeRepository;
     }
 
     /**
@@ -119,7 +124,8 @@ public class ChallengeRewardService {
                 .forEach(
                         memberResponse -> {
                             UUID memberId = memberResponse.getMemberId();
-                            MemberChallenge memberChallenge = memberChallengeService.findByMemberIdAndChallengeId(challenge.getId(), memberId);
+                            MemberChallenge memberChallenge = memberChallengeRepository.findByMemberIdAndChallengeId(challenge.getId(), memberId)
+                                    .orElseThrow(() -> new MemberChallengeNotFoundException(challenge.getId(), memberId));
                             memberChallenge.updateStatus(MemberChallengeStatus.CALCULATED);
                             memberChallenge.updateBaseReward(quizPrize);
                         }

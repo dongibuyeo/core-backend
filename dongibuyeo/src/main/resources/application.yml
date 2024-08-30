@@ -47,7 +47,6 @@ shinhan:
       success-rate: 0.82
       bounce-back-rate: 0.2
     money-unit: 10000
-
   deposit:
     min: 10000
     max: 300000
