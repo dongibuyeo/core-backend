@@ -13,6 +13,7 @@ import com.shinhan.dongibuyeo.domain.quiz.entity.QuizMember;
 import com.shinhan.dongibuyeo.domain.quiz.mapper.QuizMapper;
 import com.shinhan.dongibuyeo.domain.quiz.repository.QuizMemberRepository;
 import com.shinhan.dongibuyeo.domain.quiz.repository.QuizRepository;
+import com.shinhan.dongibuyeo.global.slack.SlackComponent;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.PageRequest;
@@ -28,12 +29,15 @@ public class QuizService {
     private QuizRepository quizRepository;
     private MemberService memberService;
     private QuizMapper quizMapper;
+    private SlackComponent slackComponent;
+    private HashMap<String,String> slackWinners = new HashMap<>();
 
-    public QuizService(QuizRepository quizRepository, MemberService memberService, QuizMapper quizMapper, QuizMemberRepository quizMemberRepository) {
+    public QuizService(QuizRepository quizRepository, MemberService memberService, QuizMapper quizMapper, QuizMemberRepository quizMemberRepository, SlackComponent slackComponent) {
         this.quizRepository = quizRepository;
         this.memberService = memberService;
         this.quizMapper = quizMapper;
         this.quizMemberRepository = quizMemberRepository;
+        this.slackComponent = slackComponent;
     }
 
     @Transactional
@@ -94,13 +98,17 @@ public class QuizService {
         Collections.shuffle(solvedList);
 
         HashMap<UUID, Member> winners = new HashMap<>();
+        slackWinners.put("EMAIL","NAME");
 
         for(QuizMember quizMember : solvedList) {
             winners.put(quizMember.getMember().getId(), quizMember.getMember());
+            slackWinners.put(quizMember.getMember().getEmail(), quizMember.getMember().getName());
 
             if(winners.size() >= 42)
                 break;
         }
+
+        slackComponent.sendSlackMessage("QUIZ CHALLENGE : "+year+"년 "+month+"월 ",slackWinners);
 
         return quizMapper.toWinnerResponse(winners);
     }

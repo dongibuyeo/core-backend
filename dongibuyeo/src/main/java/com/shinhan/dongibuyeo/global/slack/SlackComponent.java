@@ -16,23 +16,21 @@ import static com.slack.api.webhook.WebhookPayloads.payload;
 @Component
 public class SlackComponent {
 
-    @Value("${slack.url}")
+    @Value("https://hooks.slack.com/services/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")
     private String SLACK_URL;
 
     private Slack slack = Slack.getInstance();
 
     public void sendSlackMessage(String title, HashMap<String,String> data) {
-
         try {
+            StringBuilder messageBuilder = new StringBuilder(title);
+            data.forEach((key, value) -> messageBuilder.append("\n").append(key).append(": ").append(value));
+
             slack.send(SLACK_URL, payload(
-                    p -> p.text(title)
-                            .attachments(List.of(
-                                    Attachment.builder()
-                                            .fields(data.keySet().stream().map(key -> generateSlackField(key,data.get(key))).collect(Collectors.toList())).build()
-                            ))
+                    p -> p.text(messageBuilder.toString())
             ));
         } catch (IOException e) {
-
+            e.printStackTrace();
         }
 
     }
