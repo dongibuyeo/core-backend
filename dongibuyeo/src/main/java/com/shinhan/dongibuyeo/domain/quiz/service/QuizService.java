@@ -1,11 +1,13 @@
 package com.shinhan.dongibuyeo.domain.quiz.service;
 
+import com.shinhan.dongibuyeo.domain.member.dto.response.MemberResponse;
 import com.shinhan.dongibuyeo.domain.member.entity.Member;
 import com.shinhan.dongibuyeo.domain.member.service.MemberService;
 import com.shinhan.dongibuyeo.domain.quiz.dto.request.QuizMakeRequest;
 import com.shinhan.dongibuyeo.domain.quiz.dto.request.QuizSolveRequest;
 import com.shinhan.dongibuyeo.domain.quiz.dto.response.QuizResponse;
 import com.shinhan.dongibuyeo.domain.quiz.dto.response.QuizSolveResponse;
+import com.shinhan.dongibuyeo.domain.quiz.dto.response.QuizTotalResponse;
 import com.shinhan.dongibuyeo.domain.quiz.entity.Quiz;
 import com.shinhan.dongibuyeo.domain.quiz.entity.QuizMember;
 import com.shinhan.dongibuyeo.domain.quiz.mapper.QuizMapper;
@@ -18,9 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class QuizService {
@@ -89,7 +89,30 @@ public class QuizService {
     }
 
     @Transactional
-    public void getWinnerOfMonth(int year, int month) {
-        // TODO
+    public List<MemberResponse> getWinnerOfMonth(int year, int month) {
+        List<QuizMember> solvedList = quizMemberRepository.findWinnerByYearAndMonth(year,month);
+        Collections.shuffle(solvedList);
+
+        HashMap<UUID, Member> winners = new HashMap<>();
+
+        for(QuizMember quizMember : solvedList) {
+            winners.put(quizMember.getMember().getId(), quizMember.getMember());
+
+            if(winners.size() >= 42)
+                break;
+        }
+
+        return quizMapper.toWinnerResponse(winners);
     }
+
+    @Transactional
+    public QuizTotalResponse getQuizTotal(UUID memberId, Integer year, Integer month) {
+        List<QuizMember> solvedList = quizMemberRepository.findWinnerByYearAndMonth(year,month);
+        List<QuizMember> myList = solvedList.stream().filter(x -> x.getMember().getId().equals(memberId)).toList();
+
+        return new QuizTotalResponse(solvedList.size(), myList.size());
+    }
+
+
+
 }
