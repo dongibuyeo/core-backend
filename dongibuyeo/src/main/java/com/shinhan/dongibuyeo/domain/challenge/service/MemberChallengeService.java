@@ -316,7 +316,7 @@ public class MemberChallengeService {
 
     private DailyScoreDetailResponse convertToDailyScoreDetail(DailyScore dailyScore) {
         return DailyScoreDetailResponse.builder()
-                .date(dailyScore.getDate().toString())
+                .date(dailyScore.getDate())
                 .entries(dailyScore.getScoreDetails())
                 .build();
     }
