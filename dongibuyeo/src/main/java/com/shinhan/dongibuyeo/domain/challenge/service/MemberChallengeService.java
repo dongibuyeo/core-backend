@@ -283,7 +283,7 @@ public class MemberChallengeService {
                 .orElseThrow(() -> new MemberChallengeNotFoundException(challengeId, memberId));
     }
 
-    public MemberChallengesResponse findAllChallengesByMemberIdAndStatus(UUID memberId, ChallengeStatus status) {
+    public Object findAllChallengesByMemberIdAndStatus(UUID memberId, ChallengeStatus status) {
 
         int totalCalculatedNum = memberChallengeRepository.countAllByMemberIdAndStatus(memberId, MemberChallengeStatus.CALCULATED);
 
@@ -292,10 +292,14 @@ public class MemberChallengeService {
                 .map(challengeMapper::toMemberChallengeResponse)
                 .toList();
 
-        return new MemberChallengesResponse(
-                totalCalculatedNum,
-                memberChallengeDetails
-        );
+        if (status == ChallengeStatus.COMPLETED) {
+            return new MemberChallengesResponse(
+                    totalCalculatedNum,
+                    memberChallengeDetails
+            );
+        }
+
+        return memberChallengeDetails;
     }
 
     @Transactional(readOnly = true)
