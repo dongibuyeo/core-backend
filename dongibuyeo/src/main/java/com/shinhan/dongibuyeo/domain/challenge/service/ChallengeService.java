@@ -181,7 +181,7 @@ public class ChallengeService {
                         .accountName(accountName)
                         .accountDescription(challenge.getTitle() + " 전용 계좌")
                         .subscriptionPeriod(subscriptionPeriod)
-                        .minSubscriptionBalance(minBalance)
+                        .minSubscriptionBalance(1L)
                         .maxSubscriptionBalance(maxBalance)
                         .interestRate(savingInterestRate)
                         .rateDescription(savingInterestRate + "%")
