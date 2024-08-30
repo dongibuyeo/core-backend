@@ -42,6 +42,9 @@ public class MemberChallengeService {
     @Value("${shinhan.deposit.max}")
     private Long maxDeposit;
 
+    @Value("${shinhan.savings.seven.deposit}")
+    private Long savingsSevenDeposit;
+
     @Value("${shinhan.deposit.unit}")
     private Long depositUnit;
 
@@ -120,7 +123,9 @@ public class MemberChallengeService {
         Member member = memberService.getMemberById(request.getMemberId());
         Challenge challenge = findChallengeById(request.getChallengeId());
         Long deposit = request.getDeposit();
-
+        if (challenge.getType() == ChallengeType.SAVINGS_SEVEN) {
+            deposit = savingsSevenDeposit;
+        }
         validateChallengeJoin(challenge, member);
         validateDeposit(deposit);
 
