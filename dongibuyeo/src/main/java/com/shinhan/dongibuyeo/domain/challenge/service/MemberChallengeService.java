@@ -122,24 +122,13 @@ public class MemberChallengeService {
     public void joinChallenge(JoinChallengeRequest request) {
         Member member = memberService.getMemberById(request.getMemberId());
         Challenge challenge = findChallengeById(request.getChallengeId());
-        validateChallengeJoin(challenge, member);
-
         Long deposit = request.getDeposit();
-        switch (challenge.getType()) {
-            case SAVINGS_SEVEN: {
-                deposit = savingsSevenDeposit;
-                break;
-            }
 
-            case QUIZ_SOLBEING: {
-                deposit = 0L;
-                break;
-            }
-
-            default: validateDeposit(deposit);
+        validateChallengeJoin(challenge, member);
+        if (challenge.getType() != ChallengeType.QUIZ_SOLBEING) {
+            validateDeposit(deposit);
+            transferDeposit(member, challenge.getAccount().getAccountNo(), deposit);
         }
-
-        transferDeposit(member, challenge.getAccount().getAccountNo(), deposit);
 
         MemberChallenge memberChallenge = createMemberChallenge(member, challenge, deposit);
         challenge.addMember(memberChallenge);
@@ -267,7 +256,7 @@ public class MemberChallengeService {
         // 예치금 환급
         Long deposit = memberChallenge.getDeposit();
         challenge.addTotalDeposit(-deposit);
-        challengeRewardService.transferFromChallengeAccountToMemberAccount(member, challenge,deposit);
+        challengeRewardService.transferFromChallengeAccountToMemberAccount(member, challenge, deposit);
         memberChallenge.updateStatus(MemberChallengeStatus.REWARDED);
         memberChallenge.softDelete();
 
