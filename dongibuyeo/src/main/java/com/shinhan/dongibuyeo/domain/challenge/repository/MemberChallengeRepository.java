@@ -51,6 +51,8 @@ public interface MemberChallengeRepository extends JpaRepository<MemberChallenge
 
     List<MemberChallenge> findByMemberId(UUID memberId);
 
+    Optional<MemberChallenge> findByMemberIdAndChallengeId(UUID memberId, UUID challengeId);
+
     @Query("SELECT mc " +
             "FROM MemberChallenge mc " +
             "JOIN FETCH Challenge c " +

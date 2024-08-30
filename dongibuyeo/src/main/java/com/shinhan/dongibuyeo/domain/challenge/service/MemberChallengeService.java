@@ -250,7 +250,9 @@ public class MemberChallengeService {
         validateChallengeWithdrawal(challenge);
 
         // 예치금 환급
-        challengeRewardService.transferFromChallengeAccountToMemberAccount(member, challenge, memberChallenge.getDeposit());
+        Long deposit = memberChallenge.getDeposit();
+        challenge.addTotalDeposit(-deposit);
+        challengeRewardService.transferFromChallengeAccountToMemberAccount(member, challenge,deposit);
         memberChallenge.updateStatus(MemberChallengeStatus.REWARDED);
         memberChallenge.softDelete();
 
@@ -275,6 +277,11 @@ public class MemberChallengeService {
 
     private MemberChallenge getMemberChallenge(UUID challengeId, UUID memberId) {
         return memberChallengeRepository.findMemberChallengeByChallengeIdAndMemberId(challengeId, memberId)
+                .orElseThrow(() -> new MemberChallengeNotFoundException(challengeId, memberId));
+    }
+
+    public MemberChallenge findByMemberIdAndChallengeId(UUID challengeId, UUID memberId) {
+        return memberChallengeRepository.findByMemberIdAndChallengeId(memberId, challengeId)
                 .orElseThrow(() -> new MemberChallengeNotFoundException(challengeId, memberId));
     }
 
