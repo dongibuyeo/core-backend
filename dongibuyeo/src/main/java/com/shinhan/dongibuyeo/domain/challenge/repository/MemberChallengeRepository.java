@@ -4,6 +4,7 @@ import com.shinhan.dongibuyeo.domain.challenge.dto.response.ChallengeRewardStati
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.MemberChallengeDetail;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.TopRankerInfo;
 import com.shinhan.dongibuyeo.domain.challenge.entity.*;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -72,7 +73,7 @@ public interface MemberChallengeRepository extends JpaRepository<MemberChallenge
             "JOIN mc.member m " +
             "WHERE mc.challenge.id = :challengeId " +
             "ORDER BY mc.totalScore DESC")
-    List<TopRankerInfo> findTop5ByChallengeId(@Param("challengeId") UUID challengeId);
+    List<TopRankerInfo> findTop5ByChallengeId(@Param("challengeId") UUID challengeId, Pageable pageable);
 
     @Query("SELECT mc.totalScore FROM MemberChallenge mc WHERE mc.challenge.id = :challengeId ORDER BY mc.totalScore DESC")
     List<Integer> findAllScoresByChallengeId(@Param("challengeId") UUID challengeId);

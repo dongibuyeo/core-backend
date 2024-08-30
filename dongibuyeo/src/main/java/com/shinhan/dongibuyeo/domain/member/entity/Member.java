@@ -97,7 +97,7 @@ public class Member extends BaseEntity {
     public Account getChallengeAccount() {
         return accounts.stream()
                 .filter(account -> account.getAccountType() == AccountType.CHALLENGE)
-                .findFirst()
+                .min(Comparator.comparing(BaseEntity::getCreatedAt))
                 .orElseThrow(() -> new ChallengeAccountNotFoundException(this.id));
     }
 

@@ -84,7 +84,6 @@ public class AccountService {
         ShinhanGetAccountResponse shinhanAccount = accountClient.getAccountByAccountNo(
                 accountMapper.toShinhanGetAccountRequest(apiKey,member.getUserKey(),accountNo)
         );
-
         member.getAccounts().add(accountMapper.detailToPersonalAccountEntity(shinhanAccount.getRec()));
         return shinhanAccount.getRec();
     }
@@ -134,9 +133,10 @@ public class AccountService {
 
     @Transactional
     public AccountDetailInfo getChallengeAccountByMemberId(UUID memberId) {
+        log.info("[getChallengeAccountByMemberId] memberId: {}", memberId);
         Member member = memberService.getMemberById(memberId);
         String challengeAccountNo = member.getChallengeAccount().getAccountNo();
-
+        log.info("getChallengeAccountByMemberId challengeAccountNo: {}", challengeAccountNo);
         return getAccountByAccountNo(memberId, challengeAccountNo);
     }
 }
