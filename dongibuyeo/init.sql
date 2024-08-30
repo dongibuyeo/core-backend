@@ -1,9 +1,9 @@
 DROP
-DATABASE IF EXISTS `DONG`;
+    DATABASE IF EXISTS `DONG`;
 
 CREATE
-DATABASE `DONG` DEFAULT CHARACTER
-SET utf8 COLLATE utf8_unicode_ci;;
+    DATABASE `DONG` DEFAULT CHARACTER
+    SET utf8 COLLATE utf8_unicode_ci;;
 
 USE `DONG`;
 
@@ -239,26 +239,25 @@ VALUES ('2024-08-29 12:51:42', NULL, 'admin', '2024-08-29 12:51:42', 'admin', 0x
        ('2024-08-29 14:53:56', NULL, '곽곽', '2024-08-29 14:53:56', '곽곽이', 0x01919CB29B1033C9DCF879E53C3B31F2, '',
         'test123@test.co', NULL, 'cbe35d3c-caed-42ca-8caf-eaa25081ee94');
 
-# INSERT INTO DONG.member (id, email, name, nickname, profile_image, user_key, device_token, created_at, updated_at)
-# SELECT UNHEX(REPLACE(UUID(), '-', '')),
-#        CONCAT('user', n, '@dongibuyeo.com'),
-#        CONCAT('User', n),
-#        CONCAT('Nickname', n),
-#        NULL,
-#        'cbe35d3c-caed-42ca-8caf-eaa25081ee94',
-#        CONCAT('device_token_', n),
-#        DATE_ADD('2024-01-01', INTERVAL n DAY),
-#        DATE_ADD('2024-01-01', INTERVAL n DAY)
-# FROM (SELECT @row := @row + 1 AS n
-#       FROM (SELECT 0 UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL
-#             SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) t1,
-#            (SELECT 0 UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL
-#             SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) t2,
-#            (SELECT 0 UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL
-#             SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) t3,
-#            (SELECT 0 UNION ALL SELECT 1 UNION ALL SELECT 2) t4,
-#            (SELECT @row := 0) r) numbers
-# WHERE n <= 3000;
+INSERT INTO DONG.member (id, email, name, nickname, profile_image, user_key, device_token, created_at, updated_at)
+SELECT
+    UNHEX(REPLACE(UUID(), '-', '')),
+    CONCAT('user', n, '@dongibuyeo.com'),
+    CONCAT('User', n),
+    CONCAT('Nickname', n),
+    NULL,
+    'cbe35d3c-caed-42ca-8caf-eaa25081ee94',
+    CONCAT('device_token_', n),
+    DATE_ADD('2024-01-01', INTERVAL FLOOR(RAND() * 365) DAY),
+    DATE_ADD('2024-01-01', INTERVAL FLOOR(RAND() * 365) DAY)
+FROM
+    (SELECT @row := @row + 1 AS n FROM
+                                      (SELECT 0 UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) t1,
+                                      (SELECT 0 UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) t2,
+                                      (SELECT 0 UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) t3,
+                                      (SELECT @row:=0) r
+    ) numbers
+WHERE n <= 10;
 
 INSERT INTO DONG.account (created_at, deleted_at, updated_at, id, member_id, account_no, account_type)
 VALUES ('2024-08-29 13:24:02', NULL, '2024-08-29 13:24:02.964314', 0x01919C604E86334E71442B0E6AA8B8AE,
@@ -374,65 +373,56 @@ VALUES (0x00, 0, 0, 0, '2024-08-29 23:59:59', NULL, 10000, '2024-08-30 00:00:00'
 -- 모든 챌린지에 대해 멤버 챌린지 생성 (2000-3000명)
 INSERT INTO DONG.member_challenge (is_success, total_score, additional_reward, base_reward, created_at, deleted_at,
                                    deposit, updated_at, challenge_id, id, member_id, status)
-WITH RECURSIVE challenge_participants AS (
-    SELECT
-        c.id AS challenge_id,
-        2000 + FLOOR(RAND() * 1001) AS target_participants
-    FROM DONG.challenge c
-),
-               member_pool AS (
-                   SELECT id FROM DONG.member WHERE email LIKE 'user%@dongibuyeo.com'
-               ),
-               challenge_members AS (
-                   SELECT
-                       cp.challenge_id,
-                       m.id AS member_id,
-                       cp.target_participants,
-                       ROW_NUMBER() OVER (PARTITION BY cp.challenge_id ORDER BY RAND()) AS row_num
-                   FROM
-                       challenge_participants cp
-                           CROSS JOIN member_pool m
-               )
-SELECT
-    CASE
-        WHEN c.status = 2 THEN CAST(RAND() > 0.5 AS SIGNED)
-        ELSE 0
-        END,
-    CASE
-        WHEN c.status = 2 THEN FLOOR(RAND() * 1000)
-        ELSE FLOOR(RAND() * 100)
-        END,
-    CASE
-        WHEN c.status = 2 THEN FLOOR(RAND() * 5000)
-        ELSE 0
-        END,
-    CASE
-        WHEN c.status = 2 THEN 10000
-        ELSE 0
-        END,
-    c.start_date,
-    NULL,
-    CASE
-        WHEN c.type = 'SAVINGS_SEVEN' THEN 70000
-        ELSE FLOOR(RAND() * 30) * 10000 + 10000 -- 10,000원부터 300,000원까지 10,000원 단위
-        END,
-    CASE
-        WHEN c.status = 2 THEN c.end_date
-        ELSE c.start_date
-        END,
-    c.id,
-    UNHEX(REPLACE(UUID(), '-', '')),
-    cm.member_id,
-    CASE
-        WHEN c.status = 2 THEN 'CALCULATED'
-        WHEN c.status = 1 THEN 'BEFORE_CALCULATION'
-        ELSE 'BEFORE_CALCULATION'
-        END
-FROM
-    DONG.challenge c
-        JOIN challenge_members cm ON c.id = cm.challenge_id
-WHERE
-    cm.row_num <= cm.target_participants;
+WITH RECURSIVE
+    challenge_participants AS (SELECT c.id                        AS challenge_id,
+                                      10 + FLOOR(RAND() * 10) AS target_participants
+                               FROM DONG.challenge c),
+    member_pool AS (SELECT id
+                    FROM DONG.member
+                    WHERE email LIKE 'user%@dongibuyeo.com'),
+    challenge_members AS (SELECT cp.challenge_id,
+                                 m.id                                                             AS member_id,
+                                 cp.target_participants,
+                                 ROW_NUMBER() OVER (PARTITION BY cp.challenge_id ORDER BY RAND()) AS row_num
+                          FROM challenge_participants cp
+                                   CROSS JOIN member_pool m)
+SELECT CASE
+           WHEN c.status = 2 THEN CAST(RAND() > 0.5 AS SIGNED)
+           ELSE 0
+           END,
+       CASE
+           WHEN c.status = 2 THEN FLOOR(RAND() * 1000)
+           ELSE FLOOR(RAND() * 100)
+           END,
+       CASE
+           WHEN c.status = 2 THEN FLOOR(RAND() * 5000)
+           ELSE 0
+           END,
+       CASE
+           WHEN c.status = 2 THEN 10000
+           ELSE 0
+           END,
+       c.start_date,
+       NULL,
+       CASE
+           WHEN c.type = 'SAVINGS_SEVEN' THEN 70000
+           ELSE FLOOR(RAND() * 30) * 10000 + 10000 -- 10,000원부터 300,000원까지 10,000원 단위
+           END,
+       CASE
+           WHEN c.status = 2 THEN c.end_date
+           ELSE c.start_date
+           END,
+       c.id,
+       UNHEX(REPLACE(UUID(), '-', '')),
+       cm.member_id,
+       CASE
+           WHEN c.status = 2 THEN 'CALCULATED'
+           WHEN c.status = 1 THEN 'BEFORE_CALCULATION'
+           ELSE 'BEFORE_CALCULATION'
+           END
+FROM DONG.challenge c
+         JOIN challenge_members cm ON c.id = cm.challenge_id
+WHERE cm.row_num <= cm.target_participants;
 
 -- DailyScore 데이터 생성 (IN_PROGRESS 및 COMPLETED 챌린지만)
 INSERT INTO DONG.daily_score (id, member_challenge_id, date, total_score)
@@ -560,7 +550,7 @@ FROM DONG.daily_score ds
 WHERE CASE
           WHEN c.type IN ('CONSUMPTION_COFFEE', 'CONSUMPTION_DELIVERY', 'CONSUMPTION_DRINK') THEN RAND() < 0.7
           WHEN c.type = 'QUIZ_SOLBEING' THEN RAND() < 0.8
-          WHEN c.type = 'SAVINGS_SEVEN' THEN RAND() < 0.95
+          WHEN c.type = 'SAVINGS_SEVEN' THEN RAND() < 0.72
           ELSE FALSE
           END;
 
@@ -703,14 +693,13 @@ VALUES (UNHEX(REPLACE(UUID(), '-', '')), '부채는 기업의 자산에서 빚�
 
 -- SQL Insert statements for the consumption table with unique UUIDs and transaction_unique_no
 
-INSERT INTO DONG.`consumption` (
-    created_at, updated_at, deleted_at,
-    transaction_after_balance, transaction_balance,
-    id, member_id, transaction_account_no,
-    transaction_date, transaction_memo, transaction_summary,
-    transaction_time, transaction_type, transaction_type_name,
-    transaction_unique_no
-) VALUES
+INSERT INTO DONG.`consumption` (created_at, updated_at, deleted_at,
+                                transaction_after_balance, transaction_balance,
+                                id, member_id, transaction_account_no,
+                                transaction_date, transaction_memo, transaction_summary,
+                                transaction_time, transaction_type, transaction_type_name,
+                                transaction_unique_no)
+VALUES
 -- Record 1
 (NOW(), NOW(), NULL, 100000, 95000,
  UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160',
@@ -964,14 +953,13 @@ INSERT INTO DONG.`consumption` (
 
 -- SQL Insert statements for the consumption table with "COFFEE출금" transactions from March to August
 
-INSERT INTO DONG.consumption (
-    created_at, updated_at, deleted_at,
-    transaction_after_balance, transaction_balance,
-    id, member_id, transaction_account_no,
-    transaction_date, transaction_memo, transaction_summary,
-    transaction_time, transaction_type, transaction_type_name,
-    transaction_unique_no
-) VALUES
+INSERT INTO DONG.consumption (created_at, updated_at, deleted_at,
+                              transaction_after_balance, transaction_balance,
+                              id, member_id, transaction_account_no,
+                              transaction_date, transaction_memo, transaction_summary,
+                              transaction_time, transaction_type, transaction_type_name,
+                              transaction_unique_no)
+VALUES
 -- Record 1
 (NOW(), NOW(), NULL, 100000, 95400,
  UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160',
@@ -1225,159 +1213,233 @@ INSERT INTO DONG.consumption (
 
 -- Insert 50 records with varying amounts for DELIVERY 출금
 INSERT INTO DONG.consumption
-(created_at, updated_at, deleted_at, transaction_balance, transaction_after_balance, id, member_id, transaction_account_no, transaction_date, transaction_memo, transaction_summary, transaction_time, transaction_type, transaction_type_name, transaction_unique_no)
+(created_at, updated_at, deleted_at, transaction_balance, transaction_after_balance, id, member_id,
+ transaction_account_no, transaction_date, transaction_memo, transaction_summary, transaction_time, transaction_type,
+ transaction_type_name, transaction_unique_no)
 VALUES
 -- Record 1
-(NOW(), NOW(), NULL, 1000000, 983000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240301', 'Delivery payment', 'DELIVERY출금', '093000', '2', '출금(이체)', '2001'),
+(NOW(), NOW(), NULL, 1000000, 983000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240301', 'Delivery payment', 'DELIVERY출금', '093000', '2', '출금(이체)', '2001'),
 -- Record 2
-(NOW(), NOW(), NULL, 983000, 967000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240305', 'Delivery payment', 'DELIVERY출금', '103000', '2', '출금(이체)', '2002'),
+(NOW(), NOW(), NULL, 983000, 967000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240305', 'Delivery payment', 'DELIVERY출금', '103000', '2', '출금(이체)', '2002'),
 -- Record 3
-(NOW(), NOW(), NULL, 967000, 950500, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240310', 'Delivery payment', 'DELIVERY출금', '113500', '2', '출금(이체)', '2003'),
+(NOW(), NOW(), NULL, 967000, 950500, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240310', 'Delivery payment', 'DELIVERY출금', '113500', '2', '출금(이체)', '2003'),
 -- Record 4
-(NOW(), NOW(), NULL, 950500, 934500, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240315', 'Delivery payment', 'DELIVERY출금', '123000', '2', '출금(이체)', '2004'),
+(NOW(), NOW(), NULL, 950500, 934500, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240315', 'Delivery payment', 'DELIVERY출금', '123000', '2', '출금(이체)', '2004'),
 -- Record 5
-(NOW(), NOW(), NULL, 934500, 918000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240320', 'Delivery payment', 'DELIVERY출금', '133500', '2', '출금(이체)', '2005'),
+(NOW(), NOW(), NULL, 934500, 918000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240320', 'Delivery payment', 'DELIVERY출금', '133500', '2', '출금(이체)', '2005'),
 -- Record 6
-(NOW(), NOW(), NULL, 918000, 902000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240325', 'Delivery payment', 'DELIVERY출금', '143000', '2', '출금(이체)', '2006'),
+(NOW(), NOW(), NULL, 918000, 902000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240325', 'Delivery payment', 'DELIVERY출금', '143000', '2', '출금(이체)', '2006'),
 -- Record 7
-(NOW(), NOW(), NULL, 902000, 887000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240330', 'Delivery payment', 'DELIVERY출금', '153500', '2', '출금(이체)', '2007'),
+(NOW(), NOW(), NULL, 902000, 887000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240330', 'Delivery payment', 'DELIVERY출금', '153500', '2', '출금(이체)', '2007'),
 -- Record 8
-(NOW(), NOW(), NULL, 887000, 872000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240402', 'Delivery payment', 'DELIVERY출금', '163500', '2', '출금(이체)', '2008'),
+(NOW(), NOW(), NULL, 887000, 872000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240402', 'Delivery payment', 'DELIVERY출금', '163500', '2', '출금(이체)', '2008'),
 -- Record 9
-(NOW(), NOW(), NULL, 872000, 857000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240405', 'Delivery payment', 'DELIVERY출금', '173000', '2', '출금(이체)', '2009'),
+(NOW(), NOW(), NULL, 872000, 857000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240405', 'Delivery payment', 'DELIVERY출금', '173000', '2', '출금(이체)', '2009'),
 -- Record 10
-(NOW(), NOW(), NULL, 857000, 842000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240410', 'Delivery payment', 'DELIVERY출금', '183500', '2', '출금(이체)', '2010'),
+(NOW(), NOW(), NULL, 857000, 842000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240410', 'Delivery payment', 'DELIVERY출금', '183500', '2', '출금(이체)', '2010'),
 -- Record 11
-(NOW(), NOW(), NULL, 842000, 827000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240415', 'Delivery payment', 'DELIVERY출금', '193000', '2', '출금(이체)', '2011'),
+(NOW(), NOW(), NULL, 842000, 827000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240415', 'Delivery payment', 'DELIVERY출금', '193000', '2', '출금(이체)', '2011'),
 -- Record 12
-(NOW(), NOW(), NULL, 827000, 812000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240420', 'Delivery payment', 'DELIVERY출금', '203500', '2', '출금(이체)', '2012'),
+(NOW(), NOW(), NULL, 827000, 812000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240420', 'Delivery payment', 'DELIVERY출금', '203500', '2', '출금(이체)', '2012'),
 -- Record 13
-(NOW(), NOW(), NULL, 812000, 797000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240425', 'Delivery payment', 'DELIVERY출금', '213500', '2', '출금(이체)', '2013'),
+(NOW(), NOW(), NULL, 812000, 797000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240425', 'Delivery payment', 'DELIVERY출금', '213500', '2', '출금(이체)', '2013'),
 -- Record 14
-(NOW(), NOW(), NULL, 797000, 782000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240430', 'Delivery payment', 'DELIVERY출금', '223500', '2', '출금(이체)', '2014'),
+(NOW(), NOW(), NULL, 797000, 782000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240430', 'Delivery payment', 'DELIVERY출금', '223500', '2', '출금(이체)', '2014'),
 -- Record 15
-(NOW(), NOW(), NULL, 782000, 767000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240501', 'Delivery payment', 'DELIVERY출금', '233500', '2', '출금(이체)', '2015'),
+(NOW(), NOW(), NULL, 782000, 767000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240501', 'Delivery payment', 'DELIVERY출금', '233500', '2', '출금(이체)', '2015'),
 -- Record 16
-(NOW(), NOW(), NULL, 767000, 752000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240505', 'Delivery payment', 'DELIVERY출금', '243000', '2', '출금(이체)', '2016'),
+(NOW(), NOW(), NULL, 767000, 752000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240505', 'Delivery payment', 'DELIVERY출금', '243000', '2', '출금(이체)', '2016'),
 -- Record 17
-(NOW(), NOW(), NULL, 752000, 737000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240510', 'Delivery payment', 'DELIVERY출금', '253500', '2', '출금(이체)', '2017'),
+(NOW(), NOW(), NULL, 752000, 737000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240510', 'Delivery payment', 'DELIVERY출금', '253500', '2', '출금(이체)', '2017'),
 -- Record 18
-(NOW(), NOW(), NULL, 737000, 722000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240515', 'Delivery payment', 'DELIVERY출금', '263500', '2', '출금(이체)', '2018'),
+(NOW(), NOW(), NULL, 737000, 722000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240515', 'Delivery payment', 'DELIVERY출금', '263500', '2', '출금(이체)', '2018'),
 -- Record 19
-(NOW(), NOW(), NULL, 722000, 707000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240520', 'Delivery payment', 'DELIVERY출금', '273500', '2', '출금(이체)', '2019'),
+(NOW(), NOW(), NULL, 722000, 707000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240520', 'Delivery payment', 'DELIVERY출금', '273500', '2', '출금(이체)', '2019'),
 -- Record 20
-(NOW(), NOW(), NULL, 707000, 692000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240525', 'Delivery payment', 'DELIVERY출금', '283500', '2', '출금(이체)', '2020'),
+(NOW(), NOW(), NULL, 707000, 692000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240525', 'Delivery payment', 'DELIVERY출금', '283500', '2', '출금(이체)', '2020'),
 -- Record 21
-(NOW(), NOW(), NULL, 692000, 677000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240601', 'Delivery payment', 'DELIVERY출금', '293000', '2', '출금(이체)', '2021'),
+(NOW(), NOW(), NULL, 692000, 677000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240601', 'Delivery payment', 'DELIVERY출금', '293000', '2', '출금(이체)', '2021'),
 -- Record 22
-(NOW(), NOW(), NULL, 677000, 662000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240605', 'Delivery payment', 'DELIVERY출금', '303000', '2', '출금(이체)', '2022'),
+(NOW(), NOW(), NULL, 677000, 662000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240605', 'Delivery payment', 'DELIVERY출금', '303000', '2', '출금(이체)', '2022'),
 -- Record 23
-(NOW(), NOW(), NULL, 662000, 647000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240610', 'Delivery payment', 'DELIVERY출금', '313500', '2', '출금(이체)', '2023'),
+(NOW(), NOW(), NULL, 662000, 647000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240610', 'Delivery payment', 'DELIVERY출금', '313500', '2', '출금(이체)', '2023'),
 -- Record 24
-(NOW(), NOW(), NULL, 647000, 632000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240615', 'Delivery payment', 'DELIVERY출금', '323500', '2', '출금(이체)', '2024'),
+(NOW(), NOW(), NULL, 647000, 632000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240615', 'Delivery payment', 'DELIVERY출금', '323500', '2', '출금(이체)', '2024'),
 -- Record 25
-(NOW(), NOW(), NULL, 632000, 617000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240620', 'Delivery payment', 'DELIVERY출금', '333500', '2', '출금(이체)', '2025'),
+(NOW(), NOW(), NULL, 632000, 617000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240620', 'Delivery payment', 'DELIVERY출금', '333500', '2', '출금(이체)', '2025'),
 -- Record 26
-(NOW(), NOW(), NULL, 617000, 602000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240625', 'Delivery payment', 'DELIVERY출금', '343500', '2', '출금(이체)', '2026'),
+(NOW(), NOW(), NULL, 617000, 602000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240625', 'Delivery payment', 'DELIVERY출금', '343500', '2', '출금(이체)', '2026'),
 -- Record 27
-(NOW(), NOW(), NULL, 602000, 587000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240701', 'Delivery payment', 'DELIVERY출금', '353500', '2', '출금(이체)', '2027'),
+(NOW(), NOW(), NULL, 602000, 587000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240701', 'Delivery payment', 'DELIVERY출금', '353500', '2', '출금(이체)', '2027'),
 -- Record 28
-(NOW(), NOW(), NULL, 587000, 572000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240705', 'Delivery payment', 'DELIVERY출금', '363500', '2', '출금(이체)', '2028'),
+(NOW(), NOW(), NULL, 587000, 572000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240705', 'Delivery payment', 'DELIVERY출금', '363500', '2', '출금(이체)', '2028'),
 -- Record 29
-(NOW(), NOW(), NULL, 572000, 557000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240710', 'Delivery payment', 'DELIVERY출금', '373500', '2', '출금(이체)', '2029'),
+(NOW(), NOW(), NULL, 572000, 557000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240710', 'Delivery payment', 'DELIVERY출금', '373500', '2', '출금(이체)', '2029'),
 -- Record 30
-(NOW(), NOW(), NULL, 557000, 542000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240715', 'Delivery payment', 'DELIVERY출금', '383500', '2', '출금(이체)', '2030'),
+(NOW(), NOW(), NULL, 557000, 542000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240715', 'Delivery payment', 'DELIVERY출금', '383500', '2', '출금(이체)', '2030'),
 -- Record 31
-(NOW(), NOW(), NULL, 542000, 527000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240720', 'Delivery payment', 'DELIVERY출금', '393500', '2', '출금(이체)', '2031'),
+(NOW(), NOW(), NULL, 542000, 527000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240720', 'Delivery payment', 'DELIVERY출금', '393500', '2', '출금(이체)', '2031'),
 -- Record 32
-(NOW(), NOW(), NULL, 527000, 512000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240725', 'Delivery payment', 'DELIVERY출금', '403500', '2', '출금(이체)', '2032'),
+(NOW(), NOW(), NULL, 527000, 512000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240725', 'Delivery payment', 'DELIVERY출금', '403500', '2', '출금(이체)', '2032'),
 -- Record 33
-(NOW(), NOW(), NULL, 512000, 497000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240801', 'Delivery payment', 'DELIVERY출금', '413500', '2', '출금(이체)', '2033'),
+(NOW(), NOW(), NULL, 512000, 497000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240801', 'Delivery payment', 'DELIVERY출금', '413500', '2', '출금(이체)', '2033'),
 -- Record 34
-(NOW(), NOW(), NULL, 497000, 482000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240805', 'Delivery payment', 'DELIVERY출금', '423500', '2', '출금(이체)', '2034'),
+(NOW(), NOW(), NULL, 497000, 482000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240805', 'Delivery payment', 'DELIVERY출금', '423500', '2', '출금(이체)', '2034'),
 -- Record 35
-(NOW(), NOW(), NULL, 482000, 467000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240810', 'Delivery payment', 'DELIVERY출금', '433500', '2', '출금(이체)', '2035'),
+(NOW(), NOW(), NULL, 482000, 467000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240810', 'Delivery payment', 'DELIVERY출금', '433500', '2', '출금(이체)', '2035'),
 -- Record 36
-(NOW(), NOW(), NULL, 467000, 452000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240815', 'Delivery payment', 'DELIVERY출금', '443500', '2', '출금(이체)', '2036'),
+(NOW(), NOW(), NULL, 467000, 452000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240815', 'Delivery payment', 'DELIVERY출금', '443500', '2', '출금(이체)', '2036'),
 -- Record 37
-(NOW(), NOW(), NULL, 452000, 437000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240820', 'Delivery payment', 'DELIVERY출금', '453500', '2', '출금(이체)', '2037'),
+(NOW(), NOW(), NULL, 452000, 437000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240820', 'Delivery payment', 'DELIVERY출금', '453500', '2', '출금(이체)', '2037'),
 -- Record 38
-(NOW(), NOW(), NULL, 437000, 422000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240825', 'Delivery payment', 'DELIVERY출금', '463500', '2', '출금(이체)', '2038'),
+(NOW(), NOW(), NULL, 437000, 422000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240825', 'Delivery payment', 'DELIVERY출금', '463500', '2', '출금(이체)', '2038'),
 -- Record 39
-(NOW(), NOW(), NULL, 422000, 407000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240830', 'Delivery payment', 'DELIVERY출금', '473500', '2', '출금(이체)', '2039'),
+(NOW(), NOW(), NULL, 422000, 407000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240830', 'Delivery payment', 'DELIVERY출금', '473500', '2', '출금(이체)', '2039'),
 -- Record 40
-(NOW(), NOW(), NULL, 407000, 392000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240901', 'Delivery payment', 'DELIVERY출금', '483500', '2', '출금(이체)', '2040'),
+(NOW(), NOW(), NULL, 407000, 392000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240901', 'Delivery payment', 'DELIVERY출금', '483500', '2', '출금(이체)', '2040'),
 -- Record 41
-(NOW(), NOW(), NULL, 392000, 377000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240905', 'Delivery payment', 'DELIVERY출금', '493500', '2', '출금(이체)', '2041'),
+(NOW(), NOW(), NULL, 392000, 377000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240905', 'Delivery payment', 'DELIVERY출금', '493500', '2', '출금(이체)', '2041'),
 -- Record 42
-(NOW(), NOW(), NULL, 377000, 362000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240910', 'Delivery payment', 'DELIVERY출금', '503500', '2', '출금(이체)', '2042'),
+(NOW(), NOW(), NULL, 377000, 362000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240910', 'Delivery payment', 'DELIVERY출금', '503500', '2', '출금(이체)', '2042'),
 -- Record 43
-(NOW(), NOW(), NULL, 362000, 347000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240915', 'Delivery payment', 'DELIVERY출금', '513500', '2', '출금(이체)', '2043');
+(NOW(), NOW(), NULL, 362000, 347000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240915', 'Delivery payment', 'DELIVERY출금', '513500', '2', '출금(이체)', '2043');
 
-INSERT INTO DONG.consumption (
-    created_at, updated_at, deleted_at, transaction_balance,
-    transaction_after_balance, id, member_id,
-    transaction_account_no, transaction_date, transaction_memo,
-    transaction_summary, transaction_unique_no, transaction_type,
-    transaction_type_name
-) VALUES
+INSERT INTO DONG.consumption (created_at, updated_at, deleted_at, transaction_balance,
+                              transaction_after_balance, id, member_id,
+                              transaction_account_no, transaction_date, transaction_memo,
+                              transaction_summary, transaction_unique_no, transaction_type,
+                              transaction_type_name)
+VALUES
 -- Record 1
-(NOW(), NOW(), NULL, 1000000, 986000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240301', 'Drink payment', 'DRINK출금', '2051', '2', '출금(이체)'),
+(NOW(), NOW(), NULL, 1000000, 986000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240301', 'Drink payment', 'DRINK출금', '2051', '2', '출금(이체)'),
 -- Record 2
-(NOW(), NOW(), NULL, 986000, 974500, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240305', 'Drink payment', 'DRINK출금', '2052', '2', '출금(이체)'),
+(NOW(), NOW(), NULL, 986000, 974500, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240305', 'Drink payment', 'DRINK출금', '2052', '2', '출금(이체)'),
 -- Record 3
-(NOW(), NOW(), NULL, 974500, 960500, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240310', 'Drink payment', 'DRINK출금', '2053', '2', '출금(이체)'),
+(NOW(), NOW(), NULL, 974500, 960500, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240310', 'Drink payment', 'DRINK출금', '2053', '2', '출금(이체)'),
 -- Record 4
-(NOW(), NOW(), NULL, 960500, 945000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240315', 'Drink payment', 'DRINK출금', '2054', '2', '출금(이체)'),
+(NOW(), NOW(), NULL, 960500, 945000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240315', 'Drink payment', 'DRINK출금', '2054', '2', '출금(이체)'),
 -- Record 5
-(NOW(), NOW(), NULL, 945000, 932000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240320', 'Drink payment', 'DRINK출금', '2055', '2', '출금(이체)'),
+(NOW(), NOW(), NULL, 945000, 932000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240320', 'Drink payment', 'DRINK출금', '2055', '2', '출금(이체)'),
 -- Record 6
-(NOW(), NOW(), NULL, 932000, 918500, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240325', 'Drink payment', 'DRINK출금', '2056', '2', '출금(이체)'),
+(NOW(), NOW(), NULL, 932000, 918500, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240325', 'Drink payment', 'DRINK출금', '2056', '2', '출금(이체)'),
 -- Record 7
-(NOW(), NOW(), NULL, 918500, 905000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240330', 'Drink payment', 'DRINK출금', '2057', '2', '출금(이체)'),
+(NOW(), NOW(), NULL, 918500, 905000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240330', 'Drink payment', 'DRINK출금', '2057', '2', '출금(이체)'),
 -- Record 8
-(NOW(), NOW(), NULL, 905000, 890000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240405', 'Drink payment', 'DRINK출금', '2058', '2', '출금(이체)'),
+(NOW(), NOW(), NULL, 905000, 890000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240405', 'Drink payment', 'DRINK출금', '2058', '2', '출금(이체)'),
 -- Record 9
-(NOW(), NOW(), NULL, 890000, 878000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240410', 'Drink payment', 'DRINK출금', '2059', '2', '출금(이체)'),
+(NOW(), NOW(), NULL, 890000, 878000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240410', 'Drink payment', 'DRINK출금', '2059', '2', '출금(이체)'),
 -- Record 10
-(NOW(), NOW(), NULL, 878000, 864000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240415', 'Drink payment', 'DRINK출금', '2060', '2', '출금(이체)'),
+(NOW(), NOW(), NULL, 878000, 864000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240415', 'Drink payment', 'DRINK출금', '2060', '2', '출금(이체)'),
 -- Record 11
-(NOW(), NOW(), NULL, 864000, 850000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240420', 'Drink payment', 'DRINK출금', '2061', '2', '출금(이체)'),
+(NOW(), NOW(), NULL, 864000, 850000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240420', 'Drink payment', 'DRINK출금', '2061', '2', '출금(이체)'),
 -- Record 12
-(NOW(), NOW(), NULL, 850000, 836000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240425', 'Drink payment', 'DRINK출금', '2062', '2', '출금(이체)'),
+(NOW(), NOW(), NULL, 850000, 836000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240425', 'Drink payment', 'DRINK출금', '2062', '2', '출금(이체)'),
 -- Record 13
-(NOW(), NOW(), NULL, 836000, 822000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240501', 'Drink payment', 'DRINK출금', '2063', '2', '출금(이체)'),
+(NOW(), NOW(), NULL, 836000, 822000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240501', 'Drink payment', 'DRINK출금', '2063', '2', '출금(이체)'),
 -- Record 14
-(NOW(), NOW(), NULL, 822000, 808000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240505', 'Drink payment', 'DRINK출금', '2064', '2', '출금(이체)'),
+(NOW(), NOW(), NULL, 822000, 808000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240505', 'Drink payment', 'DRINK출금', '2064', '2', '출금(이체)'),
 -- Record 15
-(NOW(), NOW(), NULL, 808000, 794000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240510', 'Drink payment', 'DRINK출금', '2065', '2', '출금(이체)'),
+(NOW(), NOW(), NULL, 808000, 794000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240510', 'Drink payment', 'DRINK출금', '2065', '2', '출금(이체)'),
 -- Record 16
-(NOW(), NOW(), NULL, 794000, 780000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240515', 'Drink payment', 'DRINK출금', '2066', '2', '출금(이체)'),
+(NOW(), NOW(), NULL, 794000, 780000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240515', 'Drink payment', 'DRINK출금', '2066', '2', '출금(이체)'),
 -- Record 17
-(NOW(), NOW(), NULL, 780000, 766000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240520', 'Drink payment', 'DRINK출금', '2067', '2', '출금(이체)'),
+(NOW(), NOW(), NULL, 780000, 766000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240520', 'Drink payment', 'DRINK출금', '2067', '2', '출금(이체)'),
 -- Record 18
-(NOW(), NOW(), NULL, 766000, 752000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240525', 'Drink payment', 'DRINK출금', '2068', '2', '출금(이체)'),
+(NOW(), NOW(), NULL, 766000, 752000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240525', 'Drink payment', 'DRINK출금', '2068', '2', '출금(이체)'),
 -- Record 19
-(NOW(), NOW(), NULL, 752000, 738000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240530', 'Drink payment', 'DRINK출금', '2069', '2', '출금(이체)'),
+(NOW(), NOW(), NULL, 752000, 738000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240530', 'Drink payment', 'DRINK출금', '2069', '2', '출금(이체)'),
 -- Record 20
-(NOW(), NOW(), NULL, 738000, 724000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240605', 'Drink payment', 'DRINK출금', '2070', '2', '출금(이체)'),
+(NOW(), NOW(), NULL, 738000, 724000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240605', 'Drink payment', 'DRINK출금', '2070', '2', '출금(이체)'),
 -- Record 21
-(NOW(), NOW(), NULL, 724000, 710000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240610', 'Drink payment', 'DRINK출금', '2071', '2', '출금(이체)'),
+(NOW(), NOW(), NULL, 724000, 710000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240610', 'Drink payment', 'DRINK출금', '2071', '2', '출금(이체)'),
 -- Record 22
-(NOW(), NOW(), NULL, 710000, 696000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240615', 'Drink payment', 'DRINK출금', '2072', '2', '출금(이체)'),
+(NOW(), NOW(), NULL, 710000, 696000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240615', 'Drink payment', 'DRINK출금', '2072', '2', '출금(이체)'),
 -- Record 23
-(NOW(), NOW(), NULL, 696000, 682000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240620', 'Drink payment', 'DRINK출금', '2073', '2', '출금(이체)'),
+(NOW(), NOW(), NULL, 696000, 682000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240620', 'Drink payment', 'DRINK출금', '2073', '2', '출금(이체)'),
 -- Record 24
-(NOW(), NOW(), NULL, 682000, 668000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240625', 'Drink payment', 'DRINK출금', '2074', '2', '출금(이체)'),
+(NOW(), NOW(), NULL, 682000, 668000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240625', 'Drink payment', 'DRINK출금', '2074', '2', '출금(이체)'),
 -- Record 25
-(NOW(), NOW(), NULL, 668000, 654000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240630', 'Drink payment', 'DRINK출금', '2075', '2', '출금(이체)'),
+(NOW(), NOW(), NULL, 668000, 654000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240630', 'Drink payment', 'DRINK출금', '2075', '2', '출금(이체)'),
 -- Record 26
-(NOW(), NOW(), NULL, 654000, 640000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240705', 'Drink payment', 'DRINK출금', '2076', '2', '출금(이체)'),
+(NOW(), NOW(), NULL, 654000, 640000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240705', 'Drink payment', 'DRINK출금', '2076', '2', '출금(이체)'),
 -- Record 27
-(NOW(), NOW(), NULL, 640000, 626000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240710', 'Drink payment', 'DRINK출금', '2077', '2', '출금(이체)'),
+(NOW(), NOW(), NULL, 640000, 626000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240710', 'Drink payment', 'DRINK출금', '2077', '2', '출금(이체)'),
 -- Record 28
-(NOW(), NOW(), NULL, 626000, 612000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240715', 'Drink payment', 'DRINK출금', '2078', '2', '출금(이체)'),
+(NOW(), NOW(), NULL, 626000, 612000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240715', 'Drink payment', 'DRINK출금', '2078', '2', '출금(이체)'),
 -- Record 29
-(NOW(), NOW(), NULL, 612000, 598000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240720', 'Drink payment', 'DRINK출금', '2079', '2', '출금(이체)'),
+(NOW(), NOW(), NULL, 612000, 598000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240720', 'Drink payment', 'DRINK출금', '2079', '2', '출금(이체)'),
 -- Record 30
-(NOW(), NOW(), NULL, 598000, 584000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E, '0881367640491160', '20240725', 'Drink payment', 'DRINK출금', '2080', '2', '출금(이체)');
+(NOW(), NOW(), NULL, 598000, 584000, UNHEX(REPLACE(UUID(), '-', '')), 0x01919C5FBAC69C61BAD76CE5F992440E,
+ '0881367640491160', '20240725', 'Drink payment', 'DRINK출금', '2080', '2', '출금(이체)');
