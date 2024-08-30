@@ -28,7 +28,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -125,7 +124,6 @@ public class MemberChallengeService {
         validateChallengeJoin(challenge, member);
         validateDeposit(deposit);
 
-        // 예치금 입금 (유저 챌린지 계좌 -> 챌린지 전용 계좌)
         transferDeposit(member, challenge.getAccount().getAccountNo(), deposit);
 
         MemberChallenge memberChallenge = createMemberChallenge(member, challenge, deposit);
@@ -199,10 +197,9 @@ public class MemberChallengeService {
                     )
             );
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("[transferDeposit]", e);
             throw new CannotJoinChallengeException();
         }
-
     }
 
     private MemberChallenge createMemberChallenge(Member member, Challenge challenge, Long deposit) {
@@ -286,7 +283,7 @@ public class MemberChallengeService {
                 .orElseThrow(() -> new MemberChallengeNotFoundException(challengeId, memberId));
     }
 
-    public MemberChallengesResponse findAllChallengesByMemberIdAndStatus(UUID memberId, ChallengeStatus status) {
+    public Object findAllChallengesByMemberIdAndStatus(UUID memberId, ChallengeStatus status) {
 
         int totalCalculatedNum = memberChallengeRepository.countAllByMemberIdAndStatus(memberId, MemberChallengeStatus.CALCULATED);
 
@@ -295,10 +292,14 @@ public class MemberChallengeService {
                 .map(challengeMapper::toMemberChallengeResponse)
                 .toList();
 
-        return new MemberChallengesResponse(
-                totalCalculatedNum,
-                memberChallengeDetails
-        );
+        if (status == ChallengeStatus.COMPLETED) {
+            return new MemberChallengesResponse(
+                    totalCalculatedNum,
+                    memberChallengeDetails
+            );
+        }
+
+        return memberChallengeDetails;
     }
 
     @Transactional(readOnly = true)
@@ -316,7 +317,7 @@ public class MemberChallengeService {
 
     private DailyScoreDetailResponse convertToDailyScoreDetail(DailyScore dailyScore) {
         return DailyScoreDetailResponse.builder()
-                .date(dailyScore.getDate().toString())
+                .date(dailyScore.getDate())
                 .entries(dailyScore.getScoreDetails())
                 .build();
     }

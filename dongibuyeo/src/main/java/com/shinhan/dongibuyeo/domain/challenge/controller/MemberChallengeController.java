@@ -28,7 +28,7 @@ public class MemberChallengeController {
     }
 
     @GetMapping("/status")
-    public ResponseEntity<MemberChallengesResponse> getMemberChallengesByStatus(@RequestParam UUID memberId, @RequestParam ChallengeStatus status) {
+    public ResponseEntity<?> getMemberChallengesByStatus(@RequestParam UUID memberId, @RequestParam ChallengeStatus status) {
         return ResponseEntity.ok(memberChallengeService.findAllChallengesByMemberIdAndStatus(memberId, status));
     }
 
@@ -50,7 +50,7 @@ public class MemberChallengeController {
     }
 
     @PostMapping("/account")
-    public ResponseEntity<MakeAccountResponse> makeMemberChallengeAccount(@RequestParam @Valid UUID memberId) {
+    public ResponseEntity<MakeAccountResponse> makeMemberChallengeAccount(@RequestParam UUID memberId) {
         return ResponseEntity.ok(memberChallengeService.makeMemberChallengeAccount(memberId));
     }
 
