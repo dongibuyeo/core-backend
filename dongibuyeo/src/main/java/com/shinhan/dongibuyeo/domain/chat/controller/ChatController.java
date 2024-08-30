@@ -5,6 +5,7 @@ import com.shinhan.dongibuyeo.domain.chat.dto.response.RoomDetailResponse;
 import com.shinhan.dongibuyeo.domain.chat.service.ChatService;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
