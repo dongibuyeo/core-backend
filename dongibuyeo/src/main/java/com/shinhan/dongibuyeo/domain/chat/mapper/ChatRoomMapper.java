@@ -29,7 +29,7 @@ public class ChatRoomMapper {
                 message.getMember().getName(),
                 message.getMessage(),
                 message.getMember().getProfileImage(),
-                message.getCreatedAt()
+                message.getSendAt()
         );
     }
 }
