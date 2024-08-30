@@ -7,6 +7,7 @@ import com.shinhan.dongibuyeo.domain.account.entity.Account;
 import com.shinhan.dongibuyeo.domain.account.exception.AccountNotFoundException;
 import com.shinhan.dongibuyeo.domain.account.repository.AccountRepository;
 import com.shinhan.dongibuyeo.domain.account.service.AccountService;
+import com.shinhan.dongibuyeo.domain.alarm.service.NotificationService;
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.ChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.response.*;
 import com.shinhan.dongibuyeo.domain.challenge.entity.Challenge;
@@ -42,6 +43,9 @@ import java.util.UUID;
 
 @Service
 public class ChallengeService {
+
+    private final ChallengeRewardService challengeRewardService;
+    private final NotificationService notificationService;
 
     private final MemberService memberService;
 
@@ -85,7 +89,7 @@ public class ChallengeService {
     @Value("${shinhan.challenge.interest-rate}")
     private double challengeInterestRate;
 
-    public ChallengeService(MemberService memberService, ChallengeRepository challengeRepository, ChallengeMapper challengeMapper, AccountService accountService, ConsumeService consumeService, ProductService productService, AccountRepository accountRepository, SavingsService savingsService, MemberChallengeRepository memberChallengeRepository) {
+    public ChallengeService(MemberService memberService, ChallengeRepository challengeRepository, ChallengeMapper challengeMapper, AccountService accountService, ConsumeService consumeService, ProductService productService, AccountRepository accountRepository, SavingsService savingsService, MemberChallengeRepository memberChallengeRepository, ChallengeRewardService challengeRewardService, NotificationService notificationService) {
         this.memberService = memberService;
         this.challengeRepository = challengeRepository;
         this.challengeMapper = challengeMapper;
@@ -95,6 +99,8 @@ public class ChallengeService {
         this.accountRepository = accountRepository;
         this.savingsService = savingsService;
         this.memberChallengeRepository = memberChallengeRepository;
+        this.challengeRewardService = challengeRewardService;
+        this.notificationService = notificationService;
     }
 
     public Challenge findChallengeById(UUID challengeId) {
@@ -411,5 +417,13 @@ public class ChallengeService {
                 .top10PercentMemberNum(additionalReward.getTop10PercentMemberNum())
                 .lower90PercentMemberNum(additionalReward.getLower90PercentMemberNum()) // 정산 정보
                 .build();
+    }
+
+    @Transactional
+    public void goSettlement(UUID challengeId) {
+        Challenge challenge = findChallengeById(challengeId);
+        challengeRewardService.processConsumptionChallengeRewards(challenge);
+        challenge.updateStatus(ChallengeStatus.COMPLETED);
+        notificationService.sendNotificationMemberChallenges(challenge.getChallengeMembers(),"챌린지 종료","참여하신 챌린지가 종료되었습니다! 결과를 확인해주세요!");
     }
 }
