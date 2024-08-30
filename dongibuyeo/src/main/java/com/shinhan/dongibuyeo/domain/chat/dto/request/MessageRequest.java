@@ -11,7 +11,9 @@ import java.util.UUID;
 @AllArgsConstructor
 public class MessageRequest {
     private UUID memberId;
+    private String nickName;
     private String roomName;
     private String message;
     private String image;
+    private String sendAt;
 }

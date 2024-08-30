@@ -37,7 +37,7 @@ public class ChatService {
     public MessageResponse sendMessage(MessageRequest messageRequest) {
         Member member = memberService.getMemberById(messageRequest.getMemberId());
         Room room = chatRoomRepository.findByName(messageRequest.getRoomName()).orElseThrow(EntityNotFoundException::new);
-        Message message = new Message(messageRequest.getMessage(),member,room);
+        Message message = new Message(messageRequest.getMessage(),member,room,messageRequest.getSendAt());
         room.getMessages().add(message);
         return mapper.toMessageResponse(message);
     }
