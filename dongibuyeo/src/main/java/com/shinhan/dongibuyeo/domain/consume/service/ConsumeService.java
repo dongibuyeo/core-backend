@@ -13,6 +13,8 @@ import com.shinhan.dongibuyeo.domain.member.entity.Member;
 import com.shinhan.dongibuyeo.domain.member.service.MemberService;
 import com.shinhan.dongibuyeo.global.entity.TransferType;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +27,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 public class ConsumeService {
+    private static final Logger log = LoggerFactory.getLogger(ConsumeService.class);
     @Value("${shinhan.key}")
     private String apiKey;
     private AccountClient accountClient;
@@ -52,7 +55,7 @@ public class ConsumeService {
 
         response.getRec().getTransactions().forEach(transaction -> {
             if(transaction.getTransactionSummary().startsWith(request.getTransferType().toString())) {
-                result.addAndGet(transaction.getTransactionBalance());
+                result.addAndGet(Math.abs(transaction.getTransactionAfterBalance() - transaction.getTransactionBalance()));
             }
         });
 
