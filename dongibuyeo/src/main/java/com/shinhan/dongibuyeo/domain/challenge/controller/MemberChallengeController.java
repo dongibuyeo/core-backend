@@ -1,5 +1,6 @@
 package com.shinhan.dongibuyeo.domain.challenge.controller;
 
+import com.shinhan.dongibuyeo.domain.account.dto.request.MemberIdRequest;
 import com.shinhan.dongibuyeo.domain.account.dto.response.MakeAccountResponse;
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.JoinChallengeRequest;
 import com.shinhan.dongibuyeo.domain.challenge.dto.request.MemberChallengeRequest;
@@ -7,11 +8,13 @@ import com.shinhan.dongibuyeo.domain.challenge.dto.response.*;
 import com.shinhan.dongibuyeo.domain.challenge.entity.ChallengeStatus;
 import com.shinhan.dongibuyeo.domain.challenge.service.MemberChallengeService;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequestMapping("/challenges/member")
 public class MemberChallengeController {
@@ -50,8 +53,9 @@ public class MemberChallengeController {
     }
 
     @PostMapping("/account")
-    public ResponseEntity<MakeAccountResponse> makeMemberChallengeAccount(@RequestParam UUID memberId) {
-        return ResponseEntity.ok(memberChallengeService.makeMemberChallengeAccount(memberId));
+    public ResponseEntity<MakeAccountResponse> makeMemberChallengeAccount(@RequestBody @Valid MemberIdRequest memberIdRequest) {
+        log.info("[makeMemberChallengeAccount] memberId: {}", memberIdRequest.getMemberId());
+        return ResponseEntity.ok(memberChallengeService.makeMemberChallengeAccount(memberIdRequest.getMemberId()));
     }
 
     @PostMapping("/cancel")
