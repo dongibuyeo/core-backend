@@ -77,6 +77,10 @@ public class Challenge extends BaseEntity {
         participants--;
     }
 
+    public void addTotalDeposit(Long deposit) {
+        this.totalDeposit += totalDeposit;
+    }
+
     public void updateStatus(ChallengeStatus status) {
         this.status = status;
     }
