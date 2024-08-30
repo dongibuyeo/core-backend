@@ -128,10 +128,12 @@ public class MemberChallengeService {
         switch (challenge.getType()) {
             case SAVINGS_SEVEN: {
                 deposit = savingsSevenDeposit;
+                break;
             }
 
             case QUIZ_SOLBEING: {
                 deposit = 0L;
+                break;
             }
 
             default: validateDeposit(deposit);
