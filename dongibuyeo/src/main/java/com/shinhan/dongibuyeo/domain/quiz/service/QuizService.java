@@ -18,9 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class QuizService {
@@ -89,7 +87,21 @@ public class QuizService {
     }
 
     @Transactional
-    public void getWinnerOfMonth(int year, int month) {
-        // TODO
+    public List getWinnerOfMonth(int year, int month) {
+        List<QuizMember> solvedList = quizMemberRepository.findWinnerByYearAndMonth(year,month);
+        Collections.shuffle(solvedList);
+
+        HashMap<UUID, Member> winners = new HashMap<>();
+
+        for(QuizMember quizMember : solvedList) {
+            winners.put(quizMember.getMember().getId(), quizMember.getMember());
+
+            if(winners.size() >= 42)
+                break;
+        }
+
+        return quizMapper.toWinnerResponse(winners);
     }
+
+
 }
