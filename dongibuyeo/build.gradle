@@ -58,6 +58,9 @@ dependencies {
 
     // slack
     implementation group: 'com.slack.api', name: 'slack-api-client', version: '1.30.0'
+
+    // spring batch
+    implementation 'org.springframework.boot:spring-boot-starter-batch'
 }
 
 tasks.named('test') {
