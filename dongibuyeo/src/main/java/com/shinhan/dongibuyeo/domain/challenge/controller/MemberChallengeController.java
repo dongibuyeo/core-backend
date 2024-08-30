@@ -52,7 +52,7 @@ public class MemberChallengeController {
     }
 
     @PostMapping("/account")
-    public ResponseEntity<MakeAccountResponse> makeMemberChallengeAccount(@RequestParam UUID memberId) {
+    public ResponseEntity<MakeAccountResponse> makeMemberChallengeAccount(@RequestBody @Valid UUID memberId) {
         log.info("[makeMemberChallengeAccount] memberId: {}", memberId);
         return ResponseEntity.ok(memberChallengeService.makeMemberChallengeAccount(memberId));
     }
