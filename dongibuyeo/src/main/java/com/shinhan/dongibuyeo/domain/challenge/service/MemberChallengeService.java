@@ -124,17 +124,12 @@ public class MemberChallengeService {
         validateChallengeJoin(challenge, member);
         validateDeposit(deposit);
 
-        try {
-            // 예치금 입금 (유저 챌린지 계좌 -> 챌린지 전용 계좌)
-            transferDeposit(member, challenge.getAccount().getAccountNo(), deposit);
-            MemberChallenge memberChallenge = createMemberChallenge(member, challenge, deposit);
-            challenge.addMember(memberChallenge);
-            member.addChallenge(memberChallenge);
-            memberChallengeRepository.save(memberChallenge);
-        } catch (Exception e) {
-            log.info("[joinChallenge] error: {}", e.getMessage());
-            throw new CannotJoinChallengeException();
-        }
+        transferDeposit(member, challenge.getAccount().getAccountNo(), deposit);
+
+        MemberChallenge memberChallenge = createMemberChallenge(member, challenge, deposit);
+        challenge.addMember(memberChallenge);
+        member.addChallenge(memberChallenge);
+        memberChallengeRepository.save(memberChallenge);
     }
 
     private void validateDeposit(Long deposit) {
@@ -191,15 +186,20 @@ public class MemberChallengeService {
 
     @Transactional
     public void transferDeposit(Member member, String challengeAccountNo, Long deposit) {
-        accountService.accountTransfer(
-                new TransferRequest(
-                        member.getId(),
-                        challengeAccountNo,
-                        member.getChallengeAccount().getAccountNo(),
-                        deposit,
-                        TransferType.CHALLENGE
-                )
-        );
+        try {
+            accountService.accountTransfer(
+                    new TransferRequest(
+                            member.getId(),
+                            challengeAccountNo,
+                            member.getChallengeAccount().getAccountNo(),
+                            deposit,
+                            TransferType.CHALLENGE
+                    )
+            );
+        } catch (Exception e) {
+            log.error("[transferDeposit]", e);
+            throw new CannotJoinChallengeException();
+        }
     }
 
     private MemberChallenge createMemberChallenge(Member member, Challenge challenge, Long deposit) {
