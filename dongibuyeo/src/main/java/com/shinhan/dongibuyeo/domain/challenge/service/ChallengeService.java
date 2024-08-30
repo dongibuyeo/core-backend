@@ -29,6 +29,8 @@ import com.shinhan.dongibuyeo.domain.savings.dto.request.SavingProductRequest;
 import com.shinhan.dongibuyeo.domain.savings.service.SavingsService;
 import com.shinhan.dongibuyeo.global.entity.TransferType;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -225,7 +227,9 @@ public class ChallengeService {
         List<Integer> allScores = memberChallengeRepository.findAllScoresByChallengeId(challengeId);
         int totalParticipants = allScores.size();
         int top10PercentCutoff = calculateTop10PercentCutoff(allScores, totalParticipants);
-        List<TopRankerInfo> top5RankerInfos = memberChallengeRepository.findTop5ByChallengeId(challengeId);
+
+        Pageable top5 = PageRequest.of(0, 5);
+        List<TopRankerInfo> top5RankerInfos = memberChallengeRepository.findTop5ByChallengeId(challengeId, top5);
 
         return ChallengeRankResponse.builder()
                 .challengeId(challengeId)
