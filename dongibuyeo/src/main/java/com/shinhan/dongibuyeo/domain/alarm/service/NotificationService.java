@@ -18,6 +18,11 @@ public class NotificationService {
     }
 
     public void sendNotification(Member member,String title,String content) {
+
+        if(member.getDeviceToken() == null || member.getDeviceToken().isEmpty()) {
+            return;
+        }
+
         NotificationRequest request = makeNotificationRequest(member, title, content);
         fcmService.send(request);
     }
