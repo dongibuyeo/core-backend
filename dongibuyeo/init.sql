@@ -368,7 +368,7 @@ FROM
                  CROSS JOIN (SELECT 0 AS N UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) c
     ) seq
 WHERE
-        c.status IN (1, 2)  -- IN_PROGRESS 또는 COMPLETED 상태의 챌린지만
+    c.status IN (1, 2)  -- IN_PROGRESS 또는 COMPLETED 상태의 챌린지만
   AND mc.status IN ('BEFORE_CALCULATION', 'CALCULATED', 'REWARDED')
   AND DATE_ADD(c.start_date, INTERVAL seq.seq DAY) <= LEAST(c.end_date, CURDATE());
 
@@ -378,7 +378,7 @@ SELECT
     ds.id,
     'DAILY_SCORE',
     10,
-    10
+    0
 FROM
     DONG.daily_score ds;
 
@@ -392,40 +392,40 @@ SELECT
                 WHEN HOUR(ds.date) BETWEEN 7 AND 9 THEN '[FEVER] 7AM-10AM'
                 WHEN HOUR(ds.date) BETWEEN 11 AND 13 THEN '[FEVER] 11AM-2PM'
                 ELSE 'CONSUMPTION_COFFEE'
-                END
-        WHEN c.type = 'CONSUMPTION_DELIVERY' THEN
+END
+WHEN c.type = 'CONSUMPTION_DELIVERY' THEN
             CASE
                 WHEN HOUR(ds.date) BETWEEN 21 AND 23 OR HOUR(ds.date) < 2 THEN '[FEVER] 9PM-2AM'
                 ELSE 'CONSUMPTION_DELIVERY'
-                END
-        WHEN c.type = 'CONSUMPTION_DRINK' THEN
+END
+WHEN c.type = 'CONSUMPTION_DRINK' THEN
             CASE
                 WHEN DAYOFWEEK(ds.date) IN (6, 7) THEN '[FEVER] Weekend'
                 ELSE 'CONSUMPTION_DRINK'
-                END
-        WHEN c.type = 'QUIZ_SOLBEING' THEN 'SOLVE_QUIZ'
+END
+WHEN c.type = 'QUIZ_SOLBEING' THEN 'SOLVE_QUIZ'
         WHEN c.type = 'SAVINGS_SEVEN' THEN 'DAILY SAVINGS'
-        END AS description,
+END AS description,
     CASE
         WHEN c.type = 'CONSUMPTION_COFFEE' THEN
             CASE
                 WHEN HOUR(ds.date) BETWEEN 7 AND 9 THEN 2
                 WHEN HOUR(ds.date) BETWEEN 11 AND 13 THEN 3
                 ELSE -5
-                END
-        WHEN c.type = 'CONSUMPTION_DELIVERY' THEN
+END
+WHEN c.type = 'CONSUMPTION_DELIVERY' THEN
             CASE
                 WHEN HOUR(ds.date) BETWEEN 21 AND 23 OR HOUR(ds.date) < 2 THEN 5
                 ELSE -5
-                END
-        WHEN c.type = 'CONSUMPTION_DRINK' THEN
+END
+WHEN c.type = 'CONSUMPTION_DRINK' THEN
             CASE
                 WHEN DAYOFWEEK(ds.date) IN (6, 7) THEN 5
                 ELSE -5
-                END
-        WHEN c.type = 'QUIZ_SOLBEING' THEN 5
+END
+WHEN c.type = 'QUIZ_SOLBEING' THEN 5
         WHEN c.type = 'SAVINGS_SEVEN' THEN 5
-        END AS score,
+END AS score,
     0 AS current_total_score
 FROM
     DONG.daily_score ds
@@ -437,62 +437,60 @@ WHERE
         WHEN c.type = 'QUIZ_SOLBEING' THEN RAND() < 0.8
         WHEN c.type = 'SAVINGS_SEVEN' THEN RAND() < 0.95
         ELSE FALSE
-        END;
+END;
 
--- current_total_score 업데이트 (직전 점수 + 현재 점수)
+-- current_total_score 업데이트 (챌린지 시작부터 현재 항목까지의 누적 점수)
 UPDATE DONG.score_entries se
     JOIN (
-             SELECT
-                 se2.id,
-                 se2.daily_score_id,
-                 se2.score,
-                 COALESCE(
-                         (SELECT MAX(se3.current_total_score)
-                          FROM DONG.score_entries se3
-                          WHERE se3.daily_score_id = se2.daily_score_id
-                            AND se3.id < se2.id),
-                         0
-                 ) AS prev_total_score
-             FROM
-                 DONG.score_entries se2
-             ORDER BY
-                 se2.daily_score_id,
-                 se2.id
-         ) AS prev ON se.id = prev.id
-SET se.current_total_score = prev.prev_total_score + se.score;
+    SELECT
+    se2.daily_score_id,
+    se2.description,
+    @running_total := @running_total + se2.score AS current_total_score
+    FROM
+    (SELECT * FROM DONG.score_entries
+    JOIN DONG.daily_score ON DONG.score_entries.daily_score_id = DONG.daily_score.id
+    ORDER BY DONG.daily_score.member_challenge_id, DONG.daily_score.date, DONG.score_entries.description) se2,
+    (SELECT @running_total := 0) vars
+    ) AS calc
+SET se.current_total_score = calc.current_total_score
+WHERE se.daily_score_id = calc.daily_score_id AND se.description = calc.description;
 
 -- DailyScore의 total_score 업데이트
 UPDATE DONG.daily_score ds
-SET ds.total_score = (
-    SELECT MAX(se.current_total_score)
-    FROM DONG.score_entries se
-    WHERE se.daily_score_id = ds.id
-    );
+    JOIN (
+    SELECT daily_score_id, MAX(current_total_score) AS max_score
+    FROM DONG.score_entries
+    GROUP BY daily_score_id
+    ) se ON ds.id = se.daily_score_id
+    SET ds.total_score = se.max_score
+WHERE ds.total_score != se.max_score OR ds.total_score IS NULL;
 
 -- MemberChallenge의 total_score 업데이트
 UPDATE DONG.member_challenge mc
-SET mc.total_score = (
-    SELECT MAX(ds.total_score)
-    FROM DONG.daily_score ds
-    WHERE ds.member_challenge_id = mc.id
-    )
-WHERE EXISTS (
-    SELECT 1
-    FROM DONG.daily_score ds
-    WHERE ds.member_challenge_id = mc.id
-);
+    JOIN (
+    SELECT member_challenge_id, MAX(total_score) AS max_total_score
+    FROM DONG.daily_score
+    GROUP BY member_challenge_id
+    ) ds ON mc.id = ds.member_challenge_id
+    SET mc.total_score = ds.max_total_score
+WHERE mc.total_score != ds.max_total_score OR mc.total_score IS NULL;
 
 -- Challenge의 participants와 total_deposit 업데이트
 UPDATE DONG.challenge c
-SET
-    c.participants = (
-        SELECT COUNT(DISTINCT mc.id)
-        FROM DONG.member_challenge mc
-        WHERE mc.challenge_id = c.id
-        ),
-    c.total_deposit = (
-        SELECT COALESCE(SUM(mc.deposit), 0)
-        FROM DONG.member_challenge mc
-        WHERE mc.challenge_id = c.id
-        )
-WHERE c.status IN (1, 2);  -- IN_PROGRESS 또는 COMPLETED 상태의 챌린지만 업데이트
+    JOIN (
+    SELECT
+    challenge_id,
+    COUNT(DISTINCT id) AS participant_count,
+    COALESCE(SUM(deposit), 0) AS total_deposit_sum
+    FROM DONG.member_challenge
+    GROUP BY challenge_id
+    ) mc ON c.id = mc.challenge_id
+    SET
+        c.participants = mc.participant_count,
+        c.total_deposit = mc.total_deposit_sum
+WHERE
+    c.status IN (1, 2)  -- IN_PROGRESS 또는 COMPLETED 상태의 챌린지만 업데이트
+  AND (c.participants != mc.participant_count
+   OR c.total_deposit != mc.total_deposit_sum
+   OR c.participants IS NULL
+   OR c.total_deposit IS NULL);
