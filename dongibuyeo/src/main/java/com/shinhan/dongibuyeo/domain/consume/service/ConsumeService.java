@@ -12,6 +12,7 @@ import com.shinhan.dongibuyeo.domain.consume.entity.Consumption;
 import com.shinhan.dongibuyeo.domain.member.entity.Member;
 import com.shinhan.dongibuyeo.domain.member.service.MemberService;
 import com.shinhan.dongibuyeo.global.entity.TransferType;
+import com.shinhan.dongibuyeo.global.exception.ClientException;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -126,7 +127,11 @@ public class ConsumeService {
                                             .orderByType("DESC")
                                             .build()
                             );
-                            totalConsumption.addAndGet(getTotalConsumption(request).getTotalConsumption());
+                            try {
+                                totalConsumption.addAndGet(getTotalConsumption(request).getTotalConsumption());
+                            } catch (ClientException e) {
+                                log.error("[getMembersTotalConsumption]", e);
+                            }
                         }
                 );
 
