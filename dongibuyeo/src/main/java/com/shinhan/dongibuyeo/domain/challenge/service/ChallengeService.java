@@ -364,8 +364,27 @@ public class ChallengeService {
             throw new ChallengeNotCompletedException(challengeId);
         }
 
-        log.info("[getMemberChallengeResult] challenge: " + challenge.getTitle());
+        MemberChallenge memberChallenge = memberChallengeRepository.findMemberChallengeByChallengeIdAndMemberId(challengeId, memberId)
+                .orElseThrow(() -> new MemberChallengeNotFoundException(challengeId, memberId));
+
+
         // 환급 조회를 위한 정보
+        if (challenge.getType() == ChallengeType.QUIZ_SOLBEING || challenge.getType() == ChallengeType.SAVINGS_SEVEN) {
+            return MemberChallengeResultResponse.builder()
+                    .memberId(memberId)
+                    .challengeId(challengeId)
+                    .type(challenge.getType())
+                    .status(challenge.getStatus())
+                    .startDate(challenge.getStartDate())
+                    .endDate(challenge.getEndDate())
+                    .title(challenge.getTitle())
+                    .description(challenge.getDescription())        // 챌린지 정보
+                    .myStatus(memberChallenge.getStatus())
+                    .isSuccess(memberChallenge.getIsSuccess())
+                    .baseReward(memberChallenge.getBaseReward())
+                    .additionalReward(memberChallenge.getAdditionalReward())    // 멤버챌린지 정보
+                    .build();
+        }
 
         long totalDeposit = challenge.getTotalDeposit();
         long remainDeposit = memberChallengeRepository.getSumOfFailedBaseRewards(challengeId)
@@ -384,11 +403,6 @@ public class ChallengeService {
         );
         log.info("[getMemberChallengeResult] addtionalReward: {}", additionalReward.getTotalReward());
 
-        MemberChallenge memberChallenge = memberChallengeRepository.findMemberChallengeByChallengeIdAndMemberId(challengeId, memberId)
-                .orElseThrow(() -> new MemberChallengeNotFoundException(challengeId, memberId));
-
-        log.info("[getMemberChallengeResult] memberChallenge: {}", memberChallenge.getId());
-
         // 회원 소비 정보
         LocalDate challengeStartDate = challenge.getStartDate();
         LocalDate challengeEndDate = challenge.getEndDate();
@@ -401,8 +415,8 @@ public class ChallengeService {
         TransferType transferType = challenge.getType().getTransferType();
 
         log.info("[getMemberChallengeResult] transferType: {}", transferType);
-        long currentPeriodConsumption = consumeService.getTotalConsumption(memberId, challengeStartDate, challengeEndDate, transferType);
-        long previousPeriodConsumption = consumeService.getTotalConsumption(memberId, previousPeriodStartDate, previousPeriodEndDate, transferType);
+        long currentPeriodConsumption = consumeService.getMembersTotalConsumption(memberId, challengeStartDate, challengeEndDate, transferType);
+        long previousPeriodConsumption = consumeService.getMembersTotalConsumption(memberId, previousPeriodStartDate, previousPeriodEndDate, transferType);
         log.info("[getMemberChallengeReult] consumption: {}", currentPeriodConsumption);
         return MemberChallengeResultResponse.builder()
                 .memberId(memberId)

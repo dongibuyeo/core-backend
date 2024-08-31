@@ -25,7 +25,7 @@ public class ConsumeController {
 
     @PostMapping("/total")
     public ResponseEntity<ConsumptionResponse> getTotalBalance(@RequestBody ConsumptionRequest request) {
-        return ResponseEntity.ok(consumeService.getTotalConsumtion(request));
+        return ResponseEntity.ok(consumeService.getTotalConsumption(request));
     }
 
     @PostMapping

@@ -41,14 +41,16 @@ public class ConsumeService {
     }
 
     @Transactional
-    public ConsumptionResponse getTotalConsumtion(ConsumptionRequest request) {
+    public ConsumptionResponse getTotalConsumption(ConsumptionRequest request) {
         Member member = memberService.getMemberById(request.getHistory().getMemberId());
+        log.info("[getTotalConsumption] member: {}", member.getId());
         AtomicLong result = new AtomicLong(0);
 
         ShinhanTransactionHistoryResponse response = accountClient.getTransactionHistory(
                 accountMapper.toShinhanTransactionHistoryRequest(request.getHistory(),apiKey,member)
         );
 
+        log.info("[getTotalConsumption] response: {}", response.getRec());
         response.getRec().getTransactions().addAll(
                 getTransactionHistoryFromConsumption(member,request.getTransferType(),request.getHistory().getStartDate(),request.getHistory().getEndDate()).stream().map(this::toHistory).toList()
         );
@@ -105,17 +107,30 @@ public class ConsumeService {
     }
 
     @Transactional
-    public long getTotalConsumption(UUID memberId, LocalDate startDate, LocalDate endDate, TransferType transferType) {
-        ConsumptionRequest request = new ConsumptionRequest(
-                transferType,
-                TransactionHistoryRequest.builder()
-                        .memberId(memberId)
-                        .startDate(startDate.format(DateTimeFormatter.ofPattern("yyyyMMdd")))
-                        .endDate(endDate.format(DateTimeFormatter.ofPattern("yyyyMMdd")))
-                        .build()
-        );
-        ConsumptionResponse response = getTotalConsumtion(request);
-        return response.getTotalConsumption();
+    public long getMembersTotalConsumption(UUID memberId, LocalDate startDate, LocalDate endDate, TransferType transferType) {
+        Member member = memberService.getMemberById(memberId);
+
+        AtomicLong totalConsumption = new AtomicLong(0L);
+        member.getAccounts()
+                .forEach(
+                        account -> {
+
+                            ConsumptionRequest request = new ConsumptionRequest(
+                                    transferType,
+                                    TransactionHistoryRequest.builder()
+                                            .memberId(memberId)
+                                            .accountNo(account.getAccountNo())
+                                            .startDate(startDate.format(DateTimeFormatter.ofPattern("yyyyMMdd")))
+                                            .endDate(endDate.format(DateTimeFormatter.ofPattern("yyyyMMdd")))
+                                            .transactionType("D")
+                                            .orderByType("DESC")
+                                            .build()
+                            );
+                            totalConsumption.addAndGet(getTotalConsumption(request).getTotalConsumption());
+                        }
+                );
+
+        return totalConsumption.get();
     }
 
 
