@@ -23,9 +23,11 @@ public class Quiz extends BaseEntity {
     private UUID id = UlidCreator.getMonotonicUlid().toUuid();
     private String question;
     private Boolean answer;
+    private String description;
 
-    public Quiz(String question, Boolean answer) {
+    public Quiz(String question, Boolean answer, String description) {
         this.question = question;
         this.answer = answer;
+        this.description = description;
     }
 }
