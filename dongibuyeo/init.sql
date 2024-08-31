@@ -139,7 +139,7 @@ CREATE TABLE DONG.`message`
     `member_id`  binary(16)   DEFAULT NULL,
     `room_id`    binary(16)   DEFAULT NULL,
     `message`    varchar(255) DEFAULT NULL,
-    `sendAt` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  ,
+    `send_at` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  ,
     PRIMARY KEY (`id`),
     KEY `FK4msccpwmxulmw875edu7p352d` (`member_id`),
     KEY `FKl1kg5a2471cv6pkew0gdgjrmo` (`room_id`),
