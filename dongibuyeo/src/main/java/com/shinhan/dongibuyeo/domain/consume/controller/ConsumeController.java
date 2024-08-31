@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/consume")
+@RequestMapping("/api/v1/consume")
 public class ConsumeController {
 
     private final ConsumeService consumeService;
