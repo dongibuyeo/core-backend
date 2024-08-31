@@ -52,11 +52,7 @@ public class QuizService {
     @Transactional
     public QuizResponse getRandomQuiz(UUID memberId) {
         Member member = memberService.getMemberById(memberId);
-
-
         Quiz quiz = quizRepository.findAll(getRandomIndex()).stream().findFirst().orElseThrow(EntityNotFoundException::new);
-
-
         return quizMapper.toQuizResponse(quiz);
     }
 
@@ -70,6 +66,7 @@ public class QuizService {
     @Transactional
     public QuizSolveResponse solveQuiz(QuizSolveRequest request) {
         Quiz quiz = getQuizById(request.getQuizId());
+        log.info(quiz.getDescription());
         Member member = memberService.getMemberById(request.getMemberId());
 
         QuizMember quizMember = new QuizMember(member, quiz);
@@ -120,7 +117,6 @@ public class QuizService {
     public QuizTotalResponse getQuizTotal(UUID memberId, Integer year, Integer month) {
         List<QuizMember> solvedList = quizMemberRepository.findWinnerByYearAndMonth(year,month);
         List<QuizMember> myList = solvedList.stream().filter(x -> x.getMember().getId().equals(memberId)).toList();
-
         return new QuizTotalResponse(solvedList.size(), myList.size());
     }
 
