@@ -13,4 +13,5 @@ public class QuizResponse {
     private UUID id;
     private String question;
     private Boolean answer;
+    private String description;
 }

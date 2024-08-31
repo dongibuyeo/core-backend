@@ -26,7 +26,8 @@ public class QuizMapper {
     public Quiz toQuizEntity(QuizMakeRequest request) {
         return new Quiz(
                 request.getQuestion(),
-                request.getAnswer()
+                request.getAnswer(),
+                request.getDescription()
         );
     }
 
@@ -34,7 +35,8 @@ public class QuizMapper {
         return new QuizResponse(
                 quiz.getId(),
                 quiz.getQuestion(),
-                quiz.getAnswer()
+                quiz.getAnswer(),
+                quiz.getDescription()
         );
     }
 

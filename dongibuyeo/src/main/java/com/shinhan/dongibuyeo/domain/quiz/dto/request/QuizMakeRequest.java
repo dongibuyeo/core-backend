@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class QuizMakeRequest {
     private String question;
     private Boolean answer;
+    private String description;
 }
