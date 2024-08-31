@@ -99,6 +99,7 @@ public class ChallengeRewardService {
                         challengeMember -> {
                             challengeMember.updateStatus(MemberChallengeStatus.CALCULATED);
                             challengeMember.updateBaseReward(savingsSevenDeposit);
+                            challengeMember.updateSuccessStatus(true);
                         }
                 );
 
@@ -130,6 +131,7 @@ public class ChallengeRewardService {
                             UUID memberId = memberResponse.getMemberId();
                             MemberChallenge memberChallenge = memberChallengeRepository.findByMemberIdAndChallengeId(challenge.getId(), memberId)
                                     .orElseThrow(() -> new MemberChallengeNotFoundException(challenge.getId(), memberId));
+                            memberChallenge.updateSuccessStatus(true);
                             memberChallenge.updateStatus(MemberChallengeStatus.CALCULATED);
                             memberChallenge.updateBaseReward(quizPrize);
                         }
