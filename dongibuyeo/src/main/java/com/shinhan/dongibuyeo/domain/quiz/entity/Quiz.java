@@ -15,17 +15,18 @@ import java.util.UUID;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@SQLRestriction("deleted_at is null")
-public class Quiz extends BaseEntity {
+public class Quiz {
 
     @Id
     @Column(columnDefinition = "BINARY(16)")
     private UUID id = UlidCreator.getMonotonicUlid().toUuid();
     private String question;
     private Boolean answer;
+    private String description;
 
-    public Quiz(String question, Boolean answer) {
+    public Quiz(String question, Boolean answer, String description) {
         this.question = question;
         this.answer = answer;
+        this.description = description;
     }
 }
