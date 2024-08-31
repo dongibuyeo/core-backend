@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/challenges")
+@RequestMapping("challenges")
 public class ChallengeController {
 
     private final ChallengeService challengeService;

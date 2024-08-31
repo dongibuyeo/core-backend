@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/quiz")
+@RequestMapping("quiz")
 public class QuizController {
     private QuizService quizService;
 

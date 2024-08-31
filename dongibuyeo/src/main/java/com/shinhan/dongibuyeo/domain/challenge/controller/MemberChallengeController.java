@@ -16,7 +16,7 @@ import java.util.UUID;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/challenges/member")
+@RequestMapping("challenges/member")
 public class MemberChallengeController {
 
     private final MemberChallengeService memberChallengeService;

@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/members")
+@RequestMapping("members")
 public class MemberController {
 
     private final MemberService memberService;
