@@ -173,7 +173,7 @@ CREATE TABLE DONG.`quiz`
     `updated_at` datetime(6)  DEFAULT NULL,
     `id`         binary(16) NOT NULL,
     `question`   varchar(512) DEFAULT NULL,
-    `description` varchar(512) DEFAULT NULL,
+    `description` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;

@@ -15,8 +15,7 @@ import java.util.UUID;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@SQLRestriction("deleted_at is null")
-public class Quiz extends BaseEntity {
+public class Quiz {
 
     @Id
     @Column(columnDefinition = "BINARY(16)")

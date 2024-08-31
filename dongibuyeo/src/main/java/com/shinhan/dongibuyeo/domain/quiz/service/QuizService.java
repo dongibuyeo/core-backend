@@ -16,6 +16,8 @@ import com.shinhan.dongibuyeo.domain.quiz.repository.QuizRepository;
 import com.shinhan.dongibuyeo.global.slack.SlackComponent;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,7 @@ import java.util.*;
 
 @Service
 public class QuizService {
+    private static final Logger log = LoggerFactory.getLogger(QuizService.class);
     private final QuizMemberRepository quizMemberRepository;
     private QuizRepository quizRepository;
     private MemberService memberService;
@@ -50,9 +53,9 @@ public class QuizService {
     public QuizResponse getRandomQuiz(UUID memberId) {
         Member member = memberService.getMemberById(memberId);
 
-        Quiz quiz = quizRepository.findAll(getRandomIndex()).stream().findFirst().orElseThrow(
-                EntityNotFoundException::new
-        );
+
+        Quiz quiz = quizRepository.findAll(getRandomIndex()).stream().findFirst().orElseThrow(EntityNotFoundException::new);
+
 
         return quizMapper.toQuizResponse(quiz);
     }
