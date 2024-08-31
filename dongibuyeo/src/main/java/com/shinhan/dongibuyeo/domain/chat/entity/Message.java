@@ -29,6 +29,7 @@ public class Message extends BaseEntity {
     @JoinColumn(name = "room_id")
     private Room room;
 
+    @Column(name = "send_at")
     private String sendAt;
 
     public Message(String message, Member member, Room room, String sendAt) {
